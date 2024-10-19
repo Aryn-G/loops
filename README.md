@@ -37,4 +37,6 @@ Aryan Gera
 | :------: | :--------: | :------------------------: |
 | Started  | 9/10/2024  | Started Designing in Figma |
 | Finished | 10/10/2024 |        Checkpoint 1        |
-
+| Started  | 10/16/2024 |    Started Development     |
+| Finished | 10/19/2024 |         Home Page          |
+| Started  | 10/19/2024 |           OAuth            |
