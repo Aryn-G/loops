@@ -33,10 +33,37 @@ Aryan Gera
 
 
 # Priority List
-|  Status  |    Date    |        Description         |
-| :------: | :--------: | :------------------------: |
-| Started  | 9/10/2024  | Started Designing in Figma |
-| Finished | 10/10/2024 |        Checkpoint 1        |
-| Started  | 10/16/2024 |    Started Development     |
-| Finished | 10/19/2024 |         Home Page          |
-| Started  | 10/19/2024 |           OAuth            |
+
+## Design
+|   Status    |    Date    |       Description        |
+| :---------: | :--------: | :----------------------: |
+|   Started   | 9/10/2024  | Desktop Designs in Figma |
+|  Finished   | 10/10/2024 |       Checkpoint 1       |
+| Not Started |    N/A     | Mobile Designs in Figma  |
+
+
+## Authentication / Roles System
+|  Status  |    Date    |           Description            |
+| :------: | :--------: | :------------------------------: |
+| Started  | 10/16/2024 |  MongoDB / Mongoose Connection   |
+| Finished | 10/16/2024 |  MongoDB / Mongoose Connection   |
+| Started  | 10/16/2024 |      Home Page / Login Page      |
+| Finished | 10/19/2024 | Fixed `next/font/google` issues  |
+| Finished | 10/19/2024 |      Home Page / Login Page      |
+| Started  | 10/19/2024 | OAuth on personal google account |
+
+## Admin Dashboard
+| Status | Date  | Description |
+| :----: | :---: | :---------: |
+
+## Staff Dashboard
+| Status | Date  | Description |
+| :----: | :---: | :---------: |
+
+## Loops Page
+| Status | Date  | Description |
+| :----: | :---: | :---------: |
+
+## Student Dashboard
+| Status | Date  | Description |
+| :----: | :---: | :---------: |
