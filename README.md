@@ -43,14 +43,16 @@ Aryan Gera
 
 
 ## Authentication / Roles System
-|  Status  |    Date    |           Description            |
-| :------: | :--------: | :------------------------------: |
-| Started  | 10/16/2024 |  MongoDB / Mongoose Connection   |
-| Finished | 10/16/2024 |  MongoDB / Mongoose Connection   |
-| Started  | 10/16/2024 |      Home Page / Login Page      |
-| Finished | 10/19/2024 | Fixed `next/font/google` issues  |
-| Finished | 10/19/2024 |      Home Page / Login Page      |
-| Started  | 10/19/2024 | OAuth on personal google account |
+|  Status  |    Date    |                         Description                         |
+| :------: | :--------: | :---------------------------------------------------------: |
+| Started  | 10/16/2024 |                MongoDB / Mongoose Connection                |
+| Finished | 10/16/2024 |                MongoDB / Mongoose Connection                |
+| Started  | 10/16/2024 |                   Home Page / Login Page                    |
+| Finished | 10/19/2024 |               Fixed `next/font/google` issues               |
+| Finished | 10/19/2024 |                   Home Page / Login Page                    |
+| Started  | 10/19/2024 |              OAuth on personal google account               |
+| Finished | 10/21/2024 | OMGGGG FINALLY!!!!!!!! Finished role based OAuth w/ mongodb |
+| Started  | 10/21/2024 |        Debugging OAuth Account Already Exists Error         |
 
 ## Admin Dashboard
 | Status | Date  | Description |
@@ -67,3 +69,12 @@ Aryan Gera
 ## Student Dashboard
 | Status | Date  | Description |
 | :----: | :---: | :---------: |
+
+
+# Env Vars
+```
+MONGODB_URI=
+AUTH_SECRET=
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+```

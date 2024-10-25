@@ -1,13 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
-export interface IUser extends mongoose.Document {
+export interface IUsers extends mongoose.Document {
   email: string;
   name: string;
-  photoUrl?: string;
-  permissions?: "Student" | "Loops" | "Admin";
+  picture?: string;
+  role?: "Student" | "Loops" | "Admin";
 }
 
-const UserSchema = new mongoose.Schema<IUser>({
+const UsersSchema = new mongoose.Schema<IUsers>({
   name: {
     type: String,
     required: true,
@@ -17,15 +17,15 @@ const UserSchema = new mongoose.Schema<IUser>({
     required: true,
     unique: true,
   },
-  photoUrl: {
+  picture: {
     type: String,
   },
-  permissions: {
+  role: {
     type: String,
     enum: ["Student", "Loops", "Admin"],
     default: "Student",
   },
 });
 
-export default mongoose.models.User ||
-  mongoose.model<IUser>("User", UserSchema);
+export default mongoose.models.Users ||
+  mongoose.model<IUsers>("Users", UsersSchema);
