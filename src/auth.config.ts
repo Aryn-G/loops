@@ -11,7 +11,7 @@ export default {
       authorization: {
         params: {
           scope: "openid email profile",
-          prompt: "consent",
+          // prompt: "consent",
           access_type: "offline",
           response_type: "code",
         },

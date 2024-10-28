@@ -1,12 +1,17 @@
 import NextAuth from "next-auth";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import { CustomAdaptor } from "@/app/_lib/CustomAdapter";
 import mongoDB, { getMongoDBClient } from "./app/_mongo/connect";
 import authConfig from "./auth.config";
 import Users, { IUsers } from "./app/_mongo/models/Users";
+import Accounts from "./app/_mongo/models/Accounts";
+import Sessions from "./app/_mongo/models/Sessions";
+import VerificationTokens from "./app/_mongo/models/VerificationTokens";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // @ts-ignore
-  adapter: MongoDBAdapter(getMongoDBClient()!),
+  adapter: CustomAdaptor(getMongoDBClient(), {
+    collections: { Users, Accounts, Sessions, VerificationTokens },
+  }),
   session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user, trigger }) {

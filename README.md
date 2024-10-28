@@ -53,6 +53,9 @@ Aryan Gera
 | Started  | 10/19/2024 |              OAuth on personal google account               |
 | Finished | 10/21/2024 | OMGGGG FINALLY!!!!!!!! Finished role based OAuth w/ mongodb |
 | Started  | 10/21/2024 |        Debugging OAuth Account Already Exists Error         |
+| Started  | 10/26/2024 |                   Custom Mongoose Adapter                   |
+| Finished | 10/26/2024 |                   Custom Mongoose Adapter                   |
+| Started  | 10/26/2024 |                  Found OAuth Root Problem                   |
 
 ## Admin Dashboard
 | Status | Date  | Description |
