@@ -81,3 +81,15 @@ AUTH_SECRET=
 AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
 ```
+
+## Get Started Instructions
+
+First, run `npm i` to install dependencies.
+
+Then, run `npx auth secret`. This creates a `.env.local` file in the root folder and populates the `AUTH_SECRET` enviorment variable.
+
+Then, link MongoDB. I created a free cluster through the MongoDB online dashboard, created an admin user, and copy pasted the connect uri into the `MONGODB_URI` enviorment variable.
+
+Then, go to Google Cloud, create a new project, set up the conset screen, and generate an OAuth2 Key. The JS Origin is `http://localhost:3000`. The redirect is `https://localhost:3000/api/auth/callback/google`. Then, copy the Client ID and paste it into the `AUTH_GOOGLE_ID` enviorment variable. Then, copy the Client Secret and paste it into the `AUTH_GOOGLE_SECRET` enviorment variable.
+
+Finally, run `npm run dev`
