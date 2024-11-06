@@ -8,10 +8,11 @@ export default {
       profile(profile) {
         return { role: profile.role ?? "Student", ...profile };
       },
+      // allowDangerousEmailAccountLinking: true,
       authorization: {
         params: {
           scope: "openid email profile",
-          // prompt: "consent",
+          // prompt: "none",
           access_type: "offline",
           response_type: "code",
         },
