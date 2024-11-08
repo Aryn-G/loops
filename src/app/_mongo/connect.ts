@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import { MongoClient, ServerApiVersion } from "mongodb";
+import mongoose, { ConnectOptions } from "mongoose";
 
 declare global {
   var mongoose: any;
@@ -12,19 +13,27 @@ if (!MONGODB_URI) {
   );
 }
 
-let cached = global.mongoose;
+let cached: {
+  conn?: mongoose.Mongoose | null;
+  promise?: Promise<mongoose.Mongoose> | null;
+} = global.mongoose;
 
 if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function mongoDB() {
+async function mongoDB(): Promise<mongoose.Mongoose> {
   if (cached.conn) {
     return cached.conn;
   }
   if (!cached.promise) {
-    const opts = {
+    const opts: ConnectOptions = {
       bufferCommands: false,
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
@@ -39,6 +48,12 @@ async function mongoDB() {
   }
 
   return cached.conn;
+}
+
+export async function getMongoDBClient() {
+  await mongoDB();
+  const db = cached.conn?.connection.getClient();
+  return db;
 }
 
 export default mongoDB;

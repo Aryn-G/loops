@@ -16,9 +16,9 @@ Aryan Gera
 
 # Feature List
 - [x] UI / UX / Branding
-- [ ] Authentication
+- [X] Authentication
 - [ ] Admin Role
-  - [ ] Assigning Roles
+  - [X] Assigning Roles
   - [ ] Assigning Groups
 - [ ] Student Life Staff Role
   - [ ] Posting Loops
@@ -43,20 +43,31 @@ Aryan Gera
 
 
 ## Authentication / Roles System
-|  Status  |    Date    |           Description            |
-| :------: | :--------: | :------------------------------: |
-| Started  | 10/16/2024 |  MongoDB / Mongoose Connection   |
-| Finished | 10/16/2024 |  MongoDB / Mongoose Connection   |
-| Started  | 10/16/2024 |      Home Page / Login Page      |
-| Finished | 10/19/2024 | Fixed `next/font/google` issues  |
-| Finished | 10/19/2024 |      Home Page / Login Page      |
-| Started  | 10/19/2024 | OAuth on personal google account |
+|  Status  |    Date    |                         Description                         |
+| :------: | :--------: | :---------------------------------------------------------: |
+| Started  | 10/16/2024 |                MongoDB / Mongoose Connection                |
+| Finished | 10/16/2024 |                MongoDB / Mongoose Connection                |
+| Started  | 10/16/2024 |                   Home Page / Login Page                    |
+| Finished | 10/19/2024 |               Fixed `next/font/google` issues               |
+| Finished | 10/19/2024 |                   Home Page / Login Page                    |
+| Started  | 10/19/2024 |              OAuth on personal google account               |
+| Finished | 10/21/2024 | OMGGGG FINALLY!!!!!!!! Finished role based OAuth w/ mongodb |
+| Started  | 10/21/2024 |        Debugging OAuth Account Already Exists Error         |
+| Started  | 10/26/2024 |                   Custom Mongoose Adapter                   |
+| Finished | 10/26/2024 |                   Custom Mongoose Adapter                   |
+| Started  | 10/26/2024 |                  Found OAuth Root Problem                   |
+| Finished | 11/08/2024 |            FINALLYLLYLLYLYLLYY FIXED PROBLEM!!!             |
 
 ## Admin Dashboard
-| Status | Date  | Description |
-| :----: | :---: | :---------: |
+|  Status  |    Date    |               Description               |
+| :------: | :--------: | :-------------------------------------: |
+| Started  | 11/06/2024 |       Setting Users to Loops Role       |
+| Finished | 11/06/2024 |       Setting Users to Loops Role       |
+| Started  | 11/07/2024 | Managing Existing Users with Loops Role |
+| Finished | 11/07/2024 | Managing Existing Users with Loops Role |
 
-## Staff Dashboard
+
+## Loops Dashboard
 | Status | Date  | Description |
 | :----: | :---: | :---------: |
 
@@ -67,3 +78,24 @@ Aryan Gera
 ## Student Dashboard
 | Status | Date  | Description |
 | :----: | :---: | :---------: |
+
+
+# Env Vars
+```
+MONGODB_URI=
+AUTH_SECRET=
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+```
+
+## Get Started Instructions
+
+First, run `npm i` to install dependencies.
+
+Then, run `npx auth secret`. This creates a `.env.local` file in the root folder and populates the `AUTH_SECRET` enviorment variable.
+
+Then, link MongoDB. I created a free cluster through the MongoDB online dashboard, created an admin user, and copy pasted the connect uri into the `MONGODB_URI` enviorment variable.
+
+Then, go to Google Cloud, create a new project, set up the conset screen, and generate an OAuth2 Key. The JS Origin is `http://localhost:3000`. The redirect is `https://localhost:3000/api/auth/callback/google`. Then, copy the Client ID and paste it into the `AUTH_GOOGLE_ID` enviorment variable. Then, copy the Client Secret and paste it into the `AUTH_GOOGLE_SECRET` enviorment variable.
+
+Finally, run `npm run dev`
