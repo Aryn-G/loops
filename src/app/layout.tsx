@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Footer from "./_components/Footer";
+import Navbar from "./_components/Navbar";
 
 // const inter = Inter({
 //   variable: "--font-inter",
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body
         className={`${grot.variable} font-grot text-base px-3 min-h-screen relative flex flex-col antialiased`}
       >
+        <Navbar />
         {children}
         <Footer />
       </body>

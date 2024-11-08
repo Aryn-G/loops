@@ -24,7 +24,7 @@ export default async function Home() {
         >
           <button
             type="submit"
-            className="px-6 py-3 border border-black flex items-center justify-center gap-2.5 w-fit rounded-lg font-bold bg-white shadow-brutal-md"
+            className="px-6 py-3 ring-1 ring-black flex items-center justify-center gap-2.5 w-fit rounded-lg font-bold bg-white shadow-brutal-md"
           >
             <Image src="/glogo.png" alt="Google Logo" width={24} height={24} />
             <span>Sign in with NCSSM</span>

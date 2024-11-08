@@ -16,9 +16,9 @@ Aryan Gera
 
 # Feature List
 - [x] UI / UX / Branding
-- [ ] Authentication
+- [X] Authentication
 - [ ] Admin Role
-  - [ ] Assigning Roles
+  - [X] Assigning Roles
   - [ ] Assigning Groups
 - [ ] Student Life Staff Role
   - [ ] Posting Loops
@@ -56,12 +56,18 @@ Aryan Gera
 | Started  | 10/26/2024 |                   Custom Mongoose Adapter                   |
 | Finished | 10/26/2024 |                   Custom Mongoose Adapter                   |
 | Started  | 10/26/2024 |                  Found OAuth Root Problem                   |
+| Finished | 11/08/2024 |            FINALLYLLYLLYLYLLYY FIXED PROBLEM!!!             |
 
 ## Admin Dashboard
-| Status | Date  | Description |
-| :----: | :---: | :---------: |
+|  Status  |    Date    |               Description               |
+| :------: | :--------: | :-------------------------------------: |
+| Started  | 11/06/2024 |       Setting Users to Loops Role       |
+| Finished | 11/06/2024 |       Setting Users to Loops Role       |
+| Started  | 11/07/2024 | Managing Existing Users with Loops Role |
+| Finished | 11/07/2024 | Managing Existing Users with Loops Role |
 
-## Staff Dashboard
+
+## Loops Dashboard
 | Status | Date  | Description |
 | :----: | :---: | :---------: |
 
