@@ -1,52 +1,54 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import CaretRight from "../_icons/CaretRight";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 type Props = {
   children: JSX.Element[];
   itemsPerPage: number;
   className?: string;
+  // initPage?: number;
 };
 
 const Pagination = (props: Props) => {
+  const searchParams = useSearchParams();
+  // const { replace } = useRouter();
+  const pathname = usePathname();
+
+  const currentPage = Number(searchParams.get("p"))
+    ? Math.min(
+        Math.max(Number(searchParams.get("p")), 1),
+        Math.ceil(props.children.length / props.itemsPerPage)
+      )
+    : 1;
+  const createPageURL = (pageNumber: number) => {
+    if (pageNumber < 1) pageNumber = 1;
+    if (pageNumber > maxPages) pageNumber = maxPages;
+
+    const params = new URLSearchParams(searchParams);
+    params.set("p", pageNumber.toString());
+    return `${pathname}?${params.toString()}`;
+  };
+
   const [items, setItems] = useState(props.children);
   const [itemsPerPage, setItemsPerPage] = useState(props.itemsPerPage);
-  const [currentPage, setCurrentPage] = useState(1);
   const [maxPages, setMaxPages] = useState(
     Math.ceil(items.length / itemsPerPage)
   );
-  const [lower, setLower] = useState(0);
-  const [upper, setUpper] = useState(itemsPerPage);
+
   useEffect(() => {
     setItems(props.children);
     setItemsPerPage(props.itemsPerPage);
-    setCurrentPage(1);
-    setLower(0);
-    setUpper(props.itemsPerPage);
     setMaxPages(Math.ceil(props.children.length / props.itemsPerPage));
   }, [props]);
-  const next = () => {
-    if (upper < items.length) {
-      setLower(lower + itemsPerPage);
-      setUpper(upper + itemsPerPage);
-      setCurrentPage(currentPage + 1);
-    }
-  };
-  const prev = () => {
-    if (lower > 0) {
-      setLower(lower - itemsPerPage);
-      setUpper(upper - itemsPerPage);
-      setCurrentPage(currentPage - 1);
-    }
-  };
-  const page = (num: number) => {
-    setLower((num - 1) * itemsPerPage);
-    setUpper((num - 1) * itemsPerPage + itemsPerPage);
-    setCurrentPage(num);
-  };
 
   const pageNumberString = () => {
-    let l = lower + 1;
-    let u = upper > items.length ? items.length : upper;
+    const lower = (currentPage - 1) * itemsPerPage;
+    const upper = (currentPage - 1) * itemsPerPage + itemsPerPage;
+    const l = lower + 1;
+    const u = upper > items.length ? items.length : upper;
     if (l === u) {
       return `${l} of ${items.length}`;
     } else {
@@ -61,96 +63,116 @@ const Pagination = (props: Props) => {
         <span className="sr-only"> total pages</span>
       </div>
       <div className="flex gap-2 items-center justify-center font-bold mb-5">
-        <button
-          onClick={prev}
+        <Link
+          href={createPageURL(currentPage - 1)}
+          scroll={false}
           className="paginationBtn"
           aria-label="Previous Page"
         >
           <CaretRight className="size-6 rotate-180" />
-        </button>
-        <button
-          onClick={() => page(1)}
+        </Link>
+        <Link
+          href={createPageURL(1)}
+          scroll={false}
           className={`paginationBtn ${currentPage == 1 ? "underline" : ""}`}
           aria-label="Page 1"
         >
           1
-        </button>
+        </Link>
         {maxPages < 3 ? null : currentPage >= 1 && currentPage <= 3 ? (
           <>
-            <button
-              onClick={() => page(2)}
+            <Link
+              href={createPageURL(2)}
+              scroll={false}
               className={`paginationBtn ${currentPage == 2 ? "underline" : ""}`}
               aria-label="Page 2"
             >
               2
-            </button>
+            </Link>
             {maxPages > 3 && (
               <>
-                <button
-                  onClick={() => page(2)}
+                <Link
+                  href={createPageURL(3)}
+                  scroll={false}
                   className={`paginationBtn ${
                     currentPage == 3 ? "underline" : ""
                   }`}
                   aria-label="Page 3"
                 >
                   3
-                </button>
-                {maxPages > 4 && <DotBtn setPage={page} maxPage={maxPages} />}
+                </Link>
+                {maxPages > 4 && (
+                  <DotBtn setPage={createPageURL} maxPage={maxPages} />
+                )}
               </>
             )}
           </>
         ) : currentPage >= maxPages - 2 && currentPage <= maxPages ? (
           <>
-            {maxPages > 4 && <DotBtn setPage={page} maxPage={maxPages} />}
-            <button
-              onClick={() => page(maxPages - 2)}
+            {maxPages > 4 && (
+              <DotBtn setPage={createPageURL} maxPage={maxPages} />
+            )}
+            <Link
+              href={createPageURL(maxPages - 2)}
+              scroll={false}
               className={`paginationBtn ${
                 currentPage == maxPages - 2 ? "underline" : ""
               }`}
               aria-label={`Page ${maxPages - 2}`}
             >
               {maxPages - 2}
-            </button>
-            <button
-              onClick={() => page(maxPages - 1)}
+            </Link>
+            <Link
+              href={createPageURL(maxPages - 1)}
+              scroll={false}
               className={`paginationBtn ${
                 currentPage == maxPages - 1 ? "underline" : ""
               }`}
               aria-label={`Page ${maxPages - 1}`}
             >
               {maxPages - 1}
-            </button>
+            </Link>
           </>
         ) : (
           <>
-            <DotBtn setPage={page} maxPage={maxPages} />
-            <button
-              onClick={() => page(currentPage)}
+            <DotBtn setPage={createPageURL} maxPage={maxPages} />
+            <div
+              // onClick={() => page(currentPage)}
               className="paginationBtn underline"
               aria-label={`Page ${currentPage}`}
             >
               {currentPage}
-            </button>
-            <DotBtn setPage={page} maxPage={maxPages} />
+            </div>
+            <DotBtn setPage={createPageURL} maxPage={maxPages} />
           </>
         )}
         {maxPages > 1 && (
-          <button
-            onClick={() => page(maxPages)}
+          <Link
+            href={createPageURL(maxPages)}
+            scroll={false}
             className={`paginationBtn ${
               currentPage == maxPages ? "underline" : ""
             }`}
             aria-label={`Page ${maxPages}`}
           >
             {maxPages}
-          </button>
+          </Link>
         )}
-        <button onClick={next} className="paginationBtn" aria-label="Next Page">
+        <Link
+          href={createPageURL(currentPage + 1)}
+          scroll={false}
+          className="paginationBtn"
+          aria-label="Next Page"
+        >
           <CaretRight />
-        </button>
+        </Link>
       </div>
       <div className={props.className ?? "flex flex-col gap-2"}>
-        {items.filter((item, i) => i >= lower && i < upper)}
+        {items.filter(
+          (item, i) =>
+            i >= (currentPage - 1) * itemsPerPage &&
+            i < (currentPage - 1) * itemsPerPage + itemsPerPage
+        )}
       </div>
     </div>
   );
@@ -160,7 +182,7 @@ const DotBtn = ({
   setPage,
   maxPage,
 }: {
-  setPage: (num: number) => void;
+  setPage: (num: number) => string;
   maxPage: number;
 }) => {
   const [isBtn, setIsBtn] = useState(true);
@@ -171,6 +193,20 @@ const DotBtn = ({
       inputRef.current.focus();
     }
   }, [isBtn]);
+
+  const { replace } = useRouter();
+
+  const handleSubmit = () => {
+    if (!inputRef.current) return;
+    if (
+      parseInt(inputRef.current.value) > 0 &&
+      parseInt(inputRef.current.value) <= maxPage
+    ) {
+      // setPage(parseInt(inputRef.current.value));
+      replace(setPage(parseInt(inputRef.current.value)), { scroll: false });
+      setIsBtn(true);
+    }
+  };
 
   return (
     <>
@@ -189,14 +225,7 @@ const DotBtn = ({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (!inputRef.current) return;
-            if (
-              parseInt(inputRef.current.value) > 0 &&
-              parseInt(inputRef.current.value) <= maxPage
-            ) {
-              setPage(parseInt(inputRef.current.value));
-              setIsBtn(true);
-            }
+            handleSubmit();
           }}
           className="flex items-center justify-center"
         >
@@ -205,6 +234,7 @@ const DotBtn = ({
             ref={inputRef}
             onBlur={(e) => {
               setIsBtn(true);
+              handleSubmit();
               e.target.value = "";
             }}
             className="paginationBtn text-center"

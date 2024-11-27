@@ -1,32 +1,32 @@
-import NextAuth from "next-auth";
-import { CustomAdaptor } from "@/app/_lib/CustomAdapter";
+import NextAuth, { Session, User } from "next-auth";
 import mongoDB, { getMongoDBClient } from "./app/_mongo/connect";
 import authConfig from "./auth.config";
 import Users, { IUsers } from "./app/_mongo/models/Users";
-import Accounts from "./app/_mongo/models/Accounts";
-import Sessions from "./app/_mongo/models/Sessions";
-import VerificationTokens from "./app/_mongo/models/VerificationTokens";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
+
+export type ExtendedSession = Session & {
+  user?: User & { role?: "Student" | "Loops" | "Admin" };
+};
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // @ts-ignore
   adapter: MongoDBAdapter(getMongoDBClient()),
-  // adapter: CustomAdaptor(getMongoDBClient(), {
-  //   collections: { Users, Accounts, Sessions, VerificationTokens },
-  // }),
+
   session: { strategy: "jwt" },
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user }) {
       if (user) {
         // @ts-ignore
         token.role = user.role;
         token.image = user.image;
+        token.id = user.id;
       } else {
         await mongoDB();
         const dbUser = await Users.findById<IUsers>(token.sub);
         if (dbUser) {
           token.role = dbUser?.toJSON().role;
           token.image = dbUser?.toJSON().picture;
+          token.id = dbUser?.toJSON()._id;
         }
       }
       return token;
@@ -37,19 +37,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role;
         // @ts-ignore
         session.user.image = token.image;
+        // @ts-ignore
+        session.user.id = token.id;
       }
       // console.log(session);
       return {
         ...session,
       };
     },
-    async signIn({ account, profile }) {
-      // if (account?.provider == "google") {
-      //   return profile?.email_verified && profile.email?.endsWith("@ncssm.edu");
-      // }
+    // async signIn({ account, profile }) {
+    // if (account?.provider == "google") {
+    //   return profile?.email_verified && profile.email?.endsWith("@ncssm.edu");
+    // }
 
-      return true;
-    },
+    //   return true;
+    // },
     async redirect({ url, baseUrl }) {
       // console.log("REDIRECT");
       // Allows relative callback URLs
@@ -60,6 +62,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       return baseUrl;
     },
+  },
+  pages: {
+    error: "/",
+    signIn: "/",
+    signOut: "/",
+    newUser: "/",
+    verifyRequest: "/",
   },
   ...authConfig,
 });

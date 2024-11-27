@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Sidebar from "../Sidebar";
 import { auth, ExtendedSession } from "@/auth";
 
 export default async function Layout({
@@ -10,5 +11,10 @@ export default async function Layout({
 
   if (!session) return redirect("/");
 
-  return <>{children}</>;
+  return (
+    <div className="flex gap-5 relative">
+      <Sidebar session={session} />
+      <div className="w-full">{children}</div>
+    </div>
+  );
 }

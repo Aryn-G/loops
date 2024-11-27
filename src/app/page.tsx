@@ -1,12 +1,18 @@
-import { auth, signIn } from "@/auth";
+import { auth, ExtendedSession, signIn } from "@/auth";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
-export default async function Home() {
-  const session = await auth();
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const session: ExtendedSession | null = await auth();
   // const user = null;
 
   if (session) return redirect("/dashboard");
+
+  const err = (await searchParams).error;
 
   return (
     <main className="pt-20 flex-1 flex flex-col items-center justify-center">
@@ -30,6 +36,7 @@ export default async function Home() {
             <span>Sign in with NCSSM</span>
           </button>
         </form>
+        {err && <span className="mt-2">There was an error: {err}</span>}
       </div>
     </main>
   );

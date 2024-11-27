@@ -79,6 +79,12 @@ Aryan Gera
 | Status | Date  | Description |
 | :----: | :---: | :---------: |
 
+## Validating All Forms
+- A user can always submit a form with fraudulant data
+- Validation must take place on the server.
+
+## Deploying
+- [Deploying NextJS to Custom VPS](https://www.reddit.com/r/nextjs/comments/usrdr3/what_is_the_best_way_to_deploy_nextjs_website_to/) 
 
 # Env Vars
 ```

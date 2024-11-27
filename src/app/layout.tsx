@@ -38,7 +38,11 @@ export default function RootLayout({
         className={`${grot.variable} font-grot text-base px-3 min-h-screen relative flex flex-col antialiased`}
       >
         <Navbar />
-        {children}
+        <main className="flex-1 flex flex-col pt-20">
+          <div className="w-full md:px-20 max-w-sm md:max-w-screen-2xl mx-auto">
+            {children}
+          </div>
+        </main>
         <Footer />
       </body>
     </html>
