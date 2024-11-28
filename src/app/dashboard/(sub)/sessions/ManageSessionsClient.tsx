@@ -101,13 +101,13 @@ const SessionCard = ({
               <span className="relative w-3 h-3 rounded-full bg-ncssm-blue"></span>
             </span>
           )}
-          {s.device == "phone" ? <Phone /> : <Desktop />}
+          {s.device == "mobile" ? <Phone /> : <Desktop />}
         </div>
         <div className="flex flex-col flex-1">
           <p className="text-base md:text-lg font-light">
             <span className="font-bold">
               {title(
-                s.device == "phone"
+                s.device == "mobile"
                   ? `${s.deviceVendor} ${s.deviceModel}`
                   : s.device
               )}
