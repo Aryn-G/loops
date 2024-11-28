@@ -1,65 +1,53 @@
-import NextAuth from "next-auth";
-import { CustomAdaptor } from "@/app/_lib/CustomAdapter";
+import NextAuth, { DefaultSession, Session, User } from "next-auth";
 import mongoDB, { getMongoDBClient } from "./app/_mongo/connect";
 import authConfig from "./auth.config";
 import Users, { IUsers } from "./app/_mongo/models/Users";
-import Accounts from "./app/_mongo/models/Accounts";
-import Sessions from "./app/_mongo/models/Sessions";
-import VerificationTokens from "./app/_mongo/models/VerificationTokens";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import { headers } from "next/headers";
+import Sessions from "./app/_mongo/models/Sessions";
+import { ModifiedMongoDBAdapter } from "./app/_lib/ModifiedMongoDBAdapter";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      picture?: string;
+      role?: "Student" | "Loops" | "Admin";
+    } & DefaultSession["user"];
+    // userAgent: string;
+    id: string;
+    sessionToken: string;
+    userId: string;
+    expires: string;
+    browser: string;
+    device: string;
+    deviceVendor?: string;
+    deviceModel?: string;
+    os: string;
+    location: string;
+    ip: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // @ts-ignore
-  adapter: MongoDBAdapter(getMongoDBClient()),
-  // adapter: CustomAdaptor(getMongoDBClient(), {
-  //   collections: { Users, Accounts, Sessions, VerificationTokens },
-  // }),
-  session: { strategy: "jwt" },
+  adapter: ModifiedMongoDBAdapter(getMongoDBClient()),
+  // adapter: MongoDBAdapter(getMongoDBClient()),
+  session: { strategy: "database" },
   callbacks: {
-    async jwt({ token, user, trigger }) {
-      if (user) {
-        // @ts-ignore
-        token.role = user.role;
-        token.image = user.image;
-      } else {
-        await mongoDB();
-        const dbUser = await Users.findById<IUsers>(token.sub);
-        if (dbUser) {
-          token.role = dbUser?.toJSON().role;
-          token.image = dbUser?.toJSON().picture;
-        }
-      }
-      return token;
+    async session({ session }) {
+      return { ...session };
+      // console.log({ ...session._doc, user: session.user });
+      // return { ...session._doc, user: session.user };
     },
-    async session({ session, token }) {
-      if (session?.user) {
-        // @ts-ignore
-        session.user.role = token.role;
-        // @ts-ignore
-        session.user.image = token.image;
-      }
-      // console.log(session);
-      return {
-        ...session,
-      };
-    },
-    async signIn({ account, profile }) {
-      // if (account?.provider == "google") {
-      //   return profile?.email_verified && profile.email?.endsWith("@ncssm.edu");
-      // }
-
-      return true;
-    },
-    async redirect({ url, baseUrl }) {
-      // console.log("REDIRECT");
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-
-      // Allows callback URLs on the same origin
-      if (new URL(url).origin === baseUrl) return url;
-
-      return baseUrl;
-    },
+  },
+  pages: {
+    error: "/",
+    signIn: "/",
+    signOut: "/",
+    newUser: "/",
+    verifyRequest: "/",
   },
   ...authConfig,
 });

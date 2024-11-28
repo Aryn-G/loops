@@ -11,6 +11,7 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-y: scroll;
 }
 
 @layer components {
@@ -20,4 +21,37 @@ body {
   .font-bold {
     font-variation-settings: "opsz" 48;
   }
+  .paginationBtn {
+    @apply rounded w-10 h-10 flex items-center justify-center underline-offset-2;
+  }
+
+  .brutal-sm {
+    @apply bg-white ring-1 ring-black shadow-brutal-sm p-2 rounded-lg;
+  }
+
+  .brutal-md {
+    @apply bg-white ring-1 ring-black shadow-brutal-md p-2 rounded-lg;
+  }
+
+  .brutal-xl {
+    @apply bg-white ring-1 ring-black shadow-brutal-xl p-2 rounded-lg;
+  }
+
+  /* .brutal-focus { */
+  /* @apply outline-none ring-offset-1 ring-offset-black ring-4 ring-ncssm-blue/50; */
+  /* @apply outline; */
+  /* } */
+}
+
+::-webkit-scrollbar {
+  @apply sm:w-[8px] sm:h-[8px];
+}
+::-webkit-scrollbar-track {
+  @apply sm:bg-ncssm-light-blue;
+}
+::-webkit-scrollbar-thumb {
+  @apply sm:bg-ncssm-blue sm:rounded-full;
+}
+::-webkit-scrollbar-corner {
+  background-color: transparent;
 }

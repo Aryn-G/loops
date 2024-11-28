@@ -6,7 +6,11 @@ export default {
   providers: [
     Google({
       profile(profile) {
-        return { role: profile.role ?? "Student", ...profile };
+        return {
+          id: profile.sub ?? profile.id,
+          role: profile.role ?? "Student",
+          ...profile,
+        };
       },
       // allowDangerousEmailAccountLinking: true,
       authorization: {
