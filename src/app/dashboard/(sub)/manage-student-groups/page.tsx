@@ -1,5 +1,4 @@
-import { getFilteredUsers } from "@/app/_lib/users";
-import { auth, ExtendedSession } from "@/auth";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
@@ -7,13 +6,12 @@ import { Suspense } from "react";
 import CreateGroup from "./CreateGroup";
 import ManageGroups from "./ManageGroups";
 
-export default async function Dashbaord() {
-  const session: ExtendedSession | null = await auth();
-  if (!session) return redirect("/");
-  if (session.user?.role !== "Admin") redirect("/dashboard/profile");
-  // Beyond this point, role = "Loops" or "Admin"
+export default async function Page() {
+  const session = await auth();
 
-  const allUsers = await getFilteredUsers();
+  if (!session) return redirect("/");
+  if (session.user?.role !== "Admin") redirect("/dashboard");
+  // Beyond this point, role = "Admin"
 
   return (
     <>
@@ -47,7 +45,7 @@ export default async function Dashbaord() {
       <br />
       <p className="font-black text-xl">Create a Group</p>
       <Suspense>
-        <CreateGroup session={session} />
+        <CreateGroup />
       </Suspense>
       <br />
       <p className="font-black text-xl">Manage Groups</p>

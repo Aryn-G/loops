@@ -1,10 +1,9 @@
-import { auth, ExtendedSession, signIn } from "@/auth";
-import Image from "next/image";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import SuggestForm from "./SuggestForm";
 
-export default async function Home() {
-  const session: ExtendedSession | null = await auth();
+export default async function Page() {
+  const session = await auth();
   if (!session) return redirect("/");
 
   return (

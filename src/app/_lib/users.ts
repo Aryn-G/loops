@@ -14,7 +14,7 @@ export const getFilteredUsers = unstable_cache(
         name: user.name,
         email: user.email,
         role: user.role,
-        photo: user.picture,
+        picture: user.picture,
       };
     });
   },

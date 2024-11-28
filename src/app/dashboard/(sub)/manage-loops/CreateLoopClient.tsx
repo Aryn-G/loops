@@ -2,7 +2,6 @@
 
 import React, { useActionState, useEffect, useRef, useState } from "react";
 import { createLoopAction } from "./actions";
-import { ExtendedSession } from "@/auth";
 import Input from "@/app/_components/Input";
 import LoopCard from "@/app/_components/LoopCard";
 import Bell from "@/app/_icons/Bell";
@@ -11,9 +10,10 @@ import Customize from "@/app/_icons/Customize";
 import XMark from "@/app/_icons/XMark";
 import { getGroups } from "@/app/_lib/groups";
 import mongoose from "mongoose";
+import { Session } from "next-auth";
 
 type Props = {
-  session: ExtendedSession;
+  session: Session;
   allGroups: Awaited<ReturnType<typeof getGroups>>;
 };
 

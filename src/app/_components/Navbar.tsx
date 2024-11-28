@@ -1,4 +1,4 @@
-import { auth, ExtendedSession, signOut } from "@/auth";
+import { auth, signOut } from "@/auth";
 import Link from "next/link";
 
 export const NavLinks = [
@@ -7,7 +7,7 @@ export const NavLinks = [
 ];
 
 export default async function Navbar() {
-  const session: ExtendedSession | null = await auth();
+  const session = await auth();
   if (!session) return <></>;
 
   return (

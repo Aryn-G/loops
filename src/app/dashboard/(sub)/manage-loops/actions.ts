@@ -2,14 +2,14 @@
 
 import mongoDB from "@/app/_mongo/connect";
 import Loop from "@/app/_mongo/models/Loop";
-import { auth, ExtendedSession } from "@/auth";
+import { auth } from "@/auth";
 import { revalidateTag } from "next/cache";
 
 export async function createLoopAction(prevState: any, formData: FormData) {
   await mongoDB();
 
   // const createdBy = formData.get("userId");
-  const session: ExtendedSession | null = await auth();
+  const session = await auth();
 
   // console.log(session);
 

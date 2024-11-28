@@ -1,17 +1,16 @@
-import { getFilteredUsers } from "@/app/_lib/users";
-import { auth, ExtendedSession } from "@/auth";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
+import { Suspense } from "react";
 import CreateForm from "./CreateLoop";
 
-export default async function Dashbaord() {
-  const session: ExtendedSession | null = await auth();
-  if (!session) return redirect("/");
-  if (session.user?.role !== "Admin") redirect("/dashboard/profile");
-  // Beyond this point, role = "Loops" or "Admin"
+export default async function Page() {
+  const session = await auth();
 
-  const allUsers = await getFilteredUsers();
+  if (!session) return redirect("/");
+  if (session.user?.role === "Student") redirect("/dashboard");
+  // Beyond this point, role = "Loops" || "Admin"
 
   return (
     <>
@@ -39,8 +38,9 @@ export default async function Dashbaord() {
       </div>
       <br />
       <p className="font-black text-xl">Create a Loop</p>
-      {/* <br /> */}
-      <CreateForm session={session} />
+      <Suspense>
+        <CreateForm session={session} />
+      </Suspense>
       <br />
       <p className="font-black text-xl">Edit Loops</p>
     </>

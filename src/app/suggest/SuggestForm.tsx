@@ -2,12 +2,12 @@
 
 import React, { useActionState, useEffect, useState } from "react";
 import { suggestFormSubmit } from "./actions";
-import { ExtendedSession } from "@/auth";
 import Input from "../_components/Input";
-import TextArea from "../_components/Textarea";
+import TextArea from "../_components/TextArea";
+import { Session } from "next-auth";
 
 type Props = {
-  session: ExtendedSession;
+  session: Session;
 };
 
 const SuggestForm = ({ session }: Props) => {

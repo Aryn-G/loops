@@ -1,16 +1,17 @@
-import { auth, ExtendedSession } from "@/auth";
+import { auth } from "@/auth";
 import Image from "next/image";
 import Sidebar from "./Sidebar";
+import { redirect } from "next/navigation";
 
-export default async function Dashbaord() {
-  const session: ExtendedSession | null = await auth();
-  if (!session) return;
+export default async function Page() {
+  const session = await auth();
+  if (!session) return redirect("/");
 
   return (
     <div className="w-full flex flex-col items-center justify-center">
-      {session.user?.image ? (
+      {session.user?.picture ? (
         <Image
-          src={session.user.image}
+          src={session.user.picture}
           alt="profile pic"
           className="brutal-xl p-0"
           width={96}

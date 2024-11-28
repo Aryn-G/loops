@@ -104,9 +104,9 @@ const PersonCard = ({ u }: { u: FilteredUser }) => {
       className="py-3 flex flex-row gap-2 w-full items-center justify-center"
     >
       <div className="flex gap-2 flex-1 w-full items-center">
-        {u.photo && (
+        {u.picture && (
           <Image
-            src={u.photo}
+            src={u.picture}
             alt="profile pic"
             className="brutal-sm p-0 size-10 md:size-12"
             width={48}

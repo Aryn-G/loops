@@ -1,15 +1,14 @@
-import { auth, ExtendedSession, signIn } from "@/auth";
+import { auth, signIn } from "@/auth";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import Sessions from "./_mongo/models/Sessions";
 
-export default async function Home({
+export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const session: ExtendedSession | null = await auth();
-  // const user = null;
-
+  const session = await auth();
   if (session) return redirect("/dashboard");
 
   const err = (await searchParams).error;

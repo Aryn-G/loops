@@ -3,14 +3,12 @@
 import Link from "next/link";
 import AcademicCap from "../_icons/AcademicCap";
 import UserGroup from "../_icons/UserGroup";
-import UserCircle from "../_icons/UserCircle";
 import Bookmark from "../_icons/Bookmark";
-import Analytics from "../_icons/Analytics";
 import { usePathname } from "next/navigation";
 import CaretRight from "../_icons/CaretRight";
-import { ExtendedSession } from "@/auth";
-import Bell from "../_icons/Bell";
 import Megaphone from "../_icons/Megaphone";
+import { Session } from "next-auth";
+import RectangleGroup from "../_icons/RectangleGroup";
 
 export type SectionType = {
   section: string;
@@ -24,7 +22,8 @@ export const SidebarData: SectionType[] = [
     links: [
       // { title: "Profile", icon: <UserCircle /> },
       { title: "My Sign-Ups", icon: <Bookmark /> },
-      { title: "Notications", icon: <Bell /> },
+      { title: "Sessions", icon: <RectangleGroup /> },
+      // { title: "Notications", icon: <Bell /> },
     ],
     allow: ["Student", "Loops", "Admin"],
   },
@@ -58,7 +57,7 @@ export default function Sidebar({
   noBorder,
   showOnMobile,
 }: {
-  session: ExtendedSession | null;
+  session: Session;
   noBorder?: boolean;
   showOnMobile?: boolean;
 }) {
@@ -86,7 +85,7 @@ function Section({
   noBorder,
 }: {
   section: SectionType;
-  session: ExtendedSession | null;
+  session: Session;
   noBorder?: boolean;
 }) {
   if (!section.allow.includes(session?.user?.role ?? "")) {

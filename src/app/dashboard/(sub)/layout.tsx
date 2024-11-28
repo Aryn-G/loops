@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 import Sidebar from "../Sidebar";
-import { auth, ExtendedSession } from "@/auth";
+import { auth } from "@/auth";
 
 export default async function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session: ExtendedSession | null = await auth();
+  const session = await auth();
 
   if (!session) return redirect("/");
 

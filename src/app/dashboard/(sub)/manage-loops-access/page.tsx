@@ -1,22 +1,17 @@
-import { auth, ExtendedSession } from "@/auth";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
 import { Suspense } from "react";
-import ManageAccess from "./ManageAccess";
-import Search from "@/app/_icons/Search";
 import GiveAccess from "./GiveAccess";
-import UserPlus from "@/app/_icons/UserPlus";
+import ManageAccess from "./ManageAccess";
 
-export default async function Dashbaord({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const session: ExtendedSession | null = await auth();
+export default async function Page() {
+  const session = await auth();
+
   if (!session) return redirect("/");
-  if (session.user?.role !== "Admin") redirect("/dashboard/profile");
-  // Beyond this point, role = "Loops" or "Admin"
+  if (session.user?.role !== "Admin") redirect("/dashboard");
+  // Beyond this point, role = "Admin"
 
   return (
     <>
@@ -48,10 +43,7 @@ export default async function Dashbaord({
       </div>
       <p className="font-black text-xl">Give Access</p>
       <div>Only give Loops Access to accounts you trust.</div>
-      {/* <br /> */}
-      {/* <div className="flex flex-row-reverse"> */}
 
-      {/* </div> */}
       <Suspense>
         <GiveAccess />
       </Suspense>
