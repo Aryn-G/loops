@@ -1,10 +1,30 @@
-import { getFilteredUsers } from "@/app/_lib/users";
+import { getFilteredUsers } from "@/app/_db/queries/users";
 import CreateLoopClient from "./CreateLoopClient";
-import { getGroups } from "@/app/_lib/groups";
+import { getGroups } from "@/app/_db/queries/groups";
 import { Session } from "next-auth";
 
-export default async function CreateLoop({ session }: { session: Session }) {
-  const allGroups = await getGroups();
+import { getLoop, getLoops } from "@/app/_db/queries/loops";
 
-  return <CreateLoopClient session={session} allGroups={allGroups} />;
+export default async function CreateLoop({
+  session,
+  searchParams,
+}: {
+  session: Session;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  // await wait(1000);
+  const allGroups = await getGroups();
+  const allLoops = await getLoops();
+
+  // const autofill = (await searchParams).autofill;
+  // const loop =
+  //   typeof autofill == "string" ? await getLoop(autofill) : undefined;
+
+  return (
+    <CreateLoopClient
+      session={session}
+      allGroups={allGroups}
+      allLoops={allLoops}
+    />
+  );
 }

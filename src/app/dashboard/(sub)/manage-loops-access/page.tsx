@@ -6,6 +6,12 @@ import { Suspense } from "react";
 import GiveAccess from "./GiveAccess";
 import ManageAccess from "./ManageAccess";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Loops • Dashboard / Manage Loops Access",
+};
+
 export default async function Page() {
   const session = await auth();
 
@@ -44,13 +50,13 @@ export default async function Page() {
       <p className="font-black text-xl">Give Access</p>
       <div>Only give Loops Access to accounts you trust.</div>
 
-      <Suspense>
+      <Suspense fallback={<p>Loading...</p>}>
         <GiveAccess />
       </Suspense>
       <br />
       <p className="font-black text-xl">Current Access</p>
 
-      <Suspense>
+      <Suspense fallback={<p>Loading...</p>}>
         <ManageAccess />
       </Suspense>
     </>

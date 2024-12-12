@@ -1,6 +1,12 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Loops • Dashboard",
+};
+
 export default async function Layout({
   children,
 }: Readonly<{

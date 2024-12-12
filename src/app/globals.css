@@ -15,6 +15,9 @@ body {
 }
 
 @layer components {
+  *[aria-disabled="true"] {
+    @apply opacity-75 cursor-not-allowed;
+  }
   .font-black {
     font-variation-settings: "opsz" 96;
   }

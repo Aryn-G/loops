@@ -2,10 +2,17 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
-import mongoDB from "@/app/_mongo/connect";
-import Sessions, { ISessions } from "@/app/_mongo/models/Sessions";
+import mongoDB from "@/app/_db/connect";
+import Sessions, { ISessions } from "@/app/_db/models/Sessions";
 import { revalidateTag } from "next/cache";
 import ManageSessions from "./ManageSessions";
+import { Suspense } from "react";
+
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Loops • Dashboard / Sessions",
+};
 
 export default async function Page() {
   const session = await auth();
@@ -25,7 +32,13 @@ export default async function Page() {
           <Refresh tag={"sessions"} />
         </div>
       </div>
-      <ManageSessions session={session} />
+      <p>
+        This is a list of devices that have logged into your account. Revoke any
+        sessions that you do not recognize.
+      </p>
+      <Suspense fallback={<p>Loading...</p>}>
+        <ManageSessions session={session} />
+      </Suspense>
     </>
   );
 }

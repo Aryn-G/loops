@@ -6,11 +6,17 @@ import { Suspense } from "react";
 import CreateGroup from "./CreateGroup";
 import ManageGroups from "./ManageGroups";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Loops • Dashboard / Manage Student Groups",
+};
+
 export default async function Page() {
   const session = await auth();
 
   if (!session) return redirect("/");
-  if (session.user?.role !== "Admin") redirect("/dashboard");
+  if (session.user?.role === "Student") redirect("/dashboard");
   // Beyond this point, role = "Admin"
 
   return (
@@ -44,12 +50,12 @@ export default async function Page() {
       </div>
       <br />
       <p className="font-black text-xl">Create a Group</p>
-      <Suspense>
+      <Suspense fallback={<p>Loading...</p>}>
         <CreateGroup />
       </Suspense>
       <br />
       <p className="font-black text-xl">Manage Groups</p>
-      <Suspense>
+      <Suspense fallback={<p>Loading...</p>}>
         <ManageGroups />
       </Suspense>
     </>

@@ -1,4 +1,4 @@
-import Reload from "../_icons/Reload";
+import { ArrowPathRoundedSquareIcon } from "@heroicons/react/16/solid";
 import { refreshAction } from "./Refresh.action";
 
 export default function Refresh({
@@ -38,7 +38,7 @@ export default function Refresh({
         <input name="path" id="path" value={path} readOnly className="hidden" />
       )}
       <button className="flex items-center justify-center gap-2 p-2">
-        Sync <Reload />
+        Sync <ArrowPathRoundedSquareIcon className="size-4" />
       </button>
     </form>
   );

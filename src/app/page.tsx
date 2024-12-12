@@ -1,7 +1,6 @@
 import { auth, signIn } from "@/auth";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import Sessions from "./_mongo/models/Sessions";
 
 export default async function Page({
   searchParams,
@@ -11,8 +10,10 @@ export default async function Page({
   const session = await auth();
   if (session) return redirect("/dashboard");
 
+  // displaying search parameters
   const err = (await searchParams).error;
 
+  // jsx
   return (
     <main className="pt-20 flex-1 flex flex-col items-center justify-center">
       <div className="mx-auto h-full flex flex-col gap-3 max-w-prose items-center text-center">
@@ -24,14 +25,23 @@ export default async function Page({
         <form
           action={async () => {
             "use server";
-            await signIn("google");
+            await signIn("google", {
+              redirect: true,
+              redirectTo: "/dashboard",
+            });
           }}
         >
           <button
             type="submit"
-            className="px-6 py-3 ring-1 ring-black flex items-center justify-center gap-2.5 w-fit rounded-lg font-bold bg-white shadow-brutal-md"
+            className="px-6 py-3 brutal-md flex items-center justify-center gap-2.5 w-fit font-bold"
           >
-            <Image src="/glogo.png" alt="Google Logo" width={24} height={24} />
+            <Image
+              src="/glogo.png"
+              alt="Google Logo"
+              width={64}
+              height={64}
+              className="select-none pointer-events-none size-6"
+            />
             <span>Sign in with NCSSM</span>
           </button>
         </form>

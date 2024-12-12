@@ -1,69 +1,110 @@
 "use server";
 
-import mongoDB from "@/app/_mongo/connect";
-import Loop from "@/app/_mongo/models/Loop";
+import mongoDB from "@/app/_db/connect";
+import Loop from "@/app/_db/models/Loop";
+import { toISOStringOffset } from "@/app/_lib/time";
 import { auth } from "@/auth";
 import { revalidateTag } from "next/cache";
 
-export async function createLoopAction(prevState: any, formData: FormData) {
+export async function createLoopAction(
+  prevState: any,
+  formData: FormData
+): Promise<{ [key: string]: string }> {
   await mongoDB();
 
-  // const createdBy = formData.get("userId");
   const session = await auth();
-
-  // console.log(session);
-
   if (!session?.user || session?.user?.role === "Student")
-    return "Error: Permission Denied";
+    return { overall: "Error: Permission Denied" };
 
   const createdBy = session.user.id;
 
-  const date = formData.get("date");
+  const loopNumber = formData.get("loopNumber");
   const title = formData.get("title");
   const description = formData.get("description");
   const capacity = formData.get("capacity");
-  const departureTime = formData.get("departureTime");
+  const departureDateTime = formData.get("departureDateTime");
   const departureLoc = formData.get("departureLoc");
-  const pickUpTime = formData.get("pickUpTime");
+  const pickUpDateTime = formData.get("pickUpDateTime");
   const pickUpLoc = formData.get("pickUpLoc");
   const approxDriveTime = formData.get("approxDriveTime");
 
   const res = formData.getAll("reservations");
+  const signUpOpenDateTime = formData.get("signUpOpenDateTime");
 
   const reservations: {
     group: FormDataEntryValue | null;
     slots: FormDataEntryValue | null;
   }[] = [];
 
-  res.forEach((id) => {
+  let totalSlots = 0;
+
+  res.forEach((id, i) => {
     reservations.push({
       group: formData.get("reservationGroup" + id),
       slots: formData.get("reservationSlots" + id),
     });
+    totalSlots += Number(reservations[i].slots);
   });
 
-  // console.log(createdBy);
-
   try {
+    if (
+      !title ||
+      !description ||
+      !capacity ||
+      !departureDateTime ||
+      !departureLoc ||
+      !pickUpDateTime ||
+      !approxDriveTime
+    )
+      throw new Error("Error: Incomplete Form Submission");
+
+    if (totalSlots > Number(capacity))
+      throw new Error("Error: Cannot Reserve More Slots than Capacity");
+
     const newLoop = new Loop({
       createdBy,
-      date,
+      loopNumber,
       title,
       description,
       capacity,
-      departureTime,
+      departureDateTime,
       departureLocation: departureLoc,
-      pickUpTime,
+      pickUpDateTime,
       pickUpLocation: pickUpLoc ?? "",
       approxDriveTime,
       reservations,
+      signUpOpenDateTime,
+      createdAt: new Date(),
     });
 
     await newLoop.save();
-    revalidateTag("groups");
+    revalidateTag("loopsTag");
+  } catch (error: any) {
+    if (typeof error === "string") return { overall: error };
+    return { overall: "Internal Error" };
+  }
+
+  return { overall: "success" };
+}
+
+export async function removeLoop(prevState: any, formData: FormData) {
+  await mongoDB();
+
+  const loop = formData.get("loop");
+  try {
+    if (!loop) return "Error: Invalid Form Submission";
+
+    const loopDoc = await Loop.findOne(
+      { _id: loop }
+      // { $set: { deleted: { $not: "$deleted" } } }
+    );
+    if (!loopDoc) return "Error";
+
+    loopDoc.deleted = !loopDoc.deleted;
+    await loopDoc.save();
+    revalidateTag("loopsTag");
   } catch (error) {
-    console.log(error);
-    return "Error:";
+    return "Internal Error";
   }
 
   return "Success";

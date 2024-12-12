@@ -11,14 +11,27 @@ export default function Footer() {
         </span>
         <div className="flex flex-wrap justify-center lg:justify-start">
           {[
-            { href: "/suggest", title: "Suggest Loops" },
-            { href: "/accessibility", title: "Accessibility" },
-            { href: "/privacy", title: "Privacy Poliy" },
-            { href: "/institutional", title: "Institutional Policy" },
+            // { href: "/suggest", title: "Suggest Loops" },
+            {
+              href: "https://www.ncssm.edu/accessibility",
+              target: "_blank",
+              title: "Accessibility",
+            },
+            {
+              href: "https://www.ncssm.edu",
+              target: "_blank",
+              title: "Privacy Poliy",
+            },
+            {
+              href: "https://www.ncssm.edu/about/leadership/board-of-trustees/institutional-policies",
+              target: "_blank",
+              title: "Institutional Policy",
+            },
           ].map((l) => (
             <Link
               href={l.href}
               key={l.href}
+              target={l.target}
               className="hover:underline underline-offset-2 text-neutral-700 hover:text-current p-3"
             >
               {l.title}

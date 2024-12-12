@@ -12,7 +12,7 @@ export default async function Navbar() {
 
   return (
     <>
-      <nav className="z-50 flex flex-col gap-1 justify-center items-center  pt-7 bg-ncssm-light-blue backdrop-blur-sm fixed top-0 inset-x-0 max-w-screen-xl mx-auto px-2.5 py-1">
+      <nav className="z-50 flex flex-col gap-1 justify-center items-center  pt-7 bg-ncssm-light-blue backdrop-blur-sm fixed top-0 inset-x-0 mx-auto px-2.5 py-1">
         <div className="flex gap-3 justify-between items-center max-w-sm mx-auto w-full">
           <Link href={"/loops"}>
             <p className="text-tfblue font-bold text-xl px-1.5">L∞ps</p>
@@ -30,7 +30,7 @@ export default async function Navbar() {
             <form
               action={async () => {
                 "use server";
-                await signOut();
+                await signOut({ redirectTo: "/", redirect: true });
               }}
             >
               <button

@@ -4,8 +4,19 @@ import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
 import { Suspense } from "react";
 import CreateForm from "./CreateLoop";
+import ManageLoops from "./ManageLoops";
 
-export default async function Page() {
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Loops • Dashboard / Manage Loops",
+};
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const session = await auth();
 
   if (!session) return redirect("/");
@@ -24,25 +35,29 @@ export default async function Page() {
       <div className="flex items-center justify-between">
         <h1 className="font-black text-xl">Manage Loops</h1>
         <div className="flex items-center">
-          <Refresh tag={"loops"} />
+          <Refresh tag={["loopsTag", "groups"]} />
+          {/* <Refresh path="/dashboard/manage-loops" /> */}
         </div>
       </div>
       <div className="max-w-md">
-        <p>Loops are </p>
         <p>You might create Loops for the something like the following:</p>
         <ul className="list-disc list-inside">
           <li>Morganton Heights Shopping Center</li>
           <li>Cook Out / Chic-fil-a</li>
-          <li>Edit/Delete All Sign-Ups</li>
+          <li>A Robotics Competition</li>
         </ul>
+        {/* <p></p> */}
       </div>
       <br />
       <p className="font-black text-xl">Create a Loop</p>
-      <Suspense>
-        <CreateForm session={session} />
+      <Suspense fallback={<p>Loading...</p>}>
+        <CreateForm session={session} searchParams={searchParams} />
       </Suspense>
       <br />
       <p className="font-black text-xl">Edit Loops</p>
+      <Suspense fallback={<p>Loading...</p>}>
+        <ManageLoops />
+      </Suspense>
     </>
   );
 }

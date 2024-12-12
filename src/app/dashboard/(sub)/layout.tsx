@@ -14,7 +14,7 @@ export default async function Layout({
   return (
     <div className="flex gap-5 relative">
       <Sidebar session={session} />
-      <div className="w-full">{children}</div>
+      <div className="w-full @container/sub">{children}</div>
     </div>
   );
 }

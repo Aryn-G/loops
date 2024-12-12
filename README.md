@@ -17,16 +17,16 @@ Aryan Gera
 # Feature List
 - [x] UI / UX / Branding
 - [X] Authentication
-- [ ] Admin Role
-  - [X] Assigning Roles
-  - [ ] Assigning Groups
-- [ ] Student Life Staff Role
-  - [ ] Posting Loops
-  - [ ] Editing Signups
-- [ ] Loops Page
-  - [ ] Searching Implements `opensearch.xml`
-  - [ ] Search Functionality using URL Paremeters (`loops.ncssm.edu/loops?q={params}`)
-- [ ] Student Role
+- [x] Admin Role
+  - [x] Assigning Roles
+  - [x] Assigning Groups
+- [x] Student Life Staff Role
+  - [x] Posting Loops
+  - [x] Editing Signups
+- [x] Loops Page
+  - [x] Searching Implements `opensearch.xml`
+  - [x] Search Functionality using URL Paremeters (`loops.ncssm.edu/loops?q={params}`)
+- [x] Student Role
 - [ ] SEO
   - [ ] `robots.txt`
   - [ ] `sitemap.tsx`

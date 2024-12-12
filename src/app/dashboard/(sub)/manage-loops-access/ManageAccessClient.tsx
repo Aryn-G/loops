@@ -3,14 +3,13 @@
 import React, { useActionState, useRef, useState } from "react";
 import { removeAccessAction } from "./actions";
 
-import Search from "@/app/_icons/Search";
-import Trash from "@/app/_icons/Trash";
 import Pagination from "@/app/_components/Pagination";
 import Image from "next/image";
-import { getFilteredUsers } from "@/app/_lib/users";
+import { getFilteredUsers } from "@/app/_db/queries/users";
 import { useDebouncedCallback } from "use-debounce";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import XMark from "@/app/_icons/XMark";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParams";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 
@@ -21,25 +20,8 @@ type Props = {
 const ManageAccessClient = (props: Props) => {
   const loopsAccess = props.allUsers.filter((u) => u.role === "Loops");
 
-  const searchParams = useSearchParams();
-  const { replace } = useRouter();
-  const pathname = usePathname();
+  const [query, q, setQ, updateSearch] = useSearchParam("q");
 
-  const updateSearch = useDebouncedCallback((value: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("p", "1");
-    if (value) {
-      params.set("q", value);
-    } else {
-      params.delete("q");
-    }
-    replace(`${pathname}?${params.toString()}`, {
-      scroll: false,
-    });
-  }, 300);
-
-  const query = searchParams.get("q") ?? "";
-  const [q, setQ] = useState(query);
   const filtered = loopsAccess.filter(
     (l) =>
       l.email.toLowerCase().includes(query.toLowerCase()) ||
@@ -50,8 +32,8 @@ const ManageAccessClient = (props: Props) => {
 
   return (
     <>
-      <div className="flex flex-1 gap-2 px-4 brutal-sm focus-within:outline">
-        <Search />
+      <div className="flex flex-1 gap-2 px-4 brutal-sm focus-within:[outline:-webkit-focus-ring-color_auto_1px]">
+        <MagnifyingGlassIcon className="size-5 my-auto" />
         <input
           type="text"
           name="q"
@@ -66,31 +48,36 @@ const ManageAccessClient = (props: Props) => {
         />
         {q && (
           <button
-            className="size-6"
+            className="size-6 flex items-center justify-center"
             onClick={() => {
               setQ("");
               updateSearch("");
             }}
           >
-            <XMark />
+            <XMarkIcon className="size-5" />
           </button>
         )}
       </div>
-      {filtered.length === 0 ? (
-        <p className="text-center pt-3">
-          {query ? `No Results for ` : "No Loops Access Accounts Exist"}
-          {query && <span className="font-bold">{`"${query}"`}</span>}
-        </p>
-      ) : (
-        <Pagination
-          itemsPerPage={6}
-          className="divide-y divide-black flex flex-col md:gap-2"
-        >
-          {filtered.map((u) => (
-            <PersonCard u={u} key={u._id} />
-          ))}
-        </Pagination>
-      )}
+
+      <Pagination
+        itemsPerPage={6}
+        className="divide-y divide-black flex flex-col md:gap-2"
+        filterString={
+          <>
+            {filtered.length === 0
+              ? query
+                ? `No Results `
+                : "No Access Accounts Exist"
+              : ""}
+            {query && "for "}
+            {query && <span className="font-bold">{`"${query}"`}</span>}
+          </>
+        }
+      >
+        {filtered.map((u) => (
+          <PersonCard u={u} key={u._id} />
+        ))}
+      </Pagination>
     </>
   );
 };
@@ -108,7 +95,7 @@ const PersonCard = ({ u }: { u: FilteredUser }) => {
           <Image
             src={u.picture}
             alt="profile pic"
-            className="brutal-sm p-0 size-10 md:size-12"
+            className="brutal-sm p-0 size-10 md:size-12 select-none pointer-events-none"
             width={48}
             height={48}
             unoptimized
@@ -123,7 +110,7 @@ const PersonCard = ({ u }: { u: FilteredUser }) => {
       <form action={action} className="flex-shrink-0 w-fit">
         <input className="hidden" name="remove" readOnly value={u._id} />
         <button
-          className="text-sm w-fit text-white flex items-center justify-center gap-2 h-fit bg-rose-500 brutal-sm md:px-4 font-bold"
+          className=" text-sm w-fit text-white flex items-center justify-center gap-2 h-fit bg-rose-500 brutal-sm md:px-4 font-bold"
           type="submit"
           aria-disabled={pending}
         >

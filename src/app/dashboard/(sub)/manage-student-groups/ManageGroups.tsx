@@ -1,8 +1,9 @@
 import ManageGroupsClient from "./ManageGroupsClient";
-import { getGroups } from "@/app/_lib/groups";
+import { getGroups } from "@/app/_db/queries/groups";
 
 export default async function ManageGroups() {
-  const allGroups = await getGroups();
+  // await wait(1000);
+  const allGroups = await getGroups(null);
 
   return (
     <div className="w-full flex flex-col gap-2 my-3">

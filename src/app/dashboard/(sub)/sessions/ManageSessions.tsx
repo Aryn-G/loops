@@ -1,4 +1,4 @@
-import { getUserSessions } from "@/app/_lib/sessions";
+import { getUserSessions } from "@/app/_db/queries/sessions";
 import ManageSessionsClient from "./ManageSessionsClient";
 import { Session } from "next-auth";
 
@@ -7,6 +7,7 @@ export default async function ManageSessions({
 }: {
   session: Session;
 }) {
+  // await wait(1000);
   const userSessions = await getUserSessions(session.userId);
 
   return (

@@ -13,7 +13,7 @@ export default async function Page() {
         <Image
           src={session.user.picture}
           alt="profile pic"
-          className="brutal-xl p-0"
+          className="brutal-xl p-0 select-none pointer-events-none"
           width={96}
           height={96}
           unoptimized
