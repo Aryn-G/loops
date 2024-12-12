@@ -20,7 +20,7 @@ const MyGroupsClient = (props: Props) => {
   return (
     <div className="divide-y divide-black flex flex-col md:gap-2 items-center">
       {props.userGroups.length === 0 ? (
-        <p className="">You aren't in any student groups.</p>
+        <p className="">You aren{"'"}t in any student groups.</p>
       ) : (
         props.userGroups.map((group) => <Group group={group} key={group._id} />)
       )}
