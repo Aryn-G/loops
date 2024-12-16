@@ -7,16 +7,13 @@ import CreateForm from "./CreateLoop";
 import ManageLoops from "./ManageLoops";
 
 import { Metadata } from "next";
+import { Params } from "@/app/_lib/types";
 
 export const metadata: Metadata = {
   title: "Loops • Dashboard / Manage Loops",
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
+export default async function Page({ searchParams }: { searchParams: Params }) {
   const session = await auth();
 
   if (!session) return redirect("/");

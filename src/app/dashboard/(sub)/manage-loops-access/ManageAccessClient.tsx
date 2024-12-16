@@ -9,7 +9,8 @@ import { getFilteredUsers } from "@/app/_db/queries/users";
 import { useDebouncedCallback } from "use-debounce";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParams";
+import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParam";
+import Search from "@/app/_components/Search";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 
@@ -20,65 +21,35 @@ type Props = {
 const ManageAccessClient = (props: Props) => {
   const loopsAccess = props.allUsers.filter((u) => u.role === "Loops");
 
-  const [query, q, setQ, updateSearch] = useSearchParam("q");
-
-  const filtered = loopsAccess.filter(
-    (l) =>
-      l.email.toLowerCase().includes(query.toLowerCase()) ||
-      l.name.toLowerCase().includes(query.toLowerCase())
-  );
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
   return (
-    <>
-      <div className="flex flex-1 gap-2 px-4 brutal-sm focus-within:[outline:-webkit-focus-ring-color_auto_1px]">
-        <MagnifyingGlassIcon className="size-5 my-auto" />
-        <input
-          type="text"
-          name="q"
-          value={q}
-          className="bg-transparent outline-none ring-0 flex-1"
-          placeholder="Search Loops Access..."
-          onChange={(e) => {
-            setQ(e.target.value);
-            updateSearch(e.target.value);
-          }}
-          ref={inputRef}
-        />
-        {q && (
-          <button
-            className="size-6 flex items-center justify-center"
-            onClick={() => {
-              setQ("");
-              updateSearch("");
-            }}
-          >
-            <XMarkIcon className="size-5" />
-          </button>
-        )}
-      </div>
-
-      <Pagination
-        itemsPerPage={6}
-        className="divide-y divide-black flex flex-col md:gap-2"
-        filterString={
-          <>
-            {filtered.length === 0
-              ? query
-                ? `No Results `
-                : "No Access Accounts Exist"
-              : ""}
-            {query && "for "}
-            {query && <span className="font-bold">{`"${query}"`}</span>}
-          </>
-        }
-      >
-        {filtered.map((u) => (
-          <PersonCard u={u} key={u._id} />
-        ))}
-      </Pagination>
-    </>
+    <Search
+      all={loopsAccess}
+      name="Loops Access"
+      render={(item, i) => <PersonCard u={item} key={item._id} />}
+      inputClassName=""
+      itemsPerPage={6}
+      paginationClassName="divide-y divide-black flex flex-col md:gap-2"
+      filterString={(filtered, filters, query) => (
+        <>
+          {filtered.length === 0
+            ? query
+              ? `No Results `
+              : "No Access Accounts Exist"
+            : ""}
+          {query && "for "}
+          {query && <span className="font-bold">{`"${query}"`}</span>}
+        </>
+      )}
+      filterLogic={(all, filters, query) =>
+        all
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .filter(
+            (l) =>
+              l.email.toLowerCase().includes(query.toLowerCase()) ||
+              l.name.toLowerCase().includes(query.toLowerCase())
+          )
+      }
+    />
   );
 };
 

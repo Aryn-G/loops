@@ -15,197 +15,134 @@ import title from "title";
 import LoopCard from "@/app/_components/LoopCard";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParams";
+import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParam";
+import Search, { SearchFilters } from "@/app/_components/Search";
+import { objectMap } from "@/app/_lib/util";
 
 type Props = {
   allLoops: Awaited<ReturnType<typeof getLoops>>;
 };
 
 const ManageLoopsClient = ({ allLoops }: Props) => {
-  const searchParams = useSearchParams();
-  const { replace } = useRouter();
-  const pathname = usePathname();
-
-  const [query, q, setQ, updateSearch] = useSearchParam("q");
-
-  const [startDateParam, startDate, setStartDate, updateStartFilter] =
-    useSearchParam("start", toISOStringOffset(new Date()).slice(0, -6), false);
-
-  const [endDateParam, endDate, setEndDate, updateEndFilter] =
-    useSearchParam("end");
-
-  const deleted = searchParams.get("showDeleted") ?? "";
-
-  const filtered = allLoops.filter((loop) => {
-    const queryMatches =
-      loop.title.toLowerCase().includes(query.toLowerCase()) ||
-      loop.description.toLowerCase().includes(query.toLowerCase());
-
-    const timingMatches = isDateBetween(
-      startDateParam ? startDateParam + "T00:00" : undefined,
-      loop.departureDateTime,
-      endDateParam ? endDateParam + "T23:59" : undefined
-    );
-
-    return queryMatches && timingMatches && (!loop.deleted || deleted);
-  });
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const [filters, setFilters] = useState(false);
-
   return (
-    <>
-      <div
-        className="flex flex-1 gap-2 px-4 brutal-sm focus-within:[outline:-webkit-focus-ring-color_auto_1px]"
-        tabIndex={-1}
-      >
-        <MagnifyingGlassIcon className="size-5 my-auto flex-shrink-0" />
-        <input
-          type="text"
-          name="q"
-          value={q}
-          className="bg-transparent outline-none ring-0 w-full"
-          placeholder="Search Loops..."
-          onChange={(e) => {
-            setQ(e.target.value);
-            updateSearch(e.target.value);
-          }}
-          ref={inputRef}
-        />
-        {q && (
-          <button
-            className="size-6 flex items-center justify-center"
-            onClick={() => {
-              setQ("");
-              updateSearch("");
-              inputRef.current?.focus();
-            }}
-          >
-            <XMarkIcon className="size-5" />
-          </button>
-        )}
-        <div className="w-0.5 rounded-full bg-neutral-200"></div>
-        <button
-          className="px-2 text-nowrap"
-          onClick={() => setFilters((f) => !f)}
-        >
-          {!filters ? "Show " : "Hide "}Filters
-        </button>
-      </div>
-      {filters && (
+    <Search
+      all={allLoops}
+      name="Loops"
+      inputClassName="flex flex-col gap-2"
+      itemsPerPage={6}
+      paginationClassName="grid grid-cols-1  @2xl:grid-cols-2 @4xl:grid-cols-3 gap-2 md:gap-6"
+      render={(item) => <LoopCardR loop={item} key={String(item._id)} />}
+      filterString={(filtered, filters, query) => (
         <>
-          <div className="flex md:items-center gap-2 md:flex-row flex-col">
-            <Input
-              label="Starting: "
-              type="date"
-              name=""
-              className="mb-1 md:mr-2"
-              value={startDate ?? ""}
-              setValue={(newValue) => {
-                setStartDate(newValue as string);
-                // setEndDate(newValue as string);
-                updateStartFilter(newValue as string);
-              }}
-            />
-            <Input
-              label="Ending: "
-              type="date"
-              name=""
-              className="mb-1"
-              value={endDate ?? ""}
-              setValue={(newValue) => {
-                setEndDate(newValue as string);
-                updateEndFilter(newValue as string);
-              }}
-            />
-          </div>
-          <button
-            className="block w-full text-start underline underline-offset-2"
-            onClick={() => {
-              const params = new URLSearchParams(searchParams);
-              if (deleted != "true") {
-                params.set("showDeleted", "true");
-              } else {
-                // params.set("showDeleted", "");
-                params.delete("showDeleted");
-              }
-              replace(`${pathname}?${params.toString()}`, {
-                scroll: false,
-              });
-            }}
-          >
-            {!deleted ? "Show" : "Hide"} Deleted
-          </button>
-          <button
-            className="block w-full text-start underline underline-offset-2"
-            onClick={() => {
-              const params = new URLSearchParams(searchParams);
-              params.delete("start");
-              params.delete("end");
-              params.delete("showDeleted");
-
-              setStartDate(toISOStringOffset(new Date()).slice(0, -6));
-              setEndDate("");
-              replace(`${pathname}?${params.toString()}`, {
-                scroll: false,
-              });
-            }}
-          >
-            Reset
-          </button>
+          {filtered.length === 0
+            ? query
+              ? `No Results `
+              : "No Loops Exist"
+            : ""}
+          {query && "for "}
+          {query && <span className="font-bold">{`"${query}"`}</span>}
+          {/* {title(formatDateFilter(filters["start"], endDateParam))} */}
+          {filters["start"] && filters["end"]
+            ? filters["start"] == filters["end"]
+              ? ` on`
+              : ` between`
+            : filters["start"]
+            ? " after"
+            : filters["end"] && " before"}
+          {filters["start"] && (
+            <span className="font-bold">{` ${formatDate(
+              filters["start"] + "T00:00",
+              false
+            )}`}</span>
+          )}
+          {filters["start"] &&
+            filters["end"] &&
+            filters["start"] != filters["end"] &&
+            ` and`}
+          {filters["end"] && filters["start"] != filters["end"] && (
+            <span className="font-bold">{` ${formatDate(
+              filters["end"] + "T23:59",
+              false
+            )}`}</span>
+          )}
         </>
       )}
-      <Pagination
-        itemsPerPage={6}
-        className="grid grid-cols-1  @2xl:grid-cols-2 @4xl:grid-cols-3 gap-2 md:gap-6"
-        filterString={
-          <>
-            {filtered.length === 0
-              ? query
-                ? `No Results `
-                : "No Loops Exist"
-              : ""}
-            {query && "for "}
-            {query && <span className="font-bold">{`"${query}"`}</span>}
-            {/* {title(formatDateFilter(startDateParam, endDateParam))} */}
-            {startDateParam && endDateParam
-              ? startDateParam == endDateParam
-                ? ` on`
-                : ` between`
-              : startDateParam
-              ? " after"
-              : endDateParam && " before"}
-            {startDateParam && (
-              <span className="font-bold">{` ${formatDate(
-                startDateParam + "T00:00",
-                false
-              )}`}</span>
-            )}
-            {startDateParam &&
-              endDateParam &&
-              startDateParam != endDateParam &&
-              ` and`}
-            {endDateParam && startDateParam != endDateParam && (
-              <span className="font-bold">{` ${formatDate(
-                endDateParam + "T23:59",
-                false
-              )}`}</span>
-            )}
-          </>
-        }
-      >
-        {filtered
+      filterLogic={(all, filters, query) => {
+        return all
           .sort((a, b) =>
             new Date(a.departureDateTime) < new Date(b.departureDateTime)
               ? -1
               : 1
           )
-          .map((loop) => (
-            <LoopCardR loop={loop} key={String(loop._id)} />
-          ))}
-      </Pagination>
-    </>
+          .filter((loop) => {
+            const queryMatches =
+              loop.title.toLowerCase().includes(query.toLowerCase()) ||
+              loop.description.toLowerCase().includes(query.toLowerCase());
+
+            const timingMatches = isDateBetween(
+              filters["start"] ? filters["start"] + "T00:00" : undefined,
+              loop.departureDateTime,
+              filters["end"] ? filters["end"] + "T23:59" : undefined
+            );
+
+            return (
+              queryMatches &&
+              timingMatches &&
+              (!loop.deleted || filters["deleted"] == "true")
+            );
+          });
+      }}
+    >
+      <div className="flex flex-col md:flex-row items-center gap-2">
+        <SearchFilters
+          name="start"
+          defaultValue={toISOStringOffset(new Date()).slice(0, -6)}
+          noDel
+        >
+          {(v, setV, updateV) => (
+            <Input
+              label="Starting: "
+              type="date"
+              name=""
+              className="mb-1 md:mr-2"
+              value={v ?? ""}
+              setValue={(newValue) => {
+                setV(newValue as string);
+                updateV(newValue as string);
+              }}
+            />
+          )}
+        </SearchFilters>
+        <SearchFilters name="end">
+          {(v, setV, updateV) => (
+            <Input
+              label="Ending: "
+              type="date"
+              name=""
+              className="mb-1"
+              value={v ?? ""}
+              setValue={(newValue) => {
+                setV(newValue as string);
+                updateV(newValue as string);
+              }}
+            />
+          )}
+        </SearchFilters>
+      </div>
+      <SearchFilters name="deleted" debounceDelay={0}>
+        {(v, setV, updateV) => (
+          <button
+            className="block w-full text-start underline underline-offset-2 my-2"
+            onClick={() => {
+              updateV(v == "true" ? "" : "true");
+              setV(v == "true" ? "" : "true");
+            }}
+          >
+            {v == "true" ? "Hide" : "Show"} Deleted
+          </button>
+        )}
+      </SearchFilters>
+    </Search>
   );
 };
 

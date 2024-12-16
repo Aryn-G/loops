@@ -8,6 +8,10 @@ Loops provide students with easy access to essential shopping, dining, and recre
 ## Authors
 Aryan Gera
 
+## TODO:
+
+Make site a PWA with new [Next.js 15 PWA Features](https://nextjs.org/docs/app/building-your-application/configuring/progressive-web-apps?utm_source=chatgpt.com)
+
 ## Libraries and Equipment
 * [Next.js 15](https://nextjs.org) - Industry leading full stack website development framework
 * [React 19](https://react.dev) - Library for building highly interactive websites
@@ -84,7 +88,7 @@ Aryan Gera
 - Validation must take place on the server.
 
 ## Deploying
-- [Deploying NextJS to Custom VPS](https://www.reddit.com/r/nextjs/comments/usrdr3/what_is_the_best_way_to_deploy_nextjs_website_to/) 
+- [Deploying NextJS to Custom VPS](https://www.reddit.com/r/nextjs/comments/usrdr3/what_is_the_best_way_to_deploy_nextjs_website_to/)
 
 # Env Vars
 ```

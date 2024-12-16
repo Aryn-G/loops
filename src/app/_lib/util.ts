@@ -24,3 +24,12 @@
 //     return console.log("Attemped Calling Wait");
 //   return new Promise((resolve) => setTimeout(resolve, ms));
 // }
+
+export function objectMap<T, M>(
+  obj: Record<string, T>,
+  fn: (item: T, key: string, index: number) => M
+) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v], i) => [k, fn(v, k, i)])
+  );
+}

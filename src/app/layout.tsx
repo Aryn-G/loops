@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Footer from "./_components/Footer";
 import Navbar from "./_components/Navbar";
+import { DESCRIPTION } from "./_lib/constants";
 
 const grot = localFont({
   src: "./_fonts/BricolageGrotesque-VariableFont_opsz,wdth,wght.ttf",
@@ -12,8 +13,7 @@ const grot = localFont({
 
 export const metadata: Metadata = {
   title: "Loops",
-  description:
-    "NCSSM-Morganton Loops provide students with easy access to essential shopping, dining, and recreational activities during their time on campus",
+  description: DESCRIPTION,
 };
 
 export default function RootLayout({

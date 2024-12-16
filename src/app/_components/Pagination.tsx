@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 
 type Props = {
-  filterString?: JSX.Element;
-  children?: JSX.Element[];
+  filterString?: ReactNode;
+  children?: ReactNode[];
   itemsPerPage: number;
   className?: string;
   // initPage?: number;

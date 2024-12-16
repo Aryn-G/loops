@@ -14,7 +14,7 @@ import { ChevronRightIcon } from "@heroicons/react/20/solid";
 
 import { Session } from "next-auth";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 import {
   ChevronDoubleLeftIcon,
@@ -26,7 +26,7 @@ export type SectionType = {
   links: SectionLink[];
   allow: string[];
 };
-export type SectionLink = { title: string; icon: JSX.Element };
+export type SectionLink = { title: string; icon: ReactNode };
 export const SidebarData: SectionType[] = [
   {
     section: "General",

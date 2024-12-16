@@ -9,127 +9,60 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import Link from "next/link";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParams";
+import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParam";
+import Search, { SearchFilters } from "@/app/_components/Search";
 
 type Props = {
   allGroups: Awaited<ReturnType<typeof getGroups>>;
 };
 
 const ManageGroupsClient = ({ allGroups }: Props) => {
-  const searchParams = useSearchParams();
-  const { replace } = useRouter();
-  const pathname = usePathname();
-
-  const [query, q, setQ, updateSearch] = useSearchParam("q");
-
-  const deleted = searchParams.get("showDeleted") ?? "";
-
-  const filtered = allGroups.filter(
-    (group) =>
-      ((!group.deleted || deleted) &&
-        group.name.toLowerCase().includes(query.toLowerCase())) ||
-      group.users.filter((v) => v.toLowerCase().includes(query.toLowerCase()))
-        .length > 0
-  );
-
-  const [filters, setFilters] = useState(false);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
   return (
-    <>
-      <div
-        className="flex flex-1 gap-2 px-4 brutal-sm focus-within:[outline:-webkit-focus-ring-color_auto_1px]"
-        tabIndex={-1}
-      >
-        <MagnifyingGlassIcon className="size-5 my-auto" />
-        <input
-          type="text"
-          name="q"
-          value={q}
-          className="bg-transparent outline-none ring-0 flex-1"
-          placeholder="Search Student Groups..."
-          onChange={(e) => {
-            setQ(e.target.value);
-            updateSearch(e.target.value);
-          }}
-          ref={inputRef}
-        />
-        {q && (
-          <button
-            className="size-6 flex items-center justify-center"
-            onClick={() => {
-              setQ("");
-              updateSearch("");
-              inputRef.current?.focus();
-            }}
-          >
-            <XMarkIcon className="size-5" />
-          </button>
-        )}
-        <div className="w-0.5 rounded-full bg-neutral-200"></div>
-        <button
-          className="px-2 text-nowrap"
-          onClick={() => setFilters((f) => !f)}
-        >
-          {!filters ? "Show " : "Hide "}Filters
-        </button>
-      </div>
-      {filters && (
+    <Search
+      name="Student Groups"
+      all={allGroups}
+      inputClassName=""
+      paginationClassName="divide-y divide-black flex flex-col md:gap-2"
+      itemsPerPage={6}
+      render={(item) => <GroupCard group={item} key={item._id} />}
+      filterLogic={(all, filters, query) => {
+        return all
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .filter(
+            (group) =>
+              ((!group.deleted || filters["deleted"] == "true") &&
+                group.name.toLowerCase().includes(query.toLowerCase())) ||
+              group.users.filter((v) =>
+                v.toLowerCase().includes(query.toLowerCase())
+              ).length > 0
+          );
+      }}
+      filterString={(filtered, filters, query) => (
         <>
-          <button
-            className="block w-full text-start underline underline-offset-2"
-            onClick={() => {
-              const params = new URLSearchParams(searchParams);
-              if (deleted != "true") {
-                params.set("showDeleted", "true");
-              } else {
-                // params.set("showDeleted", "");
-                params.delete("showDeleted");
-              }
-              replace(`${pathname}?${params.toString()}`, {
-                scroll: false,
-              });
-            }}
-          >
-            {!deleted ? "Show" : "Hide"} Deleted
-          </button>
-          <button
-            className="block w-full text-start underline underline-offset-2"
-            onClick={() => {
-              const params = new URLSearchParams(searchParams);
-
-              params.delete("showDeleted");
-
-              replace(`${pathname}?${params.toString()}`, {
-                scroll: false,
-              });
-            }}
-          >
-            Reset
-          </button>
+          {filtered.length === 0
+            ? query
+              ? `No Results `
+              : "No Student Groups Exist"
+            : ""}
+          {query && "for "}
+          {query && <span className="font-bold">{`"${query}"`}</span>}
         </>
       )}
-      <Pagination
-        itemsPerPage={6}
-        className="divide-y divide-black flex flex-col md:gap-2"
-        filterString={
-          <>
-            {filtered.length === 0
-              ? query
-                ? `No Results `
-                : "No Student Groups Exist"
-              : ""}
-            {query && "for "}
-            {query && <span className="font-bold">{`"${query}"`}</span>}
-          </>
-        }
-      >
-        {filtered.map((group) => (
-          <GroupCard group={group} key={group.name} />
-        ))}
-      </Pagination>
-    </>
+    >
+      <SearchFilters name="deleted" debounceDelay={0}>
+        {(v, setV, updateV) => (
+          <button
+            className="block w-full text-start underline underline-offset-2 my-2"
+            onClick={() => {
+              updateV(v == "true" ? "" : "true");
+              setV(v == "true" ? "" : "true");
+            }}
+          >
+            {v == "true" ? "Hide" : "Show"} Deleted
+          </button>
+        )}
+      </SearchFilters>
+    </Search>
   );
 };
 

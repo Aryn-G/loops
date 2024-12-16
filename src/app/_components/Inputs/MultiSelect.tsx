@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { useFocusWithin } from "@/app/_lib/use-hooks/useFocusWithin";
 import { XMarkIcon } from "@heroicons/react/16/solid";
 
 export default function MultiSelect<T extends { [key: string]: any }>(props: {
-  icon: JSX.Element;
+  icon: ReactNode;
   allItems: T[];
   selected: T[];
   //   setSelected: (newValue: T[]) => void;

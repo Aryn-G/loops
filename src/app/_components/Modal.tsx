@@ -4,7 +4,7 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 import useOnClickOutside from "../_lib/use-hooks/useOnClickOutside";
 
 interface Props {
-  children?: JSX.Element;
+  children?: ReactNode;
   isOpen: boolean;
   onClose: (reason: "clickaway" | "close" | "timeout") => void;
   autoHideDuration?: number;
