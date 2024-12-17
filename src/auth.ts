@@ -1,19 +1,15 @@
-import NextAuth, { DefaultSession, Session, User } from "next-auth";
-import mongoDB, { getMongoDBClient } from "./app/_mongo/connect";
+import NextAuth, { DefaultSession } from "next-auth";
+import { getMongoDBClient } from "./app/_db/connect";
 import authConfig from "./auth.config";
-import Users, { IUsers } from "./app/_mongo/models/Users";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import { headers } from "next/headers";
-import Sessions from "./app/_mongo/models/Sessions";
-import { ModifiedMongoDBAdapter } from "./app/_lib/ModifiedMongoDBAdapter";
+import { ModifiedMongoDBAdapter } from "./app/_db/ModifiedMongoDBAdapter";
 
+// extend default Auth.js Session type
 declare module "next-auth" {
   interface Session {
     user: {
       picture?: string;
       role?: "Student" | "Loops" | "Admin";
     } & DefaultSession["user"];
-    // userAgent: string;
     id: string;
     sessionToken: string;
     userId: string;
@@ -23,7 +19,6 @@ declare module "next-auth" {
     deviceVendor?: string;
     deviceModel?: string;
     os: string;
-    location: string;
     ip: string;
     createdAt: Date;
     updatedAt: Date;
@@ -33,15 +28,12 @@ declare module "next-auth" {
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // @ts-ignore
   adapter: ModifiedMongoDBAdapter(getMongoDBClient()),
-  // adapter: MongoDBAdapter(getMongoDBClient()),
-  session: { strategy: "database" },
-  callbacks: {
-    async session({ session }) {
-      return { ...session };
-      // console.log({ ...session._doc, user: session.user });
-      // return { ...session._doc, user: session.user };
-    },
+  session: {
+    strategy: "database", // use database sessions
+    updateAge: 60 * 60 * 24, // update every day
+    maxAge: 60 * 60 * 24 * 30, // expires in 30 days
   },
+  // set all error pages to home
   pages: {
     error: "/",
     signIn: "/",

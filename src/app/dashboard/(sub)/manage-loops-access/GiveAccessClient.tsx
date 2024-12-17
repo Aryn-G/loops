@@ -3,11 +3,10 @@
 import React, { useActionState, useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
 import { giveAccessAction } from "./actions";
-import UserPlus from "@/app/_icons/UserPlus";
-import XMark from "@/app/_icons/XMark";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
 
-import { getFilteredUsers } from "@/app/_lib/users";
-import MultiSelect from "@/app/_components/MultiSelect";
+import { getFilteredUsers } from "@/app/_db/queries/users";
+import MultiSelect from "@/app/_components/Inputs/MultiSelect";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 
@@ -32,7 +31,7 @@ const GiveAccessClient = (props: Props) => {
   return (
     <div className="w-full flex flex-col md:flex-row gap-2 my-3">
       <MultiSelect
-        icon={<UserPlus className="size-6 flex-shrink-0" />}
+        icon={<UserPlusIcon className="size-6 flex-shrink-0" />}
         allItems={students}
         maxSearch={3}
         selected={selected}
@@ -52,7 +51,7 @@ const GiveAccessClient = (props: Props) => {
           />
         ))}
         <button
-          className="w-full md:w-fit h-fit bg-ncssm-green aria-disabled:opacity-75 text-white brutal-sm px-4 font-bold"
+          className="w-full md:w-fit h-fit bg-ncssm-green  text-white brutal-sm px-4 font-bold"
           type="submit"
           aria-disabled={pending}
         >

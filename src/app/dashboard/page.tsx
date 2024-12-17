@@ -1,11 +1,11 @@
 import { auth } from "@/auth";
 import Image from "next/image";
 import Sidebar from "./Sidebar";
-import { redirect } from "next/navigation";
+import { unauthorized } from "next/navigation";
 
 export default async function Page() {
   const session = await auth();
-  if (!session) return redirect("/");
+  if (!session) return unauthorized();
 
   return (
     <div className="w-full flex flex-col items-center justify-center">
@@ -13,7 +13,7 @@ export default async function Page() {
         <Image
           src={session.user.picture}
           alt="profile pic"
-          className="brutal-xl p-0"
+          className="brutal-xl p-0 select-none pointer-events-none"
           width={96}
           height={96}
           unoptimized

@@ -1,7 +1,7 @@
 "use server";
 
-import mongoDB from "@/app/_mongo/connect";
-import Group from "@/app/_mongo/models/Group";
+import mongoDB from "@/app/_db/connect";
+import Group from "@/app/_db/models/Group";
 import { revalidateTag } from "next/cache";
 
 export async function createGroup(prevState: any, formData: FormData) {
@@ -11,6 +11,7 @@ export async function createGroup(prevState: any, formData: FormData) {
   const users = formData.getAll("users");
 
   try {
+    if (!name) return "Error: Invalid Form Submission";
     const newGroup = new Group({
       name,
       users,
@@ -19,7 +20,7 @@ export async function createGroup(prevState: any, formData: FormData) {
     await newGroup.save();
     revalidateTag("groups");
   } catch (error) {
-    return error;
+    return "Internal Error";
   }
 
   return "Success";
@@ -50,10 +51,14 @@ export async function removeGroup(prevState: any, formData: FormData) {
   const group = formData.get("group");
   //   console.log(selected);
   try {
-    await Group.updateOne({ _id: group }, { $set: { deleted: true } });
+    if (!group) return "Error: Invalid Form Submission";
+    const groupDoc = await Group.findOne({ _id: group });
+    if (!groupDoc) return "Couldn't find group";
+    groupDoc.deleted = !groupDoc.deleted;
+    await groupDoc.save();
     revalidateTag("groups");
   } catch (error) {
-    return error;
+    return "Internal Error";
   }
 
   return "Success";

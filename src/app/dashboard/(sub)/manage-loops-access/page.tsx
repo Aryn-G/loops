@@ -1,16 +1,22 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { forbidden, redirect, unauthorized } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
 import { Suspense } from "react";
 import GiveAccess from "./GiveAccess";
 import ManageAccess from "./ManageAccess";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Loops • Dashboard / Manage Loops Access",
+};
+
 export default async function Page() {
   const session = await auth();
 
-  if (!session) return redirect("/");
-  if (session.user?.role !== "Admin") redirect("/dashboard");
+  if (!session) return unauthorized();
+  if (session.user?.role !== "Admin") return forbidden();
   // Beyond this point, role = "Admin"
 
   return (
@@ -44,13 +50,13 @@ export default async function Page() {
       <p className="font-black text-xl">Give Access</p>
       <div>Only give Loops Access to accounts you trust.</div>
 
-      <Suspense>
+      <Suspense fallback={<p>Loading...</p>}>
         <GiveAccess />
       </Suspense>
       <br />
       <p className="font-black text-xl">Current Access</p>
 
-      <Suspense>
+      <Suspense fallback={<p>Loading...</p>}>
         <ManageAccess />
       </Suspense>
     </>

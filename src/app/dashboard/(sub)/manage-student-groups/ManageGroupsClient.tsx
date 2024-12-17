@@ -3,95 +3,66 @@
 import React, { useActionState, useRef, useState } from "react";
 import { removeGroup } from "./actions";
 
-import Search from "@/app/_icons/Search";
-import Trash from "@/app/_icons/Trash";
 import Pagination from "@/app/_components/Pagination";
-import { getGroups } from "@/app/_lib/groups";
+import { getGroups } from "@/app/_db/queries/groups";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
-import XMark from "@/app/_icons/XMark";
+import Link from "next/link";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParam";
+import Search, { SearchFilters } from "@/app/_components/Search";
 
 type Props = {
   allGroups: Awaited<ReturnType<typeof getGroups>>;
 };
 
 const ManageGroupsClient = ({ allGroups }: Props) => {
-  const searchParams = useSearchParams();
-  const { replace } = useRouter();
-  const pathname = usePathname();
-
-  const updateSearch = useDebouncedCallback((value: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("p", "1");
-    if (value) {
-      params.set("q", value);
-    } else {
-      params.delete("q");
-    }
-    replace(`${pathname}?${params.toString()}`, {
-      scroll: false,
-    });
-  }, 300);
-
-  const query = searchParams.get("q") ?? "";
-  const [q, setQ] = useState(query);
-  const filtered = allGroups.filter(
-    (group) =>
-      group.name.toLowerCase().includes(query.toLowerCase()) ||
-      group.users.filter((v) => v.toLowerCase().includes(query.toLowerCase()))
-        .length > 0
-  );
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
   return (
-    <>
-      <div
-        className="flex flex-1 gap-2 px-4 brutal-sm focus-within:[outline:-webkit-focus-ring-color_auto_1px]"
-        tabIndex={-1}
-      >
-        <Search />
-        <input
-          type="text"
-          name="q"
-          value={q}
-          className="bg-transparent outline-none ring-0 flex-1"
-          placeholder="Search Student Groups..."
-          onChange={(e) => {
-            setQ(e.target.value);
-            updateSearch(e.target.value);
-          }}
-          ref={inputRef}
-        />
-        {q && (
+    <Search
+      name="Student Groups"
+      all={allGroups}
+      inputClassName=""
+      paginationClassName="divide-y divide-black flex flex-col md:gap-2"
+      itemsPerPage={6}
+      render={(item) => <GroupCard group={item} key={item._id} />}
+      filterLogic={(all, filters, query) => {
+        return all
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .filter(
+            (group) =>
+              ((!group.deleted || filters["deleted"] == "true") &&
+                group.name.toLowerCase().includes(query.toLowerCase())) ||
+              group.users.filter((v) =>
+                v.toLowerCase().includes(query.toLowerCase())
+              ).length > 0
+          );
+      }}
+      filterString={(filtered, filters, query) => (
+        <>
+          {filtered.length === 0
+            ? query
+              ? `No Results `
+              : "No Student Groups Exist"
+            : ""}
+          {query && "for "}
+          {query && <span className="font-bold">{`"${query}"`}</span>}
+        </>
+      )}
+    >
+      <SearchFilters name="deleted" debounceDelay={0}>
+        {(v, setV, updateV) => (
           <button
-            className="size-6"
+            className="block w-full text-start underline underline-offset-2 my-2"
             onClick={() => {
-              setQ("");
-              updateSearch("");
-              inputRef.current?.focus();
+              updateV(v == "true" ? "" : "true");
+              setV(v == "true" ? "" : "true");
             }}
           >
-            <XMark />
+            {v == "true" ? "Hide" : "Show"} Deleted
           </button>
         )}
-      </div>
-      {filtered.length === 0 ? (
-        <p className="text-center pt-3">
-          {query ? `No Results for ` : "No Student Groups Exist"}
-          {query && <span className="font-bold">{`"${query}"`}</span>}
-        </p>
-      ) : (
-        <Pagination
-          itemsPerPage={6}
-          className="divide-y divide-black flex flex-col md:gap-2"
-        >
-          {filtered.map((group) => (
-            <GroupCard group={group} key={group.name} />
-          ))}
-        </Pagination>
-      )}
-    </>
+      </SearchFilters>
+    </Search>
   );
 };
 
@@ -106,16 +77,26 @@ const GroupCard = ({
     <div className="py-3 flex flex-row gap-2 w-full items-center justify-center">
       <div className="flex gap-2 flex-1 w-full items-center">
         <div className="flex flex-col flex-1">
-          <p className="text-base md:text-lg font-bold">
-            {group.name} {group.deleted && "(Deleted)"}
+          <p
+            className={
+              (group.deleted && "text-rose-700") +
+              " text-base md:text-lg font-bold"
+            }
+          >
+            {group.deleted && "(Deleted) "}
+            {group.name}
           </p>
-          <p className="text-base">{group.users.join(", ")}</p>
+          {/* <p className="text-base">{group.users.join(", ")}</p> */}
+          <p className="text-base">Contains {group.users.length} People</p>
         </div>
       </div>
 
-      <button className="text-sm w-fit flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold">
+      <Link
+        href={"/dashboard/manage-student-groups/" + String(group._id)}
+        className="text-sm w-fit flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
+      >
         Edit
-      </button>
+      </Link>
       <form action={action} className="flex-shrink-0 w-fit">
         <input
           className="hidden"
@@ -124,11 +105,15 @@ const GroupCard = ({
           value={String(group._id)}
         />
         <button
-          className="text-sm w-fit text-white flex items-center justify-center gap-2 h-fit bg-rose-500 brutal-sm md:px-4 font-bold"
+          className={
+            (group.deleted ? "bg-ncssm-green" : "bg-rose-500") +
+            " brutal-sm text-sm w-fit text-white flex items-center justify-center gap-2 h-fit md:px-4 font-bold"
+          }
           type="submit"
           aria-disabled={pending}
         >
-          Delet{pending ? "ing" : "e"}
+          {group.deleted ? "Restor" : "Delet"}
+          {pending ? "ing" : "e"}
         </button>
       </form>
     </div>

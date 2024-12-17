@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import CaretRight from "../_icons/CaretRight";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 
 type Props = {
-  children: JSX.Element[];
+  filterString?: ReactNode;
+  children?: ReactNode[];
   itemsPerPage: number;
   className?: string;
   // initPage?: number;
@@ -14,13 +15,12 @@ type Props = {
 
 const Pagination = (props: Props) => {
   const searchParams = useSearchParams();
-  // const { replace } = useRouter();
   const pathname = usePathname();
 
   const currentPage = Number(searchParams.get("p"))
     ? Math.min(
         Math.max(Number(searchParams.get("p")), 1),
-        Math.ceil(props.children.length / props.itemsPerPage)
+        Math.ceil((props.children ?? []).length / props.itemsPerPage)
       )
     : 1;
   const createPageURL = (pageNumber: number) => {
@@ -32,16 +32,16 @@ const Pagination = (props: Props) => {
     return `${pathname}?${params.toString()}`;
   };
 
-  const [items, setItems] = useState(props.children);
+  const [items, setItems] = useState(props.children ?? []);
   const [itemsPerPage, setItemsPerPage] = useState(props.itemsPerPage);
   const [maxPages, setMaxPages] = useState(
     Math.ceil(items.length / itemsPerPage)
   );
 
   useEffect(() => {
-    setItems(props.children);
+    setItems(props.children ?? []);
     setItemsPerPage(props.itemsPerPage);
-    setMaxPages(Math.ceil(props.children.length / props.itemsPerPage));
+    setMaxPages(Math.ceil((props.children ?? []).length / props.itemsPerPage));
   }, [props]);
 
   const pageNumberString = () => {
@@ -50,123 +50,115 @@ const Pagination = (props: Props) => {
     const l = lower + 1;
     const u = upper > items.length ? items.length : upper;
     if (l === u) {
-      return `${l} of ${items.length}`;
+      return (
+        <>
+          <span className="font-bold">{l}</span>
+          {" of "}
+          <span className="font-bold">{items.length}</span>
+        </>
+      );
     } else {
-      return `${l}-${u} of ${items.length}`;
+      return (
+        <>
+          <span className="font-bold">
+            {l}-{u}
+          </span>
+          {" of "}
+          <span className="font-bold">{items.length}</span>
+        </>
+      );
     }
   };
 
   return (
     <div className="z-10 flex flex-col gap-2">
       <div className="text-center my-3">
-        Showing {pageNumberString()}
+        {items.length === 0 ? "" : <>Showing {pageNumberString()}</>}{" "}
+        {props.filterString}
         <span className="sr-only"> total pages</span>
       </div>
-      <div className="flex gap-2 items-center justify-center font-bold mb-5">
-        <Link
-          href={createPageURL(currentPage - 1)}
-          scroll={false}
-          className="paginationBtn"
-          aria-label="Previous Page"
-        >
-          <CaretRight className="size-6 rotate-180" />
-        </Link>
-        <Link
-          href={createPageURL(1)}
-          scroll={false}
-          className={`paginationBtn ${currentPage == 1 ? "underline" : ""}`}
-          aria-label="Page 1"
-        >
-          1
-        </Link>
-        {maxPages < 3 ? null : currentPage >= 1 && currentPage <= 3 ? (
-          <>
-            <Link
-              href={createPageURL(2)}
-              scroll={false}
-              className={`paginationBtn ${currentPage == 2 ? "underline" : ""}`}
-              aria-label="Page 2"
-            >
-              2
-            </Link>
-            {maxPages > 3 && (
-              <>
-                <Link
-                  href={createPageURL(3)}
-                  scroll={false}
-                  className={`paginationBtn ${
-                    currentPage == 3 ? "underline" : ""
-                  }`}
-                  aria-label="Page 3"
-                >
-                  3
-                </Link>
-                {maxPages > 4 && (
-                  <DotBtn setPage={createPageURL} maxPage={maxPages} />
-                )}
-              </>
-            )}
-          </>
-        ) : currentPage >= maxPages - 2 && currentPage <= maxPages ? (
-          <>
-            {maxPages > 4 && (
-              <DotBtn setPage={createPageURL} maxPage={maxPages} />
-            )}
-            <Link
-              href={createPageURL(maxPages - 2)}
-              scroll={false}
-              className={`paginationBtn ${
-                currentPage == maxPages - 2 ? "underline" : ""
-              }`}
-              aria-label={`Page ${maxPages - 2}`}
-            >
-              {maxPages - 2}
-            </Link>
-            <Link
-              href={createPageURL(maxPages - 1)}
-              scroll={false}
-              className={`paginationBtn ${
-                currentPage == maxPages - 1 ? "underline" : ""
-              }`}
-              aria-label={`Page ${maxPages - 1}`}
-            >
-              {maxPages - 1}
-            </Link>
-          </>
-        ) : (
-          <>
-            <DotBtn setPage={createPageURL} maxPage={maxPages} />
-            <div
-              // onClick={() => page(currentPage)}
-              className="paginationBtn underline"
-              aria-label={`Page ${currentPage}`}
-            >
-              {currentPage}
-            </div>
-            <DotBtn setPage={createPageURL} maxPage={maxPages} />
-          </>
-        )}
-        {maxPages > 1 && (
+      {items.length !== 0 && (
+        <div className="flex gap-2 items-center justify-center font-bold mb-5">
           <Link
-            href={createPageURL(maxPages)}
+            href={createPageURL(currentPage - 1)}
             scroll={false}
-            className={`paginationBtn ${
-              currentPage == maxPages ? "underline" : ""
-            }`}
-            aria-label={`Page ${maxPages}`}
+            className="paginationBtn"
+            aria-label="Previous Page"
           >
-            {maxPages}
+            <ChevronLeftIcon className="size-5" />
           </Link>
-        )}
-        <Link
-          href={createPageURL(currentPage + 1)}
-          scroll={false}
-          className="paginationBtn"
-          aria-label="Next Page"
-        >
-          <CaretRight />
-        </Link>
-      </div>
+          <PageBtn
+            createPageURL={createPageURL}
+            currentPage={currentPage}
+            page={1}
+          />
+          {maxPages < 3 ? null : currentPage >= 1 && currentPage <= 3 ? (
+            <>
+              <PageBtn
+                createPageURL={createPageURL}
+                currentPage={currentPage}
+                page={2}
+              />
+              {maxPages > 3 && (
+                <>
+                  <PageBtn
+                    createPageURL={createPageURL}
+                    currentPage={currentPage}
+                    page={3}
+                  />
+                  {maxPages > 4 && (
+                    <DotBtn setPage={createPageURL} maxPage={maxPages} />
+                  )}
+                </>
+              )}
+            </>
+          ) : currentPage >= maxPages - 2 && currentPage <= maxPages ? (
+            <>
+              {maxPages > 4 && (
+                <DotBtn setPage={createPageURL} maxPage={maxPages} />
+              )}
+              <PageBtn
+                createPageURL={createPageURL}
+                currentPage={currentPage}
+                page={maxPages - 2}
+              />
+
+              <PageBtn
+                createPageURL={createPageURL}
+                currentPage={currentPage}
+                page={maxPages - 1}
+              />
+            </>
+          ) : (
+            <>
+              <DotBtn setPage={createPageURL} maxPage={maxPages} />
+              <div
+                // onClick={() => page(currentPage)}
+                className="paginationBtn underline"
+                aria-label={`Page ${currentPage}`}
+              >
+                {currentPage}
+              </div>
+              <DotBtn setPage={createPageURL} maxPage={maxPages} />
+            </>
+          )}
+          {maxPages > 1 && (
+            <PageBtn
+              createPageURL={createPageURL}
+              currentPage={currentPage}
+              page={maxPages}
+            />
+          )}
+          <Link
+            href={createPageURL(currentPage + 1)}
+            scroll={false}
+            className="paginationBtn"
+            aria-label="Next Page"
+          >
+            <ChevronRightIcon className="size-5" />
+          </Link>
+        </div>
+      )}
       <div className={props.className ?? "flex flex-col gap-2"}>
         {items.filter(
           (item, i) =>
@@ -175,6 +167,27 @@ const Pagination = (props: Props) => {
         )}
       </div>
     </div>
+  );
+};
+
+const PageBtn = ({
+  createPageURL,
+  page,
+  currentPage,
+}: {
+  currentPage: number;
+  page: number;
+  createPageURL: (pagenumber: number) => string;
+}) => {
+  return (
+    <Link
+      href={createPageURL(page)}
+      scroll={false}
+      className={`paginationBtn ${currentPage == page ? "underline" : ""}`}
+      aria-label={`Page ${page}`}
+    >
+      {page}
+    </Link>
   );
 };
 

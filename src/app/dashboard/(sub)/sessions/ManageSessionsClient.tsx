@@ -1,19 +1,15 @@
 "use client";
 
-import React, { useActionState, useRef, useState } from "react";
+import React, { useActionState, useEffect, useRef, useState } from "react";
 import { removeSession } from "./actions";
 
-import Search from "@/app/_icons/Search";
-import Trash from "@/app/_icons/Trash";
-import Pagination from "@/app/_components/Pagination";
-import Image from "next/image";
-import XMark from "@/app/_icons/XMark";
-import { getUserSessions } from "@/app/_lib/sessions";
+import { getUserSessions } from "@/app/_db/queries/sessions";
 import { Session } from "next-auth";
 import title from "title";
-import UserCircle from "@/app/_icons/UserCircle";
-import Phone from "@/app/_icons/Phone";
-import Desktop from "@/app/_icons/Desktop";
+import {
+  DevicePhoneMobileIcon,
+  ComputerDesktopIcon,
+} from "@heroicons/react/20/solid";
 
 type CustomSession = Awaited<ReturnType<typeof getUserSessions>>[number];
 
@@ -46,11 +42,11 @@ const ManageAccessClient = (props: Props) => {
               />
             ))}
             <button
-              className="text-sm w-fit text-white flex items-center justify-center gap-2 h-fit bg-rose-500 brutal-sm md:px-4 font-bold"
+              className=" text-sm w-fit text-white flex items-center justify-center gap-2 h-fit bg-rose-500 brutal-sm md:px-4 font-bold"
               type="submit"
               aria-disabled={pending}
             >
-              Revok{pending ? "ing" : "e"} All Other Sessions
+              Revok{pending ? "ing" : "e"} All
             </button>
           </form>
         )}
@@ -74,8 +70,37 @@ const SessionCard = ({
   ping?: boolean;
 }) => {
   const [_state, action, pending] = useActionState(removeSession, "");
+  const [location, setLocation] = useState<{
+    city: string;
+    regionName: string;
+    country: string;
+  }>();
 
-  console.log(s);
+  useEffect(() => {
+    // fetchData(s.ip);
+    // setLocation({
+    //   city: "Test",
+    //   regionName: "TE",
+    //   country: "ST",
+    // });
+  }, []);
+
+  const fetchData = async (ip: string) => {
+    if (ip === "8.8.8.8") return;
+    const res = await fetch("http://ip-api.com/json/" + ip, {
+      cache: "force-cache",
+    });
+    const locationData = await res.json();
+    if (!locationData) return;
+
+    setLocation({
+      city: locationData.city,
+      regionName: locationData.region,
+      country: locationData.countryCode,
+    });
+  };
+
+  // console.log(s);
 
   const formatDate = (d: Date | string) => {
     if (typeof d === "string") {
@@ -96,12 +121,16 @@ const SessionCard = ({
       <div className="flex gap-2 flex-1 w-full items-center">
         <div className="size-10 p-2 relative">
           {ping && (
-            <span className="absolute top-0 right-0 w-3 h-3 flex">
-              <span className="absolute w-3 h-3 rounded-full bg-ncssm-blue opacity-75 animate-ping"></span>
-              <span className="relative w-3 h-3 rounded-full bg-ncssm-blue"></span>
+            <span className="absolute top-0 right-0 w-3 h-3 flex items-center justify-center">
+              <span className="absolute w-3 h-3 rounded-full bg-green-800 opacity-75 animate-ping"></span>
+              <span className="relative w-3 h-3 rounded-full bg-ncssm-green border-2 border-green-800"></span>
             </span>
           )}
-          {s.device == "mobile" ? <Phone /> : <Desktop />}
+          {s.device == "mobile" ? (
+            <DevicePhoneMobileIcon />
+          ) : (
+            <ComputerDesktopIcon />
+          )}
         </div>
         <div className="flex flex-col flex-1">
           <p className="text-base md:text-lg font-light">
@@ -114,17 +143,22 @@ const SessionCard = ({
             </span>
             <span className=""> - {s.ip}</span>
           </p>
+          {location && (
+            <p className="">
+              {location.city}, {location.regionName}, {location.country}
+            </p>
+          )}
           <p className="text-sm md:text-base font-light break-all">
             <span className="font-semibold">{title(s.browser)} </span>
             on
             <span className="italic"> {title(s.os)}</span>
           </p>
           <p className="text-sm md:text-base font-light break-all">
-            <span className="font-semibold">Created At: </span>
+            <span className="font-semibold">Created: </span>
             <span className="italic"> {formatDate(s.createdAt)}</span>
           </p>
           <p className="text-sm md:text-base font-light break-all">
-            <span className="font-semibold">Last Accessed: </span>
+            <span className="font-semibold">Last Used: </span>
             <span className="italic"> {formatDate(s.updatedAt)}</span>
           </p>
         </div>
@@ -133,7 +167,7 @@ const SessionCard = ({
         <form action={action} className="flex-shrink-0 w-fit">
           <input className="hidden" name="remove" readOnly value={s.id} />
           <button
-            className="text-sm w-fit text-white flex items-center justify-center gap-2 h-fit bg-rose-500 brutal-sm md:px-4 font-bold"
+            className=" text-sm w-fit text-white flex items-center justify-center gap-2 h-fit bg-rose-500 brutal-sm md:px-4 font-bold"
             type="submit"
             aria-disabled={pending}
           >

@@ -1,5 +1,11 @@
-import { redirect } from "next/navigation";
+import { redirect, unauthorized } from "next/navigation";
 import { auth } from "@/auth";
+
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Loops • Dashboard",
+};
 
 export default async function Layout({
   children,
@@ -8,7 +14,7 @@ export default async function Layout({
 }>) {
   const session = await auth();
 
-  if (!session) return redirect("/");
+  if (!session) return unauthorized();
 
   return <>{children}</>;
 }
