@@ -4,8 +4,8 @@
   "description": "NCSSM-Morganton Loops provide students with easy access to essential shopping, dining, and recreational activities during their time on campus.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#99CAEA",
+  "theme_color": "#99CAEA",
   "icons": [
     {
       "src": "/favicon-16x16.png",
