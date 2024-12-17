@@ -8,6 +8,7 @@ import {
   UserGroupIcon,
   BookmarkIcon,
   RectangleGroupIcon,
+  BellIcon,
 } from "@heroicons/react/24/outline";
 
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
@@ -35,7 +36,7 @@ export const SidebarData: SectionType[] = [
       { title: "My Sign-Ups", icon: <BookmarkIcon className="size-6" /> },
       { title: "My Groups", icon: <UserGroupIcon className="size-6" /> },
       { title: "Sessions", icon: <RectangleGroupIcon className="size-6" /> },
-      // { title: "Notications", icon: <Bell /> },
+      { title: "Notifications", icon: <BellIcon className="size-6" /> },
     ],
     allow: ["Student", "Loops", "Admin"],
   },

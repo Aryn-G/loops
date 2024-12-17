@@ -17,13 +17,17 @@ import {
   AdjustmentsHorizontalIcon,
   CheckIcon,
   ClipboardDocumentIcon,
+  PaperAirplaneIcon,
   XMarkIcon,
 } from "@heroicons/react/20/solid";
+import { getSubscriptions } from "@/app/_db/queries/subscriptions";
+import { sendNotification } from "../notifications/actions";
 
 type Props = {
   session: Session;
   allGroups: Awaited<ReturnType<typeof getGroups>>;
   allLoops: Awaited<ReturnType<typeof getLoops>>;
+  // allSubs: Awaited<ReturnType<typeof getSubscriptions>>;
 };
 
 type Reservation = { slots?: number; group?: string; id: string };
@@ -109,6 +113,8 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
     }
 
     if (_state.overall === "success" && !pending) {
+      setCopied(false);
+      setNotified(false);
       setShareModal(departureDateTime);
 
       setReservations([]);
@@ -141,6 +147,7 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
 
   const [windowLocation, setWindowLocation] = useState<Location | null>(null);
   const [copied, setCopied] = useState(false);
+  const [notified, setNotified] = useState(false);
 
   useEffect(() => {
     setWindowLocation(window.location);
@@ -149,7 +156,10 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
   const shareUrl = () =>
     `${windowLocation?.protocol}//${
       windowLocation?.host
-    }/loops/?p=1&start=${shareModal.slice(0, -6)}&end=${shareModal.slice(
+    }/${relativeShareUrl()}`;
+
+  const relativeShareUrl = () =>
+    `loops/?p=1&start=${shareModal.slice(0, -6)}&end=${shareModal.slice(
       0,
       -6
     )}`;
@@ -201,6 +211,36 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
               )}
             </div>
             <ClipboardDocumentIcon className="size-5" />
+          </button>
+          <button
+            onClick={async () => {
+              if (!notified)
+                await sendNotification(
+                  `${formatDate(shareModal).split(", ")[0]} Loops Posted`,
+                  "New Loops Posted! Click to view...",
+                  relativeShareUrl()
+                );
+              setNotified(true);
+            }}
+            className={
+              "mt-3 brutal-sm px-4 flex items-center justify-center w-full text-left " +
+              (notified ? "bg-ncssm-green/30" : "")
+            }
+          >
+            <div className="flex-1 leading-5">
+              {!notified ? (
+                <>
+                  <span className="block font-bold">Push Notification</span>
+                  <span className="text-sm leading-3">
+                    Notify that {formatDate(shareModal, false)} Loops are
+                    posted.
+                  </span>
+                </>
+              ) : (
+                <span className="block font-bold">Notified!</span>
+              )}
+            </div>
+            <PaperAirplaneIcon className="size-5" />
           </button>
           {/* <Link
             href={gmailDraft()}
