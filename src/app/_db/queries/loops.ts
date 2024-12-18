@@ -63,54 +63,58 @@ export const getLoop = unstable_cache(
     await mongoDB();
 
     // find loop by id and populate necessary paths
-    const loop = await Loop.findById<ILoop>(id).populate([
-      {
-        path: "filled",
-        select: "_id lood user group createdAt",
-        model: SignUp,
-        populate: [
-          { path: "user", select: "name email _id picture", model: Users },
-          { path: "group", select: "name _id" },
-        ],
-      },
-      { path: "reservations.group", select: "name _id", model: Group },
-    ]);
-
-    if (!loop) return null;
-
-    // convert mongodb document to usable js object
-    return {
-      _id: String(loop._id),
-      title: loop.title,
-      description: loop.description,
-      departureDateTime: toISOStringOffset(loop.departureDateTime),
-      departureLocation: loop.departureLocation,
-      pickUpDateTime: toISOStringOffset(loop.pickUpDateTime),
-      signUpOpenDateTime: toISOStringOffset(loop.signUpOpenDateTime),
-      pickUpLocation: loop.pickUpLocation,
-      approxDriveTime: loop.approxDriveTime,
-      capacity: loop.capacity,
-      reservations: loop.reservations.map((r: any) => ({
-        slots: r.slots as number,
-        group: { name: r.group.name as string, _id: String(r.group._id) },
-      })),
-      filled: loop.filled.map((v: any) => ({
-        _id: String(v._id),
-        createdAt: toISOStringOffset(v.createdAt),
-        user: {
-          name: v.user.name as string,
-          email: v.user.email as string,
-          picture: v.user.picture as string | undefined,
-          _id: String(v.user._id),
+    try {
+      const loop = await Loop.findById<ILoop>(id).populate([
+        {
+          path: "filled",
+          select: "_id lood user group createdAt",
+          model: SignUp,
+          populate: [
+            { path: "user", select: "name email _id picture", model: Users },
+            { path: "group", select: "name _id" },
+          ],
         },
-        group: v.group
-          ? { name: v.group.name as string, _id: String(v.group._id) }
-          : undefined,
-      })),
-      deleted: loop.deleted,
-      loopNumber: loop.loopNumber,
-      createdAt: toISOStringOffset(loop.createdAt),
-    };
+        { path: "reservations.group", select: "name _id", model: Group },
+      ]);
+
+      if (!loop) return null;
+
+      // convert mongodb document to usable js object
+      return {
+        _id: String(loop._id),
+        title: loop.title,
+        description: loop.description,
+        departureDateTime: toISOStringOffset(loop.departureDateTime),
+        departureLocation: loop.departureLocation,
+        pickUpDateTime: toISOStringOffset(loop.pickUpDateTime),
+        signUpOpenDateTime: toISOStringOffset(loop.signUpOpenDateTime),
+        pickUpLocation: loop.pickUpLocation,
+        approxDriveTime: loop.approxDriveTime,
+        capacity: loop.capacity,
+        reservations: loop.reservations.map((r: any) => ({
+          slots: r.slots as number,
+          group: { name: r.group.name as string, _id: String(r.group._id) },
+        })),
+        filled: loop.filled.map((v: any) => ({
+          _id: String(v._id),
+          createdAt: toISOStringOffset(v.createdAt),
+          user: {
+            name: v.user.name as string,
+            email: v.user.email as string,
+            picture: v.user.picture as string | undefined,
+            _id: String(v.user._id),
+          },
+          group: v.group
+            ? { name: v.group.name as string, _id: String(v.group._id) }
+            : undefined,
+        })),
+        deleted: loop.deleted,
+        loopNumber: loop.loopNumber,
+        createdAt: toISOStringOffset(loop.createdAt),
+      };
+    } catch {
+      return null;
+    }
   },
   ["loopsTag"],
   {

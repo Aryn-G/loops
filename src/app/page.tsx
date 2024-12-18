@@ -26,7 +26,7 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
   );
 }
 
-const SignInButton = () => (
+export const SignInButton = () => (
   <form
     action={async () => {
       "use server";

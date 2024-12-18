@@ -21,7 +21,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import { getSubscriptions } from "@/app/_db/queries/subscriptions";
-import { sendNotification } from "../notifications/actions";
+// import { sendNotification } from "../notifications/actions";
 
 type Props = {
   session: Session;
@@ -114,7 +114,7 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
 
     if (_state.overall === "success" && !pending) {
       setCopied(false);
-      setNotified(false);
+      // setNotified(false);
       setShareModal(departureDateTime);
 
       setReservations([]);
@@ -147,7 +147,7 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
 
   const [windowLocation, setWindowLocation] = useState<Location | null>(null);
   const [copied, setCopied] = useState(false);
-  const [notified, setNotified] = useState(false);
+  // const [notified, setNotified] = useState(false);
 
   useEffect(() => {
     setWindowLocation(window.location);
@@ -212,7 +212,7 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
             </div>
             <ClipboardDocumentIcon className="size-5" />
           </button>
-          <button
+          {/* <button
             onClick={async () => {
               if (!notified)
                 await sendNotification(
@@ -241,7 +241,7 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
               )}
             </div>
             <PaperAirplaneIcon className="size-5" />
-          </button>
+          </button> */}
           {/* <Link
             href={gmailDraft()}
             target="_blank"

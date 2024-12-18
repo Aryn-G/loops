@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { redirect, unauthorized } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
 import mongoDB from "@/app/_db/connect";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const session = await auth();
-  if (!session) return redirect("/");
+  if (!session) return unauthorized();
 
   return (
     <>

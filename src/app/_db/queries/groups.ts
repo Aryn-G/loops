@@ -48,28 +48,32 @@ export const getGroup = unstable_cache(
     await mongoDB();
 
     // find group by id and populate necessary paths
-    const group = await Group.findById<IGroup>(id).populate([
-      {
-        path: "users",
-        select: "_id name email picture",
-        model: Users,
-      },
-    ]);
+    try {
+      const group = await Group.findById<IGroup>(id).populate([
+        {
+          path: "users",
+          select: "_id name email picture",
+          model: Users,
+        },
+      ]);
 
-    if (!group) return null;
+      if (!group) return null;
 
-    // convert mongodb document to usable js object
-    return {
-      _id: String(group._id),
-      users: group.users.map((u: any) => ({
-        name: u.name,
-        email: u.email,
-        picture: u.picture,
-        _id: String(u._id),
-      })),
-      name: group.name,
-      deleted: group.deleted,
-    };
+      // convert mongodb document to usable js object
+      return {
+        _id: String(group._id),
+        users: group.users.map((u: any) => ({
+          name: u.name,
+          email: u.email,
+          picture: u.picture,
+          _id: String(u._id),
+        })),
+        name: group.name,
+        deleted: group.deleted,
+      };
+    } catch {
+      return null;
+    }
   },
   ["groups"],
   {
@@ -89,15 +93,19 @@ export const getUserGroups = unstable_cache(
     await mongoDB();
 
     // find all groups containing a user
-    const userGroups = await Group.find({ users: userId, deleted: false });
+    try {
+      const userGroups = await Group.find({ users: userId, deleted: false });
 
-    // convert mongodb document to usable js object
-    return userGroups.map((group) => ({
-      _id: String(group._id),
-      users: group.users.map((u: any) => String(u)),
-      name: group.name,
-      deleted: false,
-    }));
+      // convert mongodb document to usable js object
+      return userGroups.map((group) => ({
+        _id: String(group._id),
+        users: group.users.map((u: any) => String(u)),
+        name: group.name,
+        deleted: false,
+      }));
+    } catch {
+      return [];
+    }
   },
   ["groups"],
   {

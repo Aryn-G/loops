@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { forbidden, redirect, unauthorized } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 export default async function Page({ searchParams }: { searchParams: Params }) {
   const session = await auth();
 
-  if (!session) return redirect("/");
-  if (session.user?.role === "Student") redirect("/dashboard");
+  if (!session) return unauthorized();
+  if (session.user?.role === "Student") return forbidden();
   // Beyond this point, role = "Loops" || "Admin"
 
   return (

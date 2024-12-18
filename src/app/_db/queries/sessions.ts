@@ -14,26 +14,30 @@ export const getUserSessions = unstable_cache(
     await mongoDB();
 
     // find all sessiond with user
-    const userSessions = await Sessions.find<ISessions>({
-      userId: new ObjectId(userId),
-    });
+    try {
+      const userSessions = await Sessions.find<ISessions>({
+        userId: new ObjectId(userId),
+      });
 
-    // convert mongodb document to usable js object
-    return userSessions.map((session) => {
-      return {
-        id: String(session._id),
-        expires: session.expires,
-        browser: session.browser,
-        device: session.device,
-        deviceVendor: session.deviceVendor,
-        deviceModel: session.deviceModel,
-        os: session.os,
-        location: session.location,
-        ip: session.ip,
-        createdAt: session.createdAt,
-        updatedAt: session.updatedAt,
-      };
-    });
+      // convert mongodb document to usable js object
+      return userSessions.map((session) => {
+        return {
+          id: String(session._id),
+          expires: session.expires,
+          browser: session.browser,
+          device: session.device,
+          deviceVendor: session.deviceVendor,
+          deviceModel: session.deviceModel,
+          os: session.os,
+          location: session.location,
+          ip: session.ip,
+          createdAt: session.createdAt,
+          updatedAt: session.updatedAt,
+        };
+      });
+    } catch {
+      return [];
+    }
   },
   ["sessions"],
   {

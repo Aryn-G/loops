@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { forbidden, notFound, redirect, unauthorized } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
 import { getGroup } from "@/app/_db/queries/groups";
@@ -25,12 +25,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params }: Props) {
   const session = await auth();
 
-  if (!session) return redirect("/");
-  if (session.user?.role === "Student") redirect("/dashboard");
+  if (!session) return unauthorized();
+  if (session.user?.role === "Student") return forbidden();
   // Beyond this point, role = "Admin"
   const id = (await params).id;
   const group = await getGroup(id);
-  if (!group) return redirect("/dashboard/manage-student-groups");
+  if (!group) return notFound();
+
   const allUsers = await getFilteredUsers();
 
   return (

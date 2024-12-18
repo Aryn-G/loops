@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { redirect, unauthorized } from "next/navigation";
 import SearchLoops from "./SearchLoops";
 import { getLoops } from "../_db/queries/loops";
 import { Metadata } from "next";
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const session = await auth();
-  if (!session) return redirect("/");
+  if (!session) return unauthorized();
 
   return (
     <div className="pt-20">

@@ -36,7 +36,7 @@ export const SidebarData: SectionType[] = [
       { title: "My Sign-Ups", icon: <BookmarkIcon className="size-6" /> },
       { title: "My Groups", icon: <UserGroupIcon className="size-6" /> },
       { title: "Sessions", icon: <RectangleGroupIcon className="size-6" /> },
-      { title: "Notifications", icon: <BellIcon className="size-6" /> },
+      // { title: "Notifications", icon: <BellIcon className="size-6" /> },
     ],
     allow: ["Student", "Loops", "Admin"],
   },
@@ -138,9 +138,7 @@ function Section({
   }
   return (
     <div className="mb-2">
-      {!collapsed && (
-        <p className="font-syne text-lg font-black">{section.section}</p>
-      )}
+      {!collapsed && <p className="text-lg font-black">{section.section}</p>}
       <div
         className={`flex flex-col ${
           noBorder ? "divide-y divide-black" : "gap-2"

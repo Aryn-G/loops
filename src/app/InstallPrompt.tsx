@@ -51,6 +51,10 @@ export default function InstallPrompt({ barebone }: { barebone?: boolean }) {
     return null;
   }
 
+  if (deferredPrompt == null && !isIOS) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col items-center gap-3 max-w-md">
       {!barebone && (
@@ -59,7 +63,7 @@ export default function InstallPrompt({ barebone }: { barebone?: boolean }) {
 
           <p className="">
             Did you know you can install this app on your device for quick
-            access and notifications?{" "}
+            access?{" "}
             {deferredPrompt != null && (
               <>
                 Just click <span className="font-bold">Add to Home Screen</span>{" "}

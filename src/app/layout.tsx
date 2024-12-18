@@ -14,6 +14,7 @@ const grot = localFont({
 export const metadata: Metadata = {
   title: "Loops",
   description: DESCRIPTION,
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
 import LoopCard from "@/app/_components/LoopCard";
 import { getLoop } from "@/app/_db/queries/loops";
 import { auth } from "@/auth";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, unauthorized } from "next/navigation";
 import SignUpInfo from "./SignUpInfo";
 import SignUpButton from "./SignUpButton";
 import Refresh from "@/app/_components/Refresh";
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const session = await auth();
-  if (!session) return redirect("/");
+  if (!session) return unauthorized();
 
   const loopId = (await params).loopId;
 

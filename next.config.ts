@@ -5,8 +5,12 @@ import withSerwistInit from "@serwist/next";
 const withSerwist = withSerwistInit({
   // Note: This is only an example. If you use Pages Router,
   // use something else that works, such as "service-worker/index.ts".
+  cacheOnNavigation: true,
   swSrc: "src/app/sw.ts",
   swDest: "public/sw.js",
+  additionalPrecacheEntries: [
+    { url: "/~offline", revision: crypto.randomUUID() },
+  ],
 });
 
 export default withSerwist({
@@ -50,13 +54,24 @@ export default withSerwist({
             key: "Cache-Control",
             value: "no-cache, no-store, must-revalidate",
           },
-          {
-            key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self'",
-          },
+          // {
+          //   key: "Content-Security-Policy",
+          //   value: "default-src 'self'; script-src 'self'",
+          // },
         ],
       },
     ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/manifest.json",
+        destination: "/manifest.webmanifest",
+      },
+    ];
+  },
+  experimental: {
+    authInterrupts: true,
   },
 });
 
