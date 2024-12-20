@@ -73,7 +73,7 @@ export default withSerwist({
   },
   experimental: {
     authInterrupts: true,
-    ppr: true,
+    // ppr: true,
   },
 });
 
