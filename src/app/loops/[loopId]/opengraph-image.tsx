@@ -9,6 +9,7 @@ import {
 import { ImageResponse } from "next/og";
 import { join } from "node:path";
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
 // export const runtime = "edge";
 
@@ -30,7 +31,10 @@ export default async function Image({
   if (!loop) return null;
 
   const grot = async (url: string) => {
-    const grotData = await readFile(join(process.cwd(), "public", url));
+    // const grotData = await readFile(join(process.cwd(), "public", url));
+    const grotData = await readFile(
+      join(fileURLToPath(import.meta.url), "../../../_fonts", url)
+    );
     return Uint8Array.from(grotData).buffer;
   };
 
