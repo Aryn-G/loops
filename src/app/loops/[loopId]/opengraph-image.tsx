@@ -48,6 +48,7 @@ export default async function Image({
           res.on("end", () => resolve(Buffer.concat(chunks)));
         })
         .on("error", (err) => reject(err));
+      // @ts-ignore
     }) as unknown as Buffer<ArrayBufferLike>;
   };
 
