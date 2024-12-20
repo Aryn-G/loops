@@ -10,6 +10,8 @@ import { ImageResponse } from "next/og";
 import { join } from "node:path";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import http from "node:http";
+import https from "node:https";
 
 // export const runtime = "edge";
 
@@ -32,10 +34,21 @@ export default async function Image({
 
   const grot = async (url: string) => {
     // const grotData = await readFile(join(process.cwd(), "public", url));
-    const grotData = await readFile(
-      join(fileURLToPath(import.meta.url), "../../../../../public", url)
-    );
-    return Uint8Array.from(grotData).buffer;
+    // const grotData = await readFile(
+    //   join(fileURLToPath(import.meta.url), "../../../../../public", url)
+    // );
+    // return Uint8Array.from(grotData).buffer;
+
+    // return await (await fetch(new URL(url, import.meta.url))).arrayBuffer();
+    return new Promise((resolve, reject) => {
+      (process.env.APP_URL?.startsWith("https") ? https : http)
+        .get(`${process.env.APP_URL}/${url.slice(2)}`, (res) => {
+          const chunks: any[] = [];
+          res.on("data", (c) => chunks.push(c));
+          res.on("end", () => resolve(Buffer.concat(chunks)));
+        })
+        .on("error", (err) => reject(err));
+    }) as unknown as Buffer<ArrayBufferLike>;
   };
 
   console.log("gen");
