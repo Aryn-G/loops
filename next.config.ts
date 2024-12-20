@@ -11,6 +11,7 @@ const withSerwist = withSerwistInit({
   additionalPrecacheEntries: [
     { url: "/~offline", revision: crypto.randomUUID() },
   ],
+  disable: process.env.NODE_ENV === "development",
 });
 
 export default withSerwist({
@@ -72,6 +73,7 @@ export default withSerwist({
   },
   experimental: {
     authInterrupts: true,
+    ppr: true,
   },
 });
 

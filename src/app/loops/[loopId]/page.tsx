@@ -7,7 +7,8 @@ import SignUpButton from "./SignUpButton";
 import Refresh from "@/app/_components/Refresh";
 
 import { Metadata } from "next";
-import { ImageResponse } from "next/og";
+import { formatDate } from "@/app/_lib/time";
+import title from "title";
 
 type Props = {
   params: Promise<{ loopId: string }>;
@@ -20,12 +21,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: "Loops • " + loop.title,
-    // in future generate custom OG image
-    // openGraph: {
-    //   images: [new ImageResponse((<div style={}></div>), {width: 1200, height: 600})]
-    // }
+    description: title(
+      (loop.loopNumber ? "Loop #" + loop.loopNumber + " " : "") +
+        "On " +
+        formatDate(loop.departureDateTime)
+    ),
   };
 }
+
+/*
+
+<meta name="description" content="User · Aryan G">
+
+<!-- Facebook Meta Tags -->
+<meta property="og:url" content="https://open.spotify.com/user/31mqlgyaj3b45vckllbllk4ctqiu">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Aryan G">
+<meta property="og:description" content="User · Aryan G">
+<meta property="og:image" content="https://i.scdn.co/image/ab6775700000ee85e4de94cc70350e3982e6d37e">
+
+<!-- Twitter Meta Tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta property="twitter:domain" content="open.spotify.com">
+<meta property="twitter:url" content="https://open.spotify.com/user/31mqlgyaj3b45vckllbllk4ctqiu">
+<meta name="twitter:title" content="Aryan G">
+<meta name="twitter:description" content="User · Aryan G">
+<meta name="twitter:image" content="https://i.scdn.co/image/ab6775700000ee85e4de94cc70350e3982e6d37e">
+
+<!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+*/
 
 export default async function Page({ params }: Props) {
   const session = await auth();
@@ -47,7 +72,8 @@ export default async function Page({ params }: Props) {
           <p className="font-black text-xl flex-1">
             Sign Ups: {loop.filled.length} / {loop.capacity}
           </p>
-          <Refresh tag="loopsTag" />
+          {/* <Refresh tag="loopsTag" /> */}
+          <Refresh path={"/loops/" + loopId} />
         </div>
         <SignUpInfo loop={loop} session={session} />
       </div>

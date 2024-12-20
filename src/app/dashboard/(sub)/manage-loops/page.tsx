@@ -32,8 +32,8 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
       <div className="flex items-center justify-between">
         <h1 className="font-black text-xl">Manage Loops</h1>
         <div className="flex items-center">
-          <Refresh tag={["loopsTag", "groups"]} />
-          {/* <Refresh path="/dashboard/manage-loops" /> */}
+          {/* <Refresh tag={["loopsTag", "groups"]} /> */}
+          <Refresh path="/dashboard/manage-loops" />
         </div>
       </div>
       <div className="max-w-md">

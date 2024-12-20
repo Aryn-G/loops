@@ -26,6 +26,7 @@ declare module "next-auth" {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // debug: true,
   // @ts-ignore
   adapter: ModifiedMongoDBAdapter(getMongoDBClient()),
   session: {

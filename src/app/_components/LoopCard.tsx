@@ -26,7 +26,7 @@ export default function LoopCard({
   return (
     <div
       className={
-        "flex flex-col flex-1 gap-1.5 " +
+        "flex flex-col flex-1 gap-1.5 break-all " +
         (!expanded && data.deleted && "text-rose-500")
       }
     >
@@ -38,7 +38,6 @@ export default function LoopCard({
             : "<Date>"}
         </span>
         {!!data.loopNumber && <span> - Loop #{data.loopNumber}</span>}
-        {/* <span>Loop #</span> */}
       </p>
       <h3 className={"font-bold text-xl " + (data.deleted && "text-rose-500")}>
         {data.deleted && "(DELETED)"} {data.title || "<Title>"}
@@ -175,7 +174,7 @@ export default function LoopCard({
   );
 }
 
-function Curve({
+export function Curve({
   expanded,
   rotate = false,
 }: {

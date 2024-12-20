@@ -54,7 +54,8 @@ export default async function Page({ params }: Props) {
       <div className="flex items-center justify-between">
         <h1 className="font-black text-xl">Editting Student Group</h1>
         <div className="flex items-center">
-          <Refresh tag={"groups"} />
+          {/* <Refresh tag={"groups"} /> */}
+          <Refresh path={"/dashboard/manage-student-groups/" + id} />
         </div>
       </div>
 

@@ -29,7 +29,8 @@ export default async function Page() {
       <div className="flex items-center justify-between">
         <h1 className="font-black text-xl">Sessions</h1>
         <div className="flex items-center">
-          <Refresh tag={"sessions"} />
+          {/* <Refresh tag={"sessions"} /> */}
+          <Refresh path="/dashboard/sessions" />
         </div>
       </div>
       <p>

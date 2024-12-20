@@ -28,6 +28,7 @@ import type { MongoClient } from "mongodb"
 // --- ARYAN's CODE ---
 import { headers } from "next/headers"
 import { userAgent } from "next/server"
+import { getCachedSessionAndUser } from "./queries/sessions"
 
 interface ModifiedAdapterSession extends AdapterSession {
   device: "mobile" | "desktop";
@@ -91,9 +92,9 @@ export const format = {
     for (const key in object) {
       const value = object[key]
       if (key === "_id") {
-        newObject.id = value.toHexString()
+        newObject.id = typeof value !== 'string' ? value.toHexString() : value;
       } else if (key === "userId") {
-        newObject[key] = value.toHexString()
+        newObject[key] = typeof value !== 'string' ? value.toHexString() : value;
       } else {
         newObject[key] = value
       }
@@ -219,11 +220,18 @@ export function ModifiedMongoDBAdapter(
       return from<AdapterAccount>(account!)
     },
     async getSessionAndUser(sessionToken) {
-      await using db = await getDb()
-      const session = await db.S.findOne({ sessionToken })
+      const {session, user} = await getCachedSessionAndUser(sessionToken);
+
+      // await using db = await getDb()
+      // const session = await db.S.findOne({ sessionToken })
       if (!session) return null
-      const user = await db.U.findOne({ _id: new ObjectId(session.userId) })
+      // const user = await db.U.findOne({ _id: new ObjectId(session.userId) })
       if (!user) return null
+      // console.log('getSessionAndUser(...) at ', (new Date()).toLocaleTimeString('en-US', {hour12: true, minute: '2-digit', hour: '2-digit', second: '2-digit'}))
+      // console.log({
+        // user,
+        // session,
+      // })
       return {
         user: from<AdapterUser>(user),
         session: from<AdapterSession>(session),
