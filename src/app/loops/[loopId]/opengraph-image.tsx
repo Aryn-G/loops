@@ -33,7 +33,7 @@ export default async function Image({
   const grot = async (url: string) => {
     // const grotData = await readFile(join(process.cwd(), "public", url));
     const grotData = await readFile(
-      join(fileURLToPath(import.meta.url), "../../../_fonts", url)
+      join(fileURLToPath(import.meta.url), "../../../../../public", url)
     );
     return Uint8Array.from(grotData).buffer;
   };
