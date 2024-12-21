@@ -33,6 +33,7 @@ export async function removeAccessAction(prevState: any, formData: FormData) {
     await Users.updateOne({ _id: remove }, { $set: { role: "Student" } });
     revalidateTag("filteredUsers");
   } catch (error) {
+    console.log("Internal Error");
     return "Internal Error";
   }
 

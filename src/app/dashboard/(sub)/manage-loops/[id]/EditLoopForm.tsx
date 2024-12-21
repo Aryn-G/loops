@@ -95,6 +95,13 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
               value={session.user?.id}
             />
             <input
+              name="timezone"
+              type="number"
+              className="hidden"
+              readOnly
+              value={new Date().getTimezoneOffset()}
+            />
+            <input
               name="loop"
               type="text"
               className="hidden"

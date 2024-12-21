@@ -2,7 +2,7 @@
 
 import mongoDB from "@/app/_db/connect";
 import Loop from "@/app/_db/models/Loop";
-import { toISOStringOffset } from "@/app/_lib/time";
+import { toDateWithOffset, toISOStringOffset } from "@/app/_lib/time";
 import { auth } from "@/auth";
 import { revalidateTag } from "next/cache";
 
@@ -17,6 +17,8 @@ export async function createLoopAction(
     return { overall: "Error: Permission Denied" };
 
   const createdBy = session.user.id;
+
+  const timezone = formData.get("timezone");
 
   const loopNumber = formData.get("loopNumber");
   const title = formData.get("title");
@@ -48,6 +50,7 @@ export async function createLoopAction(
 
   try {
     if (
+      !timezone ||
       !title ||
       !description ||
       !capacity ||
@@ -61,19 +64,35 @@ export async function createLoopAction(
     if (totalSlots > Number(capacity))
       throw new Error("Error: Cannot Reserve More Slots than Capacity");
 
+    const departureD = toDateWithOffset(
+      departureDateTime.toString(),
+      Number(timezone)
+    );
+    const pickUpD = toDateWithOffset(
+      pickUpDateTime.toString(),
+      Number(timezone)
+    );
+    const signUpOpenD = !!signUpOpenDateTime
+      ? toDateWithOffset(signUpOpenDateTime.toString(), Number(timezone))
+      : undefined;
+
+    console.log("Timezone: " + timezone);
+    console.log("Form Departure Time: " + departureDateTime);
+    console.log("Departure Time to DB: " + departureD);
+
     const newLoop = new Loop({
       createdBy,
       loopNumber,
       title,
       description,
       capacity,
-      departureDateTime,
+      departureDateTime: departureD,
       departureLocation: departureLoc,
-      pickUpDateTime,
+      pickUpDateTime: pickUpD,
       pickUpLocation: pickUpLoc ?? "",
       approxDriveTime,
       reservations,
-      signUpOpenDateTime,
+      signUpOpenDateTime: signUpOpenD,
       createdAt: new Date(),
     });
 
@@ -104,6 +123,7 @@ export async function removeLoop(prevState: any, formData: FormData) {
     await loopDoc.save();
     revalidateTag("loopsTag");
   } catch (error) {
+    console.log("Internal Error");
     return "Internal Error";
   }
 

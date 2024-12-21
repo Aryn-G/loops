@@ -61,8 +61,8 @@ export default async function Page({ params }: Props) {
       <div className="flex items-center justify-between">
         <h1 className="font-black text-xl">Editting Loop: {loop._id}</h1>
         <div className="flex items-center">
-          {/* <Refresh tag={"loopsTag"} /> */}
-          <Refresh path={"/dashboard/manage-loops/" + id} />
+          <Refresh tag={"loopsTag"} />
+          {/* <Refresh path={"/dashboard/manage-loops/" + id} /> */}
         </div>
       </div>
 

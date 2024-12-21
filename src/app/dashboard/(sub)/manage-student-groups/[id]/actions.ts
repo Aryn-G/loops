@@ -18,6 +18,7 @@ export async function editGroup(prevState: any, formData: FormData) {
     await Group.findByIdAndUpdate(group, { $set: { name } });
     revalidateTag("groups");
   } catch (error) {
+    console.log("Internal Error");
     return "Internal Error";
   }
 
@@ -43,6 +44,7 @@ export async function addStudents(prevState: any, formData: FormData) {
     revalidateTag("groups");
   } catch (error) {
     if (typeof error === "string") return error;
+    console.log("Internal Error");
     return "Internal Error";
   }
 
@@ -66,6 +68,7 @@ export async function removeFromGroup(prevState: any, formData: FormData) {
     revalidateTag("groups");
   } catch (error) {
     // console.log(error);
+    console.log("Internal Error");
     return "Internal Error";
   }
 

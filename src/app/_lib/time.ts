@@ -11,6 +11,21 @@ export function toISOStringOffset(date: Date) {
 }
 
 /**
+ * Convert ISO Date Time String to a UTC Date with timezone
+ * @param dateTime ISO Date Time String
+ * @param timezone timezone offset in minutes
+ * @returns UTC Date with timezone
+ */
+export function toDateWithOffset(datetime: string, timezone: number) {
+  timezone = Math.floor(timezone);
+  const hours = String(Math.floor(timezone / 60)).padStart(2, "0");
+  const mins = String(timezone % 60).padStart(2, "0");
+  const sign = timezone > 0 ? "-" : "+";
+
+  return new Date(datetime + `${sign}${hours}:${mins}`);
+}
+
+/**
  * Format Time in 12hr format
  * @param dateTime ISO Date Time String
  * @returns formated time string

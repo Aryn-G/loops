@@ -20,6 +20,7 @@ export async function createGroup(prevState: any, formData: FormData) {
     await newGroup.save();
     revalidateTag("groups");
   } catch (error) {
+    console.log("Internal Error");
     return "Internal Error";
   }
 
@@ -58,6 +59,7 @@ export async function removeGroup(prevState: any, formData: FormData) {
     await groupDoc.save();
     revalidateTag("groups");
   } catch (error) {
+    console.log("Internal Error");
     return "Internal Error";
   }
 

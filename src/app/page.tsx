@@ -26,13 +26,13 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
   );
 }
 
-export const SignInButton = () => (
+export const SignInButton = ({ redirectTo = "/dashboard" }) => (
   <form
     action={async () => {
       "use server";
       await signIn("google", {
         redirect: true,
-        redirectTo: "/dashboard",
+        redirectTo,
       });
     }}
   >

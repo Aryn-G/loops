@@ -72,8 +72,8 @@ export default async function Page({ params }: Props) {
           <p className="font-black text-xl flex-1">
             Sign Ups: {loop.filled.length} / {loop.capacity}
           </p>
-          {/* <Refresh tag="loopsTag" /> */}
-          <Refresh path={"/loops/" + loopId} />
+          <Refresh tag="loopsTag" />
+          {/* <Refresh path={"/loops/" + loopId} /> */}
         </div>
         <SignUpInfo loop={loop} session={session} />
       </div>

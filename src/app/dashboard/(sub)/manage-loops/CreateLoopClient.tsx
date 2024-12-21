@@ -33,6 +33,10 @@ type Props = {
 type Reservation = { slots?: number; group?: string; id: string };
 
 const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
+  const [_state, action, pending] = useActionState(createLoopAction, {
+    overall: "",
+  });
+
   const searchParams = useSearchParams();
   const { replace } = useRouter();
   const pathname = usePathname();
@@ -63,8 +67,6 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
       setSignUpOpenDateTime(toISOStringOffset(new Date()));
     }
   }, [param]);
-
-  const [_state, action, pending] = useActionState(createLoopAction, {});
 
   const [loopNumber, setLoopNumber] = useState<number>(
     autofill ? autofill.loopNumber ?? NaN : NaN
@@ -112,7 +114,7 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
       setReservations((r) => [...r]);
     }
 
-    if (_state.overall === "success" && !pending) {
+    if (_state && _state.overall === "success" && !pending) {
       setCopied(false);
       // setNotified(false);
       setShareModal(departureDateTime);
@@ -266,6 +268,14 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
               className="hidden"
               readOnly
               value={session.user?.id}
+            />
+
+            <input
+              name="timezone"
+              type="number"
+              className="hidden"
+              readOnly
+              value={new Date().getTimezoneOffset()}
             />
 
             <div className="flex flex-col w-full">

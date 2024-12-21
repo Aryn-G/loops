@@ -31,8 +31,8 @@ export default async function Page() {
       <div className="flex items-center justify-between">
         <h1 className="font-black text-xl">Manage Student Groups</h1>
         <div className="flex items-center">
-          {/* <Refresh tag={"groups"} /> */}
-          <Refresh path={"/dashboard/manage-student-groups"} />
+          <Refresh tag={"groups"} />
+          {/* <Refresh path={"/dashboard/manage-student-groups"} /> */}
         </div>
       </div>
       <div className="">

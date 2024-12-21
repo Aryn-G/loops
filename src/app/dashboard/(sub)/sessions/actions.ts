@@ -14,6 +14,7 @@ export async function removeSession(prevState: any, formData: FormData) {
     await Sessions.deleteMany({ _id: { $in: remove } });
     revalidateTag("sessions");
   } catch (error) {
+    console.log("Internal Error");
     return "Internal Error";
   }
 

@@ -63,14 +63,14 @@ export default withSerwist({
       },
     ];
   },
-  async rewrites() {
-    return [
-      {
-        source: "/manifest.json",
-        destination: "/manifest.webmanifest",
-      },
-    ];
-  },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: "/manifest.json",
+  //       destination: "/manifest.webmanifest",
+  //     },
+  //   ];
+  // },
   experimental: {
     authInterrupts: true,
     // ppr: true,

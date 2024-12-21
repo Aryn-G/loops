@@ -67,6 +67,7 @@ export async function addSelfToLoop(prevState: any, formData: FormData) {
   } catch (error) {
     // console.log(error);
     if (typeof error === "string") return error;
+    console.log("Internal Error");
     return "Internal Error";
   }
 
