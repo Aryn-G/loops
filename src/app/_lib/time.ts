@@ -4,6 +4,7 @@
  * @returns ISO Date Time String in local timezone
  */
 export function toISOStringOffset(date: Date) {
+  if (typeof date === "string") date = new Date(date);
   const timezoneOffset = date.getTimezoneOffset() * 60000;
   const localDate = new Date(date.getTime() - timezoneOffset);
 

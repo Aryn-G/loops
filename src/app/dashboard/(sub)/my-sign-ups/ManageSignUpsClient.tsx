@@ -1,22 +1,13 @@
 "use client";
 
-import React, { useActionState, useRef, useState } from "react";
+import React, { useActionState } from "react";
 
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
-
-import Pagination from "@/app/_components/Pagination";
-
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useDebouncedCallback } from "use-debounce";
 import Link from "next/link";
-import { getLoops } from "@/app/_db/queries/loops";
 import { formatDate, isDateBetween, toISOStringOffset } from "@/app/_lib/time";
 import Input from "@/app/_components/Inputs/Input";
-import title from "title";
 import LoopCard from "@/app/_components/LoopCard";
 import { getUserSignUps } from "@/app/_db/queries/signups";
 import { removeSelfFromLoop } from "@/app/loops/[loopId]/actions";
-import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParam";
 import Search, { SearchFilters } from "@/app/_components/Search";
 
 type Props = {
@@ -82,7 +73,7 @@ const ManageSignUpsClient = ({ userSignUps }: Props) => {
 
             const timingMatches = isDateBetween(
               filters["start"] ? filters["start"] + "T00:00" : undefined,
-              item.loop.departureDateTime,
+              toISOStringOffset(item.loop.departureDateTime),
               filters["end"] ? filters["end"] + "T23:59" : undefined
             );
 

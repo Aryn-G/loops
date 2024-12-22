@@ -41,11 +41,11 @@ const SignUpButton = ({ loop, session }: Props) => {
   const notOpenYet = isDateBetween(
     undefined,
     toISOStringOffset(dateTime),
-    loop.signUpOpenDateTime
+    toISOStringOffset(loop.signUpOpenDateTime)
   );
 
   const windowPassed = isDateBetween(
-    loop.departureDateTime,
+    toISOStringOffset(loop.departureDateTime),
     toISOStringOffset(dateTime),
     undefined
   );
@@ -56,9 +56,9 @@ const SignUpButton = ({ loop, session }: Props) => {
     if (loop.deleted) return ["Loop Deleted", "bg-ncssm-purple text-white"];
     if (notOpenYet)
       return [
-        `Sign-Ups Open ${formatDate(loop.signUpOpenDateTime)} at ${formatTime(
-          loop.signUpOpenDateTime
-        )}`,
+        `Sign-Ups Open ${formatDate(
+          toISOStringOffset(loop.signUpOpenDateTime)
+        )} at ${formatTime(toISOStringOffset(loop.signUpOpenDateTime))}`,
         "bg-ncssm-yellow text-black",
       ];
     if (windowPassed) return ["Sign-Ups Closed", "bg-ncssm-purple text-white"];

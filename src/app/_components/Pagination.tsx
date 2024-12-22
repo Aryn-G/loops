@@ -70,9 +70,11 @@ const Pagination = (props: Props) => {
     }
   };
 
+  const ref = useRef<HTMLDivElement>(null);
+
   return (
     <div className="z-10 flex flex-col gap-2">
-      <div className="text-center my-3">
+      <div className="text-center my-3 scroll-mt-60" ref={ref}>
         {items.length === 0 ? "" : <>Showing {pageNumberString()}</>}{" "}
         {props.filterString}
         <span className="sr-only"> total pages</span>
@@ -166,6 +168,14 @@ const Pagination = (props: Props) => {
             i < (currentPage - 1) * itemsPerPage + itemsPerPage
         )}
       </div>
+      <button
+        className="underline underline-offset-2 mt-2 p-2"
+        onClick={() =>
+          ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+      >
+        Scroll to Top
+      </button>
     </div>
   );
 };

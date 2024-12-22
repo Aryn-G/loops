@@ -1,19 +1,12 @@
 "use client";
 
-import React, { useActionState, useRef, useState } from "react";
+import React from "react";
 
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
-
-import Pagination from "@/app/_components/Pagination";
-
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useDebouncedCallback } from "use-debounce";
 import Link from "next/link";
 import { getLoops } from "@/app/_db/queries/loops";
 import { formatDate, isDateBetween, toISOStringOffset } from "@/app/_lib/time";
 import Input from "@/app/_components/Inputs/Input";
 import LoopCard from "../_components/LoopCard";
-import { useSearchParam } from "../_lib/use-hooks/useSearchParam";
 import Search, { SearchFilters } from "../_components/Search";
 
 type Props = {
@@ -21,32 +14,6 @@ type Props = {
 };
 
 const SearchLoops = ({ allLoops }: Props) => {
-  const searchParams = useSearchParams();
-  const { replace } = useRouter();
-  const pathname = usePathname();
-
-  const [query, q, setQ, updateSearch] = useSearchParam("q");
-
-  const [startDateParam, startDate, setStartDate, updateStartFilter] =
-    useSearchParam("start", toISOStringOffset(new Date()).slice(0, -6), false);
-
-  const [endDateParam, endDate, setEndDate, updateEndFilter] =
-    useSearchParam("end");
-
-  const filtered = allLoops.filter((loop) => {
-    const queryMatches =
-      loop.title.toLowerCase().includes(query.toLowerCase()) ||
-      loop.description.toLowerCase().includes(query.toLowerCase());
-
-    const timingMatches = isDateBetween(
-      startDateParam ? startDateParam + "T00:00" : undefined,
-      loop.departureDateTime,
-      endDateParam ? endDateParam + "T23:59" : undefined
-    );
-
-    return queryMatches && timingMatches;
-  });
-
   return (
     <Search
       all={allLoops}
@@ -106,11 +73,7 @@ const SearchLoops = ({ allLoops }: Props) => {
       )}
       filterLogic={(all, filters, query) => {
         return all
-          .sort((a, b) =>
-            new Date(a.departureDateTime) < new Date(b.departureDateTime)
-              ? -1
-              : 1
-          )
+          .sort((a, b) => (a.departureDateTime < b.departureDateTime ? -1 : 1))
           .filter((item) => {
             const queryMatches =
               item.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -118,7 +81,7 @@ const SearchLoops = ({ allLoops }: Props) => {
 
             const timingMatches = isDateBetween(
               filters["start"] ? filters["start"] + "T00:00" : undefined,
-              item.departureDateTime,
+              toISOStringOffset(item.departureDateTime),
               filters["end"] ? filters["end"] + "T23:59" : undefined
             );
 

@@ -1,7 +1,6 @@
 import { unstable_cache } from "next/cache";
 import mongoDB from "../connect";
 import Loop, { ILoop } from "../models/Loop";
-import { toISOStringOffset } from "../../_lib/time";
 import Users from "../models/Users";
 import Group from "../models/Group";
 import SignUp from "../models/SignUp";
@@ -28,10 +27,10 @@ export const getLoops = unstable_cache(
       _id: String(loop._id),
       title: loop.title,
       description: loop.description,
-      departureDateTime: toISOStringOffset(loop.departureDateTime),
+      departureDateTime: loop.departureDateTime,
       departureLocation: loop.departureLocation,
-      pickUpDateTime: toISOStringOffset(loop.pickUpDateTime),
-      signUpOpenDateTime: toISOStringOffset(loop.signUpOpenDateTime),
+      pickUpDateTime: loop.pickUpDateTime,
+      signUpOpenDateTime: loop.signUpOpenDateTime,
       pickUpLocation: loop.pickUpLocation,
       approxDriveTime: loop.approxDriveTime,
       capacity: loop.capacity,
@@ -84,10 +83,10 @@ export const getLoop = unstable_cache(
         _id: String(loop._id),
         title: loop.title,
         description: loop.description,
-        departureDateTime: toISOStringOffset(loop.departureDateTime),
+        departureDateTime: loop.departureDateTime,
         departureLocation: loop.departureLocation,
-        pickUpDateTime: toISOStringOffset(loop.pickUpDateTime),
-        signUpOpenDateTime: toISOStringOffset(loop.signUpOpenDateTime),
+        pickUpDateTime: loop.pickUpDateTime,
+        signUpOpenDateTime: loop.signUpOpenDateTime,
         pickUpLocation: loop.pickUpLocation,
         approxDriveTime: loop.approxDriveTime,
         capacity: loop.capacity,
@@ -97,7 +96,7 @@ export const getLoop = unstable_cache(
         })),
         filled: loop.filled.map((v: any) => ({
           _id: String(v._id),
-          createdAt: toISOStringOffset(v.createdAt),
+          createdAt: v.createdAt as Date,
           user: {
             name: v.user.name as string,
             email: v.user.email as string,
@@ -110,7 +109,7 @@ export const getLoop = unstable_cache(
         })),
         deleted: loop.deleted,
         loopNumber: loop.loopNumber,
-        createdAt: toISOStringOffset(loop.createdAt),
+        createdAt: loop.createdAt,
       };
     } catch {
       return null;

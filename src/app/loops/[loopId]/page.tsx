@@ -7,7 +7,7 @@ import SignUpButton from "./SignUpButton";
 import Refresh from "@/app/_components/Refresh";
 
 import { Metadata } from "next";
-import { formatDate } from "@/app/_lib/time";
+import { formatDate, toISOStringOffset } from "@/app/_lib/time";
 import title from "title";
 
 type Props = {
@@ -24,7 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: title(
       (loop.loopNumber ? "Loop #" + loop.loopNumber + " " : "") +
         "On " +
-        formatDate(loop.departureDateTime)
+        // TECHNICALLY INCORRECT
+        // DATE IS LOCAL TO SERVER
+        formatDate(toISOStringOffset(loop.departureDateTime))
     ),
   };
 }

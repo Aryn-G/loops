@@ -81,7 +81,7 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
 
             const timingMatches = isDateBetween(
               filters["start"] ? filters["start"] + "T00:00" : undefined,
-              loop.departureDateTime,
+              toISOStringOffset(loop.departureDateTime),
               filters["end"] ? filters["end"] + "T23:59" : undefined
             );
 

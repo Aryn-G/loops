@@ -1,4 +1,4 @@
-import { getLoop } from "../_db/queries/loops";
+import { getLoop, getLoops } from "../_db/queries/loops";
 import { LoopData } from "../_db/models/Loop";
 import {
   addMinutes,
@@ -6,7 +6,9 @@ import {
   formatDuration,
   formatTime,
   subTime,
+  toISOStringOffset,
 } from "@/app/_lib/time";
+import { getUserSignUps } from "../_db/queries/signups";
 
 // type OptionalLoopData = { [P in keyof LoopData]?: LoopData[P] };
 type OptionalLoopData = LoopData;
@@ -15,13 +17,24 @@ export default function LoopCard({
   expanded = false,
   capDesc = "line-clamp-6",
 }: {
-  data: OptionalLoopData | NonNullable<Awaited<ReturnType<typeof getLoop>>>;
+  data:
+    | OptionalLoopData
+    | NonNullable<Awaited<ReturnType<typeof getLoop>>>
+    | NonNullable<Awaited<ReturnType<typeof getLoops>>>[number]
+    | NonNullable<Awaited<ReturnType<typeof getUserSignUps>>>[number]["loop"];
   expanded?: boolean;
   capDesc?: "line-clamp-6" | "line-clamp-1";
 }) {
   data.approxDriveTime ||= 0;
   data.capacity ||= 0;
   // data.filled ||= 0;
+
+  if (typeof data.departureDateTime !== "string")
+    data.departureDateTime = toISOStringOffset(data.departureDateTime);
+  if (typeof data.pickUpDateTime !== "string")
+    data.pickUpDateTime = toISOStringOffset(data.pickUpDateTime);
+  if (typeof data.signUpOpenDateTime !== "string")
+    data.signUpOpenDateTime = toISOStringOffset(data.signUpOpenDateTime);
 
   return (
     <div

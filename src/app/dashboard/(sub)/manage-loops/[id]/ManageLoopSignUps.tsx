@@ -5,7 +5,7 @@ import { removeFromLoop } from "./actions";
 
 import Image from "next/image";
 import { getLoop } from "@/app/_db/queries/loops";
-import { formatDate, formatTime } from "@/app/_lib/time";
+import { formatDate, formatTime, toISOStringOffset } from "@/app/_lib/time";
 
 type Loop = NonNullable<Awaited<ReturnType<typeof getLoop>>>;
 type Props = {
@@ -54,8 +54,9 @@ const PersonCard = ({
             {u.user.email}
           </p>
           <p className="text-sm md:text-base font-thin break-all">
-            {formatDate(u.createdAt, false)} {formatTime(u.createdAt)}
-            {/* {u.createdAt} */}
+            {formatDate(toISOStringOffset(u.createdAt), false)}{" "}
+            {formatTime(toISOStringOffset(u.createdAt))}
+            {/* {toISOStringOffset(u.createdAt)} */}
           </p>
           {u.group && (
             <p className="text-sm md:text-base break-all">

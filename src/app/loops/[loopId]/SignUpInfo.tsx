@@ -3,7 +3,7 @@
 import React, { Fragment, useActionState } from "react";
 import { Session } from "next-auth";
 import { getLoop } from "@/app/_db/queries/loops";
-import { formatDate, formatTime } from "@/app/_lib/time";
+import { formatDate, formatTime, toISOStringOffset } from "@/app/_lib/time";
 import Image from "next/image";
 import { removeSelfFromLoop } from "./actions";
 
@@ -95,8 +95,9 @@ const PersonCard = ({
           <p className="text-base font-bold">{u.user.name}</p>
           <p className="text-sm font-thin break-all">{u.user.email}</p>
           <p className="text-sm font-thin break-all">
-            {formatDate(u.createdAt, false)} {formatTime(u.createdAt)}
-            {/* {u.createdAt} */}
+            {formatDate(toISOStringOffset(u.createdAt), false)}{" "}
+            {formatTime(toISOStringOffset(u.createdAt))}
+            {/* {toISOStringOffset(u.createdAt)} */}
           </p>
           {u.group && (
             <p className="text-sm break-all">{u.group.name} Reservation</p>

@@ -8,13 +8,10 @@ import LoopCard from "@/app/_components/LoopCard";
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/20/solid";
 
 import { getGroups } from "@/app/_db/queries/groups";
-import mongoose from "mongoose";
 import { Session } from "next-auth";
 import TextArea from "@/app/_components/Inputs/TextArea";
-import { addMinutes, formatDate, toISOStringOffset } from "@/app/_lib/time";
-import Modal from "@/app/_components/Modal";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { getLoop, getLoops } from "@/app/_db/queries/loops";
+import { addMinutes, toISOStringOffset } from "@/app/_lib/time";
+import { getLoop } from "@/app/_db/queries/loops";
 
 import { ReservationItem } from "../CreateLoopClient";
 
@@ -27,10 +24,6 @@ type Props = {
 type Reservation = { slots?: number; group?: string; id: string };
 
 const EditLoopForm = ({ session, allGroups, loop }: Props) => {
-  const searchParams = useSearchParams();
-  const { replace } = useRouter();
-  const pathname = usePathname();
-
   const [_state, action, pending] = useActionState(editLoopAction, {});
 
   const [loopNumber, setLoopNumber] = useState<number>(loop.loopNumber ?? NaN);
@@ -54,18 +47,18 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
     loop.departureLocation
   );
   const [departureDateTime, setDepartureDateTime] = useState<string>(
-    loop.departureDateTime
+    toISOStringOffset(loop.departureDateTime)
   );
 
   const [pickUpLocation, setPickUpLocation] = useState<string>(
     loop.pickUpLocation ?? ""
   );
   const [pickUpDateTime, setPickUpDateTime] = useState<string>(
-    loop.pickUpDateTime
+    toISOStringOffset(loop.pickUpDateTime)
   );
 
   const [signUpOpenDateTime, setSignUpOpenDateTime] = useState<string>(
-    loop.signUpOpenDateTime
+    toISOStringOffset(loop.signUpOpenDateTime)
   );
   useEffect(() => {
     if (!pending) {
@@ -269,7 +262,10 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
                 label="Sign Ups Open"
                 type="datetime-local"
                 required
-                min={loop.createdAt.slice(0, -2) + "00" || "0000-01-01T00:00"}
+                min={
+                  toISOStringOffset(loop.createdAt).slice(0, -2) + "00" ||
+                  "0000-01-01T00:00"
+                }
                 max={departureDateTime || "9999-12-31T23:59"}
                 value={signUpOpenDateTime ?? ""}
                 setValue={(newValue) =>

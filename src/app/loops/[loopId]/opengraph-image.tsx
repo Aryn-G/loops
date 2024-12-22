@@ -5,6 +5,7 @@ import {
   formatDuration,
   formatTime,
   subTime,
+  toISOStringOffset,
 } from "@/app/_lib/time";
 import { ImageResponse } from "next/og";
 import { join } from "node:path";
@@ -28,6 +29,9 @@ export default async function Image({
 }: {
   params: { loopId: string };
 }) {
+  // TECHNICALLY INCORRECT
+  // ALL DATES ARE LOCAL TO SERVER
+
   const loopId = params.loopId;
   const loop = await getLoop(loopId);
   if (!loop) return null;
@@ -60,7 +64,7 @@ export default async function Image({
           <div tw="text-2xl h-full flex-1 flex flex-col justify-center">
             <span tw="flex">
               {loop.departureDateTime
-                ? formatDate(loop.departureDateTime, false)
+                ? formatDate(toISOStringOffset(loop.departureDateTime), false)
                 : "<Date>"}
               {!!loop.loopNumber && ` - Loop #${loop.loopNumber}`}
             </span>
@@ -85,7 +89,7 @@ export default async function Image({
               <div tw="flex w-full">
                 <span tw="w-36 flex items-center justify-center font-bold text-2xl">
                   {loop.departureDateTime
-                    ? formatTime(loop.departureDateTime)
+                    ? formatTime(toISOStringOffset(loop.departureDateTime))
                     : "00:00 AM"}
                 </span>
                 <div tw="flex flex-col flex-1 items-center justify-center relative">
@@ -120,7 +124,7 @@ export default async function Image({
                   {loop.departureDateTime
                     ? formatTime(
                         addMinutes(
-                          loop.departureDateTime,
+                          toISOStringOffset(loop.departureDateTime),
                           loop.approxDriveTime ?? 0
                         )
                       )
@@ -186,17 +190,15 @@ export default async function Image({
                     }}
                     tw="text-2xl"
                   >
-                    {loop.departureDateTime !== "" && loop.pickUpDateTime !== ""
-                      ? formatDuration(
-                          subTime(
-                            loop.pickUpDateTime,
-                            addMinutes(
-                              loop.departureDateTime,
-                              loop.approxDriveTime ?? 0
-                            )
-                          )
+                    {formatDuration(
+                      subTime(
+                        toISOStringOffset(loop.pickUpDateTime),
+                        addMinutes(
+                          toISOStringOffset(loop.departureDateTime),
+                          loop.approxDriveTime ?? 0
                         )
-                      : formatDuration(0)}
+                      )
+                    )}
                   </span>
                 </div>
                 <div
@@ -238,7 +240,7 @@ export default async function Image({
               <div tw="flex w-full">
                 <span tw="w-36 flex items-center justify-center font-bold text-2xl">
                   {loop.pickUpDateTime
-                    ? formatTime(loop.pickUpDateTime)
+                    ? formatTime(toISOStringOffset(loop.pickUpDateTime))
                     : "00:00 AM"}
                 </span>
                 <div tw="flex flex-col flex-1 items-center justify-center relative">
@@ -273,7 +275,7 @@ export default async function Image({
                   {loop.pickUpDateTime
                     ? formatTime(
                         addMinutes(
-                          loop.pickUpDateTime,
+                          toISOStringOffset(loop.pickUpDateTime),
                           loop.approxDriveTime ?? 0
                         )
                       )

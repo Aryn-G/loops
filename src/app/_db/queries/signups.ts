@@ -5,7 +5,6 @@ import SignUp, { ISignUp } from "../models/SignUp";
 import Loop from "../models/Loop";
 import Group from "../models/Group";
 import Users from "../models/Users";
-import { toISOStringOffset } from "@/app/_lib/time";
 
 /**
  * Gets a User's Sign Ups from DB
@@ -61,12 +60,10 @@ export const getUserSignUps = unstable_cache(
             _id: String(signup.loop._id),
             title: signup.loop.title,
             description: signup.loop.description,
-            departureDateTime: toISOStringOffset(signup.loop.departureDateTime),
+            departureDateTime: signup.loop.departureDateTime,
             departureLocation: signup.loop.departureLocation,
-            pickUpDateTime: toISOStringOffset(signup.loop.pickUpDateTime),
-            signUpOpenDateTime: toISOStringOffset(
-              signup.loop.signUpOpenDateTime
-            ),
+            pickUpDateTime: signup.loop.pickUpDateTime,
+            signUpOpenDateTime: signup.loop.signUpOpenDateTime,
             pickUpLocation: signup.loop.pickUpLocation,
             approxDriveTime: signup.loop.approxDriveTime,
             capacity: signup.loop.capacity,
