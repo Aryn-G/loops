@@ -60,6 +60,7 @@ export default function MultiSelect<T extends { [key: string]: any }>(props: {
                     }
                   }
                 }}
+                tabIndex={0}
               >
                 {props.displayFn(s)}
                 <XMarkIcon className="size-4 text-rose-500" />
@@ -114,6 +115,7 @@ export default function MultiSelect<T extends { [key: string]: any }>(props: {
                       setValue("");
                       inputRef.current?.focus();
                     }}
+                    tabIndex={0}
                   >
                     <span className="text-start max-w-full block break-all">
                       {props.displayFn(u)}
