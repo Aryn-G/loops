@@ -29,7 +29,7 @@ export default function RootLayout({
           rel="search"
           type="application/opensearchdescription+xml"
           href="/opensearch.xml"
-          title="ShortName"
+          title="Search Loops"
         />
       </head>
       <body
