@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useActionState } from "react";
+import React, { useActionState, useEffect, useState } from "react";
 
 import Link from "next/link";
 import { formatDate, isDateBetween, toISOStringOffset } from "@/app/_lib/time";
@@ -128,38 +128,65 @@ const LoopCardR = ({
 }) => {
   const [_state, action, pending] = useActionState(removeSelfFromLoop, "");
 
+  const [dateTime, setDateTime] = useState(new Date());
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setDateTime(new Date());
+    }, 2500);
+
+    return () => clearInterval(intervalId);
+  }, []);
+  const notOpenYet = isDateBetween(
+    undefined,
+    toISOStringOffset(dateTime),
+    toISOStringOffset(signup.loop.signUpOpenDateTime)
+  );
+
+  const windowPassed = isDateBetween(
+    toISOStringOffset(signup.loop.departureDateTime),
+    toISOStringOffset(dateTime),
+    undefined
+  );
+
   return (
     <div className="brutal-sm p-6 flex flex-col">
       <LoopCard data={signup.loop} capDesc="line-clamp-1" />
 
-      <div className="grid grid-cols-2 gap-2">
+      <div
+        className={`${
+          !notOpenYet && !windowPassed && "grid grid-cols-2"
+        } gap-2`}
+      >
         <Link
           href={"/loops/" + String(signup.loop._id)}
           className="text-sm w-full flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
         >
           See More
         </Link>
-        <form action={action} className="flex-shrink-0 w-full">
-          <input
-            className="hidden"
-            name="loop"
-            readOnly
-            value={String(signup.loop._id)}
-          />
-          <input
-            className="hidden"
-            name="remove"
-            readOnly
-            value={String(signup._id)}
-          />
-          <button
-            className=" text-sm w-full text-white flex items-center justify-center gap-2 h-fit bg-rose-500 brutal-sm md:px-4 font-bold"
-            type="submit"
-            aria-disabled={pending}
-          >
-            Remov{pending ? "ing" : "e"}
-          </button>
-        </form>
+        {!notOpenYet && !windowPassed && (
+          <form action={action} className="flex-shrink-0 w-full">
+            <input
+              className="hidden"
+              name="loop"
+              readOnly
+              value={String(signup.loop._id)}
+            />
+            <input
+              className="hidden"
+              name="remove"
+              readOnly
+              value={String(signup._id)}
+            />
+            <button
+              className=" text-sm w-full text-white flex items-center justify-center gap-2 h-fit bg-rose-500 brutal-sm md:px-4 font-bold"
+              type="submit"
+              aria-disabled={pending}
+            >
+              Remov{pending ? "ing" : "e"}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

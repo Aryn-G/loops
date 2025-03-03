@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "./_components/Footer";
 import Navbar from "./_components/Navbar";
 import { DESCRIPTION } from "./_lib/constants";
+import { Toaster, toast } from "sonner";
 
 const grot = localFont({
   src: "./_fonts/BricolageGrotesque-VariableFont_opsz,wdth,wght.ttf",
@@ -35,6 +36,11 @@ export default function RootLayout({
       <body
         className={`${grot.variable} font-grot text-base px-3 min-h-screen relative flex flex-col antialiased`}
       >
+        <Toaster
+          position="bottom-center"
+          className="w-full md:px-20 max-w-sm md:max-w-screen-2xl mx-auto"
+          toastOptions={{ className: "w-full" }}
+        />
         <Navbar />
         <main className="flex-1 flex flex-col pt-20">
           <div className="w-full md:px-20 max-w-sm md:max-w-screen-2xl mx-auto">

@@ -50,16 +50,16 @@ const PersonCard = ({
         )}
         <div className="flex flex-col flex-1">
           <p className="text-base md:text-lg font-bold">{u.user.name}</p>
-          <p className="text-sm md:text-base font-thin break-all">
+          <p className="text-sm md:text-base font-thin break-words">
             {u.user.email}
           </p>
-          <p className="text-sm md:text-base font-thin break-all">
+          <p className="text-sm md:text-base font-thin break-words">
             {formatDate(toISOStringOffset(u.createdAt), false)}{" "}
             {formatTime(toISOStringOffset(u.createdAt))}
             {/* {toISOStringOffset(u.createdAt)} */}
           </p>
           {u.group && (
-            <p className="text-sm md:text-base break-all">
+            <p className="text-sm md:text-base break-words">
               {u.group.name} Reservation
             </p>
           )}

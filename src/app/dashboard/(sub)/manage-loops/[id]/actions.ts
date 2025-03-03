@@ -231,3 +231,20 @@ export async function editLoopAction(
 
   return { overall: "success" };
 }
+
+export async function deleteLoop(prevState: any, formData: FormData) {
+  await mongoDB();
+
+  const remove = formData.get("remove");
+  //   console.log(selected);
+  try {
+    if (!remove) return "Invalid Form Submission";
+    await Loop.deleteMany({ _id: remove });
+    revalidateTag("loopsTag");
+  } catch (error) {
+    console.log("Internal Error");
+    return "Internal Error";
+  }
+
+  return "Success";
+}

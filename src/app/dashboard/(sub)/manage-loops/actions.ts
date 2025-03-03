@@ -99,6 +99,7 @@ export async function createLoopAction(
     await newLoop.save();
     revalidateTag("loopsTag");
   } catch (error: any) {
+    console.log(error);
     if (typeof error === "string") return { overall: error };
     return { overall: "Internal Error" };
   }

@@ -1,3 +1,5 @@
+"use client";
+
 import { getLoop, getLoops } from "../_db/queries/loops";
 import { LoopData } from "../_db/models/Loop";
 import {
@@ -39,7 +41,7 @@ export default function LoopCard({
   return (
     <div
       className={
-        "flex flex-col flex-1 gap-1.5 break-all " +
+        "flex flex-col flex-1 gap-1.5 break-words " +
         (!expanded && data.deleted && "text-rose-500")
       }
     >

@@ -39,7 +39,7 @@ const LoopSchema = new mongoose.Schema<ILoop>({
     ref: "Users",
     required: true,
   },
-  loopNumber: { type: Number, required: true, default: 0 },
+  loopNumber: { type: Number, default: 0, required: false },
   // date: { type: Date, required: true },
   title: { type: String, required: true },
   description: { type: String, required: true },

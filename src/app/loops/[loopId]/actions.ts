@@ -22,7 +22,7 @@ export async function addSelfToLoop(prevState: any, formData: FormData) {
     if (!loop || !userId) return "Error: Invalid Form Submission";
 
     if (session.userId !== userId)
-      throw new Error("Error: You can add remove your own signup");
+      throw new Error("Error: You can signup yourself");
 
     if (!loop) throw new Error("Error: Invalid Submission");
 

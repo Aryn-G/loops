@@ -7,6 +7,7 @@ import { UserPlusIcon } from "@heroicons/react/24/outline";
 import MultiSelect from "@/app/_components/Inputs/MultiSelect";
 import { getLoop } from "@/app/_db/queries/loops";
 import { getFilteredUsers } from "@/app/_db/queries/users";
+import toast from "@/app/_components/Toasts/toast";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 type Loop = NonNullable<Awaited<ReturnType<typeof getLoop>>>;
@@ -28,6 +29,16 @@ const EditLoopSignUps = ({ loop, allUsers }: Props) => {
 
   useEffect(() => {
     if (!pending) {
+      if (_state == "Success")
+        toast({
+          title: "Success",
+          description:
+            "Signed up " +
+            selected.length +
+            " student" +
+            (selected.length != 1 ? "s" : ""),
+          button: { label: "Close", onClick: () => {} },
+        });
       setSelected([]);
     }
   }, [pending]);
@@ -46,8 +57,9 @@ const EditLoopSignUps = ({ loop, allUsers }: Props) => {
           maxSearch={3}
           selected={selected}
           setSelected={setSelected}
-          keyFn={(u) => u._id}
-          displayFn={(u) => u.email}
+          id={(u) => u._id}
+          render={(u) => u.email}
+          filter={(u) => u.email}
           placeholder="Type or paste in emails..."
         />
         <div className="flex gap-2">

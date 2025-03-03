@@ -6,14 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "roles": "node scripts/out/scripts/updateUserRole.js"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.7.2",
     "@heroicons/react": "^2.2.0",
+    "@inquirer/prompts": "^7.3.2",
     "@serwist/next": "^9.0.11",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.15",
+    "dotenv": "^16.4.7",
+    "inquirer": "^12.4.2",
     "mongodb": "^6.10.0",
     "mongoose": "^8.7.1",
     "next": "^15.1.2",
@@ -21,6 +25,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "serwist": "^9.0.11",
+    "sonner": "^2.0.1",
     "title": "^4.0.1",
     "use-debounce": "^10.0.4",
     "web-push": "^3.6.7",
@@ -36,6 +41,7 @@
     "eslint-config-next": "15.0.0-rc.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   }
 }

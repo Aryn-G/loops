@@ -148,16 +148,16 @@ const SessionCard = ({
               {location.city}, {location.regionName}, {location.country}
             </p>
           )}
-          <p className="text-sm md:text-base font-light break-all">
+          <p className="text-sm md:text-base font-light break-words">
             <span className="font-semibold">{title(s.browser)} </span>
             on
             <span className="italic"> {title(s.os)}</span>
           </p>
-          <p className="text-sm md:text-base font-light break-all">
+          <p className="text-sm md:text-base font-light break-words">
             <span className="font-semibold">Created: </span>
             <span className="italic"> {formatDate(s.createdAt)}</span>
           </p>
-          <p className="text-sm md:text-base font-light break-all">
+          <p className="text-sm md:text-base font-light break-words">
             <span className="font-semibold">Last Used: </span>
             <span className="italic"> {formatDate(s.updatedAt)}</span>
           </p>

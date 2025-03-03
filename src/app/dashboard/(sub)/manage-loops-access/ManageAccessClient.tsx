@@ -75,7 +75,9 @@ const PersonCard = ({ u }: { u: FilteredUser }) => {
         )}
         <div className="flex flex-col flex-1">
           <p className="text-base md:text-lg font-bold">{u.name}</p>
-          <p className="text-sm md:text-base font-thin break-all">{u.email}</p>
+          <p className="text-sm md:text-base font-thin break-words">
+            {u.email}
+          </p>
         </div>
       </div>
       <form action={action} className="flex-shrink-0 w-fit">

@@ -33,26 +33,40 @@ type Props<T> = {
     filters: Record<string, string>,
     query: string
   ) => ReactNode;
-  children?: ReactNode;
+  children?: (states: {
+    [key: string]: React.Dispatch<React.SetStateAction<string>>;
+  }) => ReactNode;
 };
 
-function findFilters(children: ReactNode) {
+function findFilters(children: Props<any>["children"]) {
   const filters: [string, { defaultValue: string; value: string }][] = [];
 
-  React.Children.forEach(children, (child) => {
-    if (React.isValidElement(child)) {
-      if (child.type === SearchFilters) {
-        const { name, defaultValue = "" } = child.props;
-        filters.push([name, { defaultValue, value: defaultValue }]);
-      } else if (child.props && child.props.children) {
-        filters.push(...findFilters(child.props.children));
+  // console.log(typeof children == "function" ? children({}) : null);
+  React.Children.forEach(
+    typeof children == "function" ? children({}) : null,
+    (child) => {
+      let childNode = child;
+      // console.log(childNode);
+
+      if (React.isValidElement(childNode)) {
+        if (childNode.type === SearchFilters) {
+          const { name, defaultValue = "" } = childNode.props;
+          filters.push([name, { defaultValue, value: defaultValue }]);
+        } else if (childNode.props && childNode.props.children) {
+          filters.push(...findFilters(childNode.props.children));
+        }
       }
     }
-  });
+  );
+
+  // console.log(filters);
   return filters;
 }
 
 type SearchContextType = {
+  states: {
+    [key: string]: React.Dispatch<React.SetStateAction<string>>;
+  };
   setStates: React.Dispatch<
     React.SetStateAction<{
       [key: string]: React.Dispatch<React.SetStateAction<string>>;
@@ -60,7 +74,9 @@ type SearchContextType = {
   >;
 };
 
-const SearchContext = createContext<SearchContextType | null>(null);
+export const SearchContext = createContext<SearchContextType>(
+  {} as SearchContextType
+);
 
 export default function Search<T>(props: Props<T>) {
   const searchParams = useSearchParams();
@@ -108,7 +124,7 @@ export default function Search<T>(props: Props<T>) {
   };
 
   return (
-    <SearchContext.Provider value={{ setStates }}>
+    <SearchContext.Provider value={{ states, setStates }}>
       <div className={props.inputClassName}>
         <div
           className="flex flex-1 gap-2 px-4 brutal-sm focus-within:[outline:-webkit-focus-ring-color_auto_1px]"
@@ -152,9 +168,9 @@ export default function Search<T>(props: Props<T>) {
           )}
         </div>
         <div className={`flex flex-col ${!showFilters && "hidden"}`}>
-          {props.children}
+          {props.children && props.children(states)}
           <button
-            className="block w-full text-start underline underline-offset-2"
+            className="mt-2 block w-full text-center underline underline-offset-2"
             onClick={resetFilters}
           >
             Reset Filters
@@ -210,7 +226,7 @@ export const SearchFilters = memo(
 
     useEffect(() => {
       context.setStates((s) => ({ ...s, [name]: setV }));
-    }, []);
+    }, [defaultValue, !noDel, debounceDelay]);
 
     return <>{children(v, setV, updateV)}</>;
   }

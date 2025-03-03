@@ -36,8 +36,9 @@ const GiveAccessClient = (props: Props) => {
         maxSearch={3}
         selected={selected}
         setSelected={setSelected}
-        keyFn={(u) => u._id}
-        displayFn={(u) => u.email}
+        id={(u) => u._id}
+        filter={(u) => u.email}
+        render={(u) => u.email}
         placeholder="Type or paste in emails..."
       />
       <form action={action}>

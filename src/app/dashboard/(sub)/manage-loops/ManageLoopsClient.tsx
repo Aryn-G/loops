@@ -30,7 +30,7 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
       name="Loops"
       inputClassName="flex flex-col gap-2"
       itemsPerPage={6}
-      paginationClassName="grid grid-cols-1  @2xl:grid-cols-2 @4xl:grid-cols-3 gap-2 md:gap-6"
+      paginationClassName="grid grid-cols-1  @2xl:grid-cols-2 @4xl:grid-cols-3 gap-3 md:gap-6"
       render={(item) => <LoopCardR loop={item} key={String(item._id)} />}
       filterString={(filtered, filters, query) => (
         <>
