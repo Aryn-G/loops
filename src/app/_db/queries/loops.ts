@@ -11,16 +11,14 @@ import SignUp from "../models/SignUp";
  * @returns all loops
  */
 export const getLoops = unstable_cache(
-  async (deleted: boolean | null = false) => {
+  async (deleted: boolean | null = false, published: boolean | null = true) => {
     // connect to mongodb
     await mongoDB();
 
-    // if deleted == true
-    //   find all deleted loops
-    // if deleted == false
-    //   find all non deleted loops
-    // else find all loops
-    const allLoops = await Loop.find<ILoop>(deleted != null ? { deleted } : {});
+    const query: Record<string, any> = {};
+    if (deleted != null) query["deleted"] = deleted;
+    if (published != null) query["published"] = published;
+    const allLoops = await Loop.find<ILoop>(query);
 
     // convert mongodb document to usable js object
     return allLoops.map((loop) => ({
@@ -40,6 +38,8 @@ export const getLoops = unstable_cache(
       })),
       filled: loop.filled.map((f) => String(f)),
       deleted: loop.deleted,
+      published: loop.published,
+      canceled: loop.canceled,
       loopNumber: loop.loopNumber,
       createdAt: loop.createdAt,
     }));
@@ -107,6 +107,8 @@ export const getLoop = unstable_cache(
             ? { name: v.group.name as string, _id: String(v.group._id) }
             : undefined,
         })),
+        published: loop.published ?? true,
+        canceled: loop.canceled ?? false,
         deleted: loop.deleted,
         loopNumber: loop.loopNumber,
         createdAt: loop.createdAt,

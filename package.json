@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "roles": "node scripts/out/scripts/updateUserRole.js"
+    "roles": "node scripts/out/scripts/updateUserRole.js",
+    "updates": "node scripts/out/scripts/updateLoops.js"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.7.2",
@@ -22,6 +23,7 @@
     "mongoose": "^8.7.1",
     "next": "^15.1.2",
     "next-auth": "^5.0.0-beta.25",
+    "ora": "^8.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "serwist": "^9.0.11",

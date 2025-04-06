@@ -1,10 +1,25 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-import { search, select } from "@inquirer/prompts";
+import { confirm, search, select } from "@inquirer/prompts";
 import { ServerApiVersion } from "mongodb";
 import mongoose, { ConnectOptions } from "mongoose";
 import Users, { IUsers } from "../src/app/_db/models/Users";
+
+process.on("SIGINT", () => {
+  console.log("\nClosing Terminal...");
+  process.exit(0);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+  process.exit(1);
+});
 
 async function main() {
   console.log("Connecting to MongoDB...");
@@ -72,23 +87,29 @@ async function main() {
     ],
   });
 
+  if (updatedRole === user.role) {
+    console.log("Previous role and new role are the same.");
+    process.exit(0);
+  }
+
+  let confirmation = true;
+  if (updatedRole === "Admin") {
+    confirmation = await confirm({
+      message: "Are you sure you want to grant this account Admin permissions?",
+      default: false,
+    });
+  }
+  if (!confirmation) {
+    console.log("Canceled!");
+    process.exit(0);
+  }
+
   await Users.findOneAndUpdate(
     { _id: user._id },
     { $set: { role: updatedRole } }
   );
   console.log("Success!");
-  process.exit();
+  process.exit(0);
 }
 
-process.on("uncaughtException", (error) => {
-  if (error instanceof Error && error.name === "ExitPromptError") {
-    console.log("Closing Terminal...");
-  } else {
-    // Rethrow unknown errors
-    throw error;
-  }
-});
-
 main();
-
-// console.log("HI!");

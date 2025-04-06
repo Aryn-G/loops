@@ -70,35 +70,35 @@ const SessionCard = ({
   ping?: boolean;
 }) => {
   const [_state, action, pending] = useActionState(removeSession, "");
-  const [location, setLocation] = useState<{
-    city: string;
-    regionName: string;
-    country: string;
-  }>();
+  // const [location, setLocation] = useState<{
+  // city: string;
+  // regionName: string;
+  // country: string;
+  // }>();
 
-  useEffect(() => {
-    // fetchData(s.ip);
-    // setLocation({
-    //   city: "Test",
-    //   regionName: "TE",
-    //   country: "ST",
-    // });
-  }, []);
+  // useEffect(() => {
+  // fetchData(s.ip);
+  // setLocation({
+  //   city: "Test",
+  //   regionName: "TE",
+  //   country: "ST",
+  // });
+  // }, []);
 
-  const fetchData = async (ip: string) => {
-    if (ip === "8.8.8.8") return;
-    const res = await fetch("http://ip-api.com/json/" + ip, {
-      cache: "force-cache",
-    });
-    const locationData = await res.json();
-    if (!locationData) return;
+  // const fetchData = async (ip: string) => {
+  //   if (ip === "8.8.8.8") return;
+  //   const res = await fetch("http://ip-api.com/json/" + ip, {
+  //     cache: "force-cache",
+  //   });
+  //   const locationData = await res.json();
+  //   if (!locationData) return;
 
-    setLocation({
-      city: locationData.city,
-      regionName: locationData.region,
-      country: locationData.countryCode,
-    });
-  };
+  //   setLocation({
+  //     city: locationData.city,
+  //     regionName: locationData.region,
+  //     country: locationData.countryCode,
+  //   });
+  // };
 
   // console.log(s);
 
@@ -141,13 +141,13 @@ const SessionCard = ({
                   : s.device
               )}
             </span>
-            <span className=""> - {s.ip}</span>
+            {/* <span className=""> - {s.ip}</span> */}
           </p>
-          {location && (
+          {/* {location && (
             <p className="">
               {location.city}, {location.regionName}, {location.country}
             </p>
-          )}
+          )} */}
           <p className="text-sm md:text-base font-light break-words">
             <span className="font-semibold">{title(s.browser)} </span>
             on

@@ -33,6 +33,8 @@ export async function createLoopAction(
   const res = formData.getAll("reservations");
   const signUpOpenDateTime = formData.get("signUpOpenDateTime");
 
+  const submissionType = formData.get("submissionType");
+
   const reservations: {
     group: FormDataEntryValue | null;
     slots: FormDataEntryValue | null;

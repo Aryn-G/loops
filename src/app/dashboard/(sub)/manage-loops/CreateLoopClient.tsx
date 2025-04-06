@@ -373,13 +373,22 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
               setValue={(newValue) => setSignUpOpenDateTime(newValue as string)}
             />
           </div>
-          <button
-            className=" text-sm md:text-base w-full text-white flex items-center justify-center gap-2 h-fit bg-ncssm-green brutal-sm px-4 font-bold"
-            type="submit"
-            aria-disabled={pending}
-          >
-            Creat{pending ? "ing" : "e"}
-          </button>
+          <div className="flex flex-col md:flex-row">
+            <input
+              className=" text-sm md:text-base w-full text-white flex items-center justify-center gap-2 h-fit bg-ncssm-green brutal-sm px-4 font-bold"
+              type="submit"
+              aria-disabled={pending}
+              name="submissionType"
+              value="Save"
+            />
+            <button
+              className=" text-sm md:text-base w-full text-white flex items-center justify-center gap-2 h-fit bg-ncssm-green brutal-sm px-4 font-bold"
+              type="submit"
+              aria-disabled={pending}
+              name="submissionType"
+              value="Publish"
+            />
+          </div>
           <p className="mt-2">{}</p>
         </form>
       </div>

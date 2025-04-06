@@ -55,7 +55,8 @@ export default function LoopCard({
         {!!data.loopNumber && <span> - Loop #{data.loopNumber}</span>}
       </p>
       <h3 className={"font-bold text-xl " + (data.deleted && "text-rose-500")}>
-        {data.deleted && "(DELETED)"} {data.title || "<Title>"}
+        {data.deleted ? "(DELETED)" : data.canceled ? "(CANCELED)" : ""}{" "}
+        {data.title || "<Title>"}
       </h3>
       {!expanded && (
         <p className="">

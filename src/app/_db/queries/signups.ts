@@ -72,6 +72,8 @@ export const getUserSignUps = unstable_cache(
               group: String(r.group),
             })),
             filled: signup.loop.filled.map((f) => String(f)),
+            canceled: signup.loop.canceled,
+            published: signup.loop.published,
             deleted: signup.loop.deleted,
             loopNumber: signup.loop.loopNumber,
           },

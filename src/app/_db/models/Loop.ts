@@ -12,11 +12,14 @@ export type LoopData = {
   capacity: number;
   reservations: {
     slots?: number;
-    group?: string;
+    group?: string | mongoose.Types.ObjectId;
   }[];
   filled: any[];
   signUpOpenDateTime: string;
+  published?: boolean;
+  canceled?: boolean;
   deleted: boolean;
+  createdBy?: mongoose.Types.ObjectId;
 };
 
 export interface ILoop
@@ -64,10 +67,18 @@ const LoopSchema = new mongoose.Schema<ILoop>({
     default: [],
   },
   filled: {
-    type: [{ type: mongoose.Types.ObjectId, ref: "SignUp" }],
+    type: [{ type: mongoose.Schema.ObjectId, ref: "SignUp" }],
     default: [],
   },
   signUpOpenDateTime: { type: Date, required: true },
+  published: {
+    type: Boolean,
+    default: true,
+  },
+  canceled: {
+    type: Boolean,
+    default: false,
+  },
   deleted: {
     type: Boolean,
     default: false,

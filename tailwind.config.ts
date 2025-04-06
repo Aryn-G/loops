@@ -25,6 +25,7 @@ const config: Config = {
         },
       },
       boxShadow: {
+        "brutal-xs": "-0.5px 0.5px 0 0.5px rgb(0,0,0)",
         "brutal-sm": "-1px 1px 0 1px rgb(0,0,0)",
         "brutal-md": "-2px 2px 0 2px rgb(0,0,0)",
         // "brutal-md-off": "-4px 4px 0 2px rgb(0,0,0)",

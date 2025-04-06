@@ -42,9 +42,21 @@ var prompts_1 = require("@inquirer/prompts");
 var mongodb_1 = require("mongodb");
 var mongoose_1 = require("mongoose");
 var Users_1 = require("../src/app/_db/models/Users");
+process.on("SIGINT", function () {
+    console.log("\nClosing Terminal...");
+    process.exit(0);
+});
+process.on("uncaughtException", function (error) {
+    console.error("Uncaught Exception:", error);
+    process.exit(1);
+});
+process.on("unhandledRejection", function (reason) {
+    console.error("Unhandled Rejection:", reason);
+    process.exit(1);
+});
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var MONGODB_URI, opts, allUsers, user, updatedRole;
+        var MONGODB_URI, opts, allUsers, user, updatedRole, confirmation;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -119,24 +131,32 @@ function main() {
                         })];
                 case 4:
                     updatedRole = _a.sent();
-                    return [4 /*yield*/, Users_1.default.findOneAndUpdate({ _id: user._id }, { $set: { role: updatedRole } })];
+                    if (updatedRole === user.role) {
+                        console.log("Previous role and new role are the same.");
+                        process.exit(0);
+                    }
+                    confirmation = true;
+                    if (!(updatedRole === "Admin")) return [3 /*break*/, 6];
+                    return [4 /*yield*/, (0, prompts_1.confirm)({
+                            message: "Are you sure you want to grant this account Admin permissions?",
+                            default: false,
+                        })];
                 case 5:
+                    confirmation = _a.sent();
+                    _a.label = 6;
+                case 6:
+                    if (!confirmation) {
+                        console.log("Canceled!");
+                        process.exit(0);
+                    }
+                    return [4 /*yield*/, Users_1.default.findOneAndUpdate({ _id: user._id }, { $set: { role: updatedRole } })];
+                case 7:
                     _a.sent();
                     console.log("Success!");
-                    process.exit();
+                    process.exit(0);
                     return [2 /*return*/];
             }
         });
     });
 }
-process.on("uncaughtException", function (error) {
-    if (error instanceof Error && error.name === "ExitPromptError") {
-        console.log("Closing Terminal...");
-    }
-    else {
-        // Rethrow unknown errors
-        throw error;
-    }
-});
 main();
-// console.log("HI!");

@@ -242,11 +242,11 @@ export function ModifiedMongoDBAdapter(
       const h = await headers();
       const ua = userAgent({headers: h });
 
-      const rawIp = h.get("x-forwarded-for")?.split(",")[0] ||
-                h.get("remote-addr") ||
-                "::1";
+      // const rawIp = h.get("x-forwarded-for")?.split(",")[0] ||
+      //           h.get("remote-addr") ||
+      //           "::1";
       
-      const ip = ["::1", "127.0.0.1"].includes(rawIp) ? "localhost" : rawIp;
+      // const ip = ["::1", "127.0.0.1"].includes(rawIp) ? "localhost" : rawIp;
 
       const d = {
         ...data, 
@@ -255,7 +255,7 @@ export function ModifiedMongoDBAdapter(
         deviceVendor: ua.device.type === "mobile" ? ua.device.vendor : undefined,
         deviceModel: ua.device.type === "mobile" ? ua.device.model : undefined,
         os: ua.os.name,
-        ip,
+        // ip,
         createdAt: new Date(),
         updatedAt: new Date()
       }
@@ -271,11 +271,11 @@ export function ModifiedMongoDBAdapter(
       const h = await headers();
       const ua = userAgent({headers: h });
 
-      const rawIp = h.get("x-forwarded-for")?.split(",")[0] ||
-                h.get("remote-addr") ||
-                "::1";
+      // const rawIp = h.get("x-forwarded-for")?.split(",")[0] ||
+                // h.get("remote-addr") ||
+                // "::1";
       
-      const ip = ["::1", "127.0.0.1"].includes(rawIp) ? "localhost" : rawIp;
+      // const ip = ["::1", "127.0.0.1"].includes(rawIp) ? "localhost" : rawIp;
 
       const d = {
         ...data, 
@@ -284,7 +284,7 @@ export function ModifiedMongoDBAdapter(
         deviceVendor: ua.device.type === "mobile" ? ua.device.vendor : undefined,
         deviceModel: ua.device.type === "mobile" ? ua.device.model : undefined,
         os: ua.os.name,
-        ip,
+        // ip,
         updatedAt: new Date()
       }
       // --- ARYAN's CODE STOP ---
