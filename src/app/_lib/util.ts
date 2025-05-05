@@ -33,3 +33,23 @@ export function objectMap<T, M>(
     Object.entries(obj).map(([k, v], i) => [k, fn(v, k, i)])
   );
 }
+
+export function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, "+")
+    .replace(/_/g, "/");
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+export function isValidDateStr(str: string) {
+  // @ts-ignore
+  return new Date(str) !== "Invalid Date" && !isNaN(new Date(str));
+}

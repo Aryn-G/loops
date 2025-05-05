@@ -1,9 +1,14 @@
 "use client";
 
-import React, { Fragment, useActionState } from "react";
+import React, { Fragment, useActionState, useEffect, useState } from "react";
 import { Session } from "next-auth";
 import { getLoop } from "@/app/_db/queries/loops";
-import { formatDate, formatTime } from "@/app/_lib/time";
+import {
+  formatDate,
+  formatTime,
+  isDateBetween,
+  toISOStringOffset,
+} from "@/app/_lib/time";
 import Image from "next/image";
 import { removeSelfFromLoop } from "./actions";
 
@@ -15,6 +20,28 @@ type Props = {
 };
 
 const SignUpInfo = ({ loop, session }: Props) => {
+  const [dateTime, setDateTime] = useState(new Date());
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setDateTime(new Date());
+    }, 2500);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const notOpenYet = isDateBetween(
+    undefined,
+    toISOStringOffset(dateTime),
+    toISOStringOffset(loop.signUpOpenDateTime)
+  );
+
+  const windowPassed = isDateBetween(
+    toISOStringOffset(loop.departureDateTime),
+    toISOStringOffset(dateTime),
+    undefined
+  );
+
   return (
     <div className="flex-1 flex flex-col">
       <div className="w-fit grid grid-cols-[repeat(4,auto)] gap-x-1">
@@ -56,6 +83,8 @@ const SignUpInfo = ({ loop, session }: Props) => {
                 loop={loop._id}
                 userId={session.userId}
                 key={u.user._id}
+                notOpenYet={notOpenYet}
+                windowPassed={windowPassed}
               />
             ))}
       </div>
@@ -67,10 +96,14 @@ const PersonCard = ({
   u,
   loop,
   userId,
+  notOpenYet,
+  windowPassed,
 }: {
   u: Loop["filled"][number];
   loop: string;
   userId: string;
+  notOpenYet: boolean;
+  windowPassed: boolean;
 }) => {
   const [_state, action, pending] = useActionState(removeSelfFromLoop, "");
 
@@ -80,7 +113,7 @@ const PersonCard = ({
       className="py-3 flex flex-row gap-2 w-full items-center justify-center"
     >
       <div className="flex gap-2 flex-1 w-full items-center">
-        {u.user.picture && (
+        {u.user.picture ? (
           <Image
             src={u.user.picture}
             alt="profile pic"
@@ -90,20 +123,25 @@ const PersonCard = ({
             unoptimized
             referrerPolicy="no-referrer"
           />
+        ) : (
+          <div className="brutal-sm p-0 size-10 md:size-12 flex items-center justify-center">
+            {u.user.email?.at(0)}
+          </div>
         )}
         <div className="flex flex-col flex-1">
           <p className="text-base font-bold">{u.user.name}</p>
-          <p className="text-sm font-thin break-all">{u.user.email}</p>
-          <p className="text-sm font-thin break-all">
-            {formatDate(u.createdAt, false)} {formatTime(u.createdAt)}
-            {/* {u.createdAt} */}
+          <p className="text-sm font-thin break-words">{u.user.email}</p>
+          <p className="text-sm font-thin break-words">
+            {formatDate(toISOStringOffset(u.createdAt), false)}{" "}
+            {formatTime(toISOStringOffset(u.createdAt))}
+            {/* {toISOStringOffset(u.createdAt)} */}
           </p>
           {u.group && (
-            <p className="text-sm break-all">{u.group.name} Reservation</p>
+            <p className="text-sm break-words">{u.group.name} Reservation</p>
           )}
         </div>
       </div>
-      {userId === u.user._id && (
+      {!notOpenYet && !windowPassed && userId === u.user._id && (
         <form action={action} className="flex-shrink-0 w-fit">
           <input className="hidden" name="loop" readOnly value={loop} />
           <input className="hidden" name="remove" readOnly value={u._id} />

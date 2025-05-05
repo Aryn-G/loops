@@ -12,7 +12,7 @@ export interface ISessions extends mongoose.Document {
   deviceModel?: string;
   os: string;
   location: string;
-  ip: string;
+  // ip: string;
 }
 
 const SessionsSchema = new mongoose.Schema<ISessions>(
@@ -30,6 +30,7 @@ const SessionsSchema = new mongoose.Schema<ISessions>(
     expires: {
       type: Date,
       required: true,
+      // index: { expires: 0 },
     },
     createdAt: {
       type: Date,
@@ -54,9 +55,9 @@ const SessionsSchema = new mongoose.Schema<ISessions>(
     os: {
       type: String,
     },
-    ip: {
-      type: String,
-    },
+    // ip: {
+    // type: String,
+    // },
     location: {
       type: String,
     },

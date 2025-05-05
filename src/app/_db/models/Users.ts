@@ -2,15 +2,16 @@ import mongoose from "mongoose";
 
 export interface IUsers extends mongoose.Document {
   email: string;
-  name: string;
+  name?: string;
   picture?: string;
-  role?: "Student" | "Loops" | "Admin";
+  role?: "No" | "Student" | "Loops" | "Admin";
+  linked: boolean;
+  deleted: boolean;
 }
 
 const UsersSchema = new mongoose.Schema<IUsers>({
   name: {
     type: String,
-    required: true,
   },
   email: {
     type: String,
@@ -22,8 +23,16 @@ const UsersSchema = new mongoose.Schema<IUsers>({
   },
   role: {
     type: String,
-    enum: ["Student", "Loops", "Admin"],
-    default: "Student",
+    enum: ["No", "Student", "Loops", "Admin"],
+    default: "No",
+  },
+  linked: {
+    type: Boolean,
+    required: true,
+  },
+  deleted: {
+    type: Boolean,
+    default: false,
   },
 });
 

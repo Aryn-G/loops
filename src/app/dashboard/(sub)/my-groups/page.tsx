@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { redirect, unauthorized } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
 import mongoDB from "@/app/_db/connect";
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const session = await auth();
-  if (!session) return redirect("/");
+  if (!session) return unauthorized();
 
   return (
     <>
@@ -31,6 +31,7 @@ export default async function Page() {
         <h1 className="font-black text-xl">My Groups</h1>
         <div className="flex items-center">
           <Refresh tag={"groups"} />
+          {/* <Refresh path="/dashboard/my-groups" /> */}
         </div>
       </div>
       <p>This is a list of all the student groups you are a part of.</p>

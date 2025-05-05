@@ -3,6 +3,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { Params } from "./_lib/types";
 import { DESCRIPTION } from "./_lib/constants";
+import InstallPrompt from "./InstallPrompt";
 
 export default async function Page({ searchParams }: { searchParams: Params }) {
   const session = await auth();
@@ -19,18 +20,19 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
         <p>{DESCRIPTION}</p>
         <SignInButton />
         {err && <span className="mt-2">There was an error: {err}</span>}
+        <InstallPrompt />
       </div>
     </main>
   );
 }
 
-const SignInButton = () => (
+export const SignInButton = ({ redirectTo = "/dashboard" }) => (
   <form
     action={async () => {
       "use server";
       await signIn("google", {
         redirect: true,
-        redirectTo: "/dashboard",
+        redirectTo,
       });
     }}
   >

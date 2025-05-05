@@ -26,8 +26,10 @@ export const getGroups = unstable_cache(
     return allGroups.map((group) => ({
       _id: String(group._id),
       users: group.users.map((u) => String(u)),
+      subgroups: group.subgroups.map((u) => String(u)),
       name: group.name,
       deleted: group.deleted,
+      count: countUsers(String(group._id), allGroups),
     }));
   },
   ["groups"],
@@ -48,28 +50,51 @@ export const getGroup = unstable_cache(
     await mongoDB();
 
     // find group by id and populate necessary paths
-    const group = await Group.findById<IGroup>(id).populate([
-      {
-        path: "users",
-        select: "_id name email picture",
-        model: Users,
-      },
-    ]);
+    try {
+      const allGroups = await Group.find<IGroup>({});
 
-    if (!group) return null;
+      const group = await Group.findById<IGroup>(id).populate([
+        {
+          path: "users",
+          select: "_id name email picture",
+          model: Users,
+        },
+        {
+          path: "subgroups",
+          select: "_id name deleted",
+          model: Group,
+        },
+      ]);
 
-    // convert mongodb document to usable js object
-    return {
-      _id: String(group._id),
-      users: group.users.map((u: any) => ({
-        name: u.name,
-        email: u.email,
-        picture: u.picture,
-        _id: String(u._id),
-      })),
-      name: group.name,
-      deleted: group.deleted,
-    };
+      if (!group) return null;
+
+      // convert mongodb document to usable js object
+      return {
+        _id: String(group._id),
+        users: group.users.map((u: any) =>
+          u !== null
+            ? {
+                name: u.name,
+                email: u.email,
+                picture: u.picture,
+                _id: String(u._id),
+              }
+            : { name: "[deleted user]", email: null, picture: null, _id: null }
+        ),
+        subgroups: group.subgroups.map((g: any) => ({
+          _id: String(g._id),
+          name: String(g.name),
+          deleted: g.deleted,
+          users: g.users,
+          count: countUsers(String(g._id), allGroups),
+        })),
+        name: group.name,
+        deleted: group.deleted,
+        count: countUsers(String(group._id), allGroups),
+      };
+    } catch {
+      return null;
+    }
   },
   ["groups"],
   {
@@ -89,15 +114,100 @@ export const getUserGroups = unstable_cache(
     await mongoDB();
 
     // find all groups containing a user
-    const userGroups = await Group.find({ users: userId, deleted: false });
+    try {
+      const allGroups = await Group.find<IGroup>();
+      const groupMap = new Map<string, IGroup>(
+        allGroups.map((g) => [String(g._id), g])
+      );
+      const memo = new Map<string, boolean>();
 
-    // convert mongodb document to usable js object
-    return userGroups.map((group) => ({
-      _id: String(group._id),
-      users: group.users.map((u: any) => String(u)),
-      name: group.name,
-      deleted: false,
-    }));
+      // recursively check if user is in group
+      function userInGroup(
+        groupId: string,
+        visited = new Set<string>()
+      ): boolean {
+        if (memo.has(groupId)) return memo.get(groupId)!;
+        if (visited.has(groupId)) return false;
+
+        const group = groupMap.get(groupId);
+        if (!group || group.deleted) {
+          memo.set(groupId, false);
+          return false;
+        }
+
+        visited.add(groupId);
+
+        if (group.users.some((u) => u.toString() === userId)) {
+          memo.set(groupId, true);
+          return true;
+        }
+
+        for (const subId of group.subgroups) {
+          if (userInGroup(subId.toString(), visited)) {
+            memo.set(groupId, true);
+            return true;
+          }
+        }
+
+        memo.set(groupId, false);
+        return false;
+      }
+
+      // matching groups
+      const userGroups = allGroups.filter(
+        (group) => !group.deleted && userInGroup(String(group._id))
+      );
+
+      // convert mongodb document to usable js object
+      return userGroups.map((group) => ({
+        _id: String(group._id),
+        users: group.users.map((u: any) => String(u)),
+        name: group.name,
+        deleted: false,
+        count: countUsers(String(group._id), allGroups),
+      }));
+    } catch {
+      return [];
+    }
+  },
+  ["groups"],
+  {
+    tags: ["groups"],
+    revalidate: 60,
+  }
+);
+
+const countUsers = (groupId: string, allGroups: IGroup[]) => {
+  const groupMap = new Map(allGroups.map((g) => [String(g._id), g]));
+
+  const visited = new Set<string>();
+  const userSet = new Set<string>();
+
+  function collectUsers(id: string) {
+    if (visited.has(id)) return;
+    visited.add(id);
+
+    const group = groupMap.get(id);
+    if (!group || group.deleted) return; // Skip deleted groups
+
+    group.users.forEach((user) => userSet.add(String(user)));
+    group.subgroups.forEach((sub) => collectUsers(String(sub)));
+  }
+
+  collectUsers(String(groupId));
+  return userSet.size;
+};
+
+export const countUsersInGroup = unstable_cache(
+  async (groupId: string) => {
+    await mongoDB();
+
+    try {
+      const allGroups = await Group.find<IGroup>({});
+      return countUsers(groupId, allGroups);
+    } catch {
+      return -1;
+    }
   },
   ["groups"],
   {

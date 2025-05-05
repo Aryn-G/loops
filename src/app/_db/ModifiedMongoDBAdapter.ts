@@ -28,12 +28,17 @@ import type { MongoClient } from "mongodb"
 // --- ARYAN's CODE ---
 import { headers } from "next/headers"
 import { userAgent } from "next/server"
+import { getCachedSessionAndUser } from "./queries/sessions"
+
+interface ModifiedAdapterUser extends AdapterUser {
+  linked: boolean;
+}
 
 interface ModifiedAdapterSession extends AdapterSession {
   device: "mobile" | "desktop";
   os: string;
   browser: string;
-  ip: string;
+  // ip: string;
   createdAt: Date;
   updatedAt: Date;
   deviceVendor?: string;
@@ -91,9 +96,9 @@ export const format = {
     for (const key in object) {
       const value = object[key]
       if (key === "_id") {
-        newObject.id = value.toHexString()
+        newObject.id = typeof value !== 'string' ? value.toHexString() : value;
       } else if (key === "userId") {
-        newObject[key] = value.toHexString()
+        newObject[key] = typeof value !== 'string' ? value.toHexString() : value;
       } else {
         newObject[key] = value
       }
@@ -149,7 +154,7 @@ export function ModifiedMongoDBAdapter(
     const _db = _client.db(options.databaseName)
     const c = { ...defaultCollections, ...collections }
     return {
-      U: _db.collection<AdapterUser>(c.Users),
+      U: _db.collection<ModifiedAdapterUser>(c.Users),
       A: _db.collection<AdapterAccount>(c.Accounts),
       S: _db.collection<AdapterSession>(c.Sessions),
       // S: Sessions,
@@ -162,22 +167,22 @@ export function ModifiedMongoDBAdapter(
 
   return {
     async createUser(data) {
-      const user = to<AdapterUser>(data)
+      const user = to<ModifiedAdapterUser>({ ...data, linked: true })
       await using db = await getDb()
       await db.U.insertOne(user)
-      return from<AdapterUser>(user)
+      return from<ModifiedAdapterUser>(user)
     },
     async getUser(id) {
       await using db = await getDb()
       const user = await db.U.findOne({ _id: _id(id) })
       if (!user) return null
-      return from<AdapterUser>(user)
+      return from<ModifiedAdapterUser>(user)
     },
     async getUserByEmail(email) {
       await using db = await getDb()
       const user = await db.U.findOne({ email })
       if (!user) return null
-      return from<AdapterUser>(user)
+      return from<ModifiedAdapterUser>(user)
     },
     async getUserByAccount(provider_providerAccountId) {
       await using db = await getDb()
@@ -185,10 +190,10 @@ export function ModifiedMongoDBAdapter(
       if (!account) return null
       const user = await db.U.findOne({ _id: new ObjectId(account.userId) })
       if (!user) return null
-      return from<AdapterUser>(user)
+      return from<ModifiedAdapterUser>(user)
     },
     async updateUser(data) {
-      const { _id, ...user } = to<AdapterUser>(data)
+      const { _id, ...user } = to<ModifiedAdapterUser>({ ...data, linked: true })
       await using db = await getDb()
       const result = await db.U.findOneAndUpdate(
         { _id },
@@ -196,7 +201,7 @@ export function ModifiedMongoDBAdapter(
         { returnDocument: "after" }
       )
 
-      return from<AdapterUser>(result!)
+      return from<ModifiedAdapterUser>(result!)
     },
     async deleteUser(id) {
       const userId = _id(id)
@@ -219,13 +224,20 @@ export function ModifiedMongoDBAdapter(
       return from<AdapterAccount>(account!)
     },
     async getSessionAndUser(sessionToken) {
-      await using db = await getDb()
-      const session = await db.S.findOne({ sessionToken })
+      const {session, user} = await getCachedSessionAndUser(sessionToken);
+
+      // await using db = await getDb()
+      // const session = await db.S.findOne({ sessionToken })
       if (!session) return null
-      const user = await db.U.findOne({ _id: new ObjectId(session.userId) })
+      // const user = await db.U.findOne({ _id: new ObjectId(session.userId) })
       if (!user) return null
+      // console.log('getSessionAndUser(...) at ', (new Date()).toLocaleTimeString('en-US', {hour12: true, minute: '2-digit', hour: '2-digit', second: '2-digit'}))
+      // console.log({
+        // user,
+        // session,
+      // })
       return {
-        user: from<AdapterUser>(user),
+        user: from<ModifiedAdapterUser>(user),
         session: from<AdapterSession>(session),
       }
     },
@@ -234,11 +246,11 @@ export function ModifiedMongoDBAdapter(
       const h = await headers();
       const ua = userAgent({headers: h });
 
-      const rawIp = h.get("x-forwarded-for")?.split(",")[0] ||
-                h.get("remote-addr") ||
-                "::1";
+      // const rawIp = h.get("x-forwarded-for")?.split(",")[0] ||
+      //           h.get("remote-addr") ||
+      //           "::1";
       
-      const ip = ["::1", "127.0.0.1"].includes(rawIp) ? "localhost" : rawIp;
+      // const ip = ["::1", "127.0.0.1"].includes(rawIp) ? "localhost" : rawIp;
 
       const d = {
         ...data, 
@@ -247,7 +259,7 @@ export function ModifiedMongoDBAdapter(
         deviceVendor: ua.device.type === "mobile" ? ua.device.vendor : undefined,
         deviceModel: ua.device.type === "mobile" ? ua.device.model : undefined,
         os: ua.os.name,
-        ip,
+        // ip,
         createdAt: new Date(),
         updatedAt: new Date()
       }
@@ -263,11 +275,11 @@ export function ModifiedMongoDBAdapter(
       const h = await headers();
       const ua = userAgent({headers: h });
 
-      const rawIp = h.get("x-forwarded-for")?.split(",")[0] ||
-                h.get("remote-addr") ||
-                "::1";
+      // const rawIp = h.get("x-forwarded-for")?.split(",")[0] ||
+                // h.get("remote-addr") ||
+                // "::1";
       
-      const ip = ["::1", "127.0.0.1"].includes(rawIp) ? "localhost" : rawIp;
+      // const ip = ["::1", "127.0.0.1"].includes(rawIp) ? "localhost" : rawIp;
 
       const d = {
         ...data, 
@@ -276,7 +288,7 @@ export function ModifiedMongoDBAdapter(
         deviceVendor: ua.device.type === "mobile" ? ua.device.vendor : undefined,
         deviceModel: ua.device.type === "mobile" ? ua.device.model : undefined,
         os: ua.os.name,
-        ip,
+        // ip,
         updatedAt: new Date()
       }
       // --- ARYAN's CODE STOP ---

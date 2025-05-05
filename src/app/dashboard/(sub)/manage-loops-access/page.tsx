@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { forbidden, redirect, unauthorized } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 export default async function Page() {
   const session = await auth();
 
-  if (!session) return redirect("/");
-  if (session.user?.role !== "Admin") redirect("/dashboard");
+  if (!session) return unauthorized();
+  if (session.user?.role !== "Admin") return forbidden();
   // Beyond this point, role = "Admin"
 
   return (
@@ -32,6 +32,7 @@ export default async function Page() {
         <h1 className="font-black text-xl">Manage Loops Access</h1>
         <div className="flex items-center">
           <Refresh tag={"filteredUsers"} />
+          {/* <Refresh path="/dashboard/manage-loops-access" /> */}
         </div>
       </div>
       <div className="">

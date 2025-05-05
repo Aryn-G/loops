@@ -2,7 +2,7 @@ import { auth, signOut } from "@/auth";
 import Link from "next/link";
 
 export const NavLinks = [
-  // { href: "/loops", title: "Home" },
+  { href: "/loops", title: "Home" },
   { href: "/dashboard", title: "Dashboard" },
 ];
 
@@ -27,7 +27,7 @@ export default async function Navbar() {
                 {link.title}
               </Link>
             ))}
-            <form
+            {/* <form
               action={async () => {
                 "use server";
                 await signOut({ redirectTo: "/", redirect: true });
@@ -39,7 +39,7 @@ export default async function Navbar() {
               >
                 <span>Log Out</span>
               </button>
-            </form>
+            </form> */}
           </div>
         </div>
         <div className="h-px w-3/12 bg-current rounded-full mx-auto max-w-40"></div>

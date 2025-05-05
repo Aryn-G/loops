@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { forbidden, notFound, redirect, unauthorized } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
 import { getFilteredUsers } from "@/app/_db/queries/users";
@@ -29,12 +29,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params }: Props) {
   const session = await auth();
 
-  if (!session) return redirect("/");
-  if (session.user?.role === "Student") redirect("/dashboard");
+  if (!session) return unauthorized();
+  if (session.user?.role === "Student") return forbidden();
   // Beyond this point, role = "Admin"
   const id = (await params).id;
   const loop = await getLoop(id);
-  if (!loop) return redirect("/dashboard/manage-loops");
+  if (!loop) return notFound();
+
   const allUsers = await getFilteredUsers();
   const allGroups = await getGroups();
 
@@ -61,6 +62,7 @@ export default async function Page({ params }: Props) {
         <h1 className="font-black text-xl">Editting Loop: {loop._id}</h1>
         <div className="flex items-center">
           <Refresh tag={"loopsTag"} />
+          {/* <Refresh path={"/dashboard/manage-loops/" + id} /> */}
         </div>
       </div>
 

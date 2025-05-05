@@ -12,6 +12,7 @@ import { ObjectId } from "mongodb";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { toDateWithOffset } from "@/app/_lib/time";
 
 export async function editLoopSignUps(prevState: any, formData: FormData) {
   await mongoDB();
@@ -62,6 +63,7 @@ export async function editLoopSignUps(prevState: any, formData: FormData) {
     revalidateTag("signups");
   } catch (error) {
     if (typeof error === "string") return error;
+    console.log("Internal Error");
     return "Internal Error";
   }
 
@@ -97,6 +99,7 @@ export async function froceLoopSignUps(prevState: any, formData: FormData) {
     revalidateTag("signups");
   } catch (error) {
     if (typeof error === "string") return error;
+    console.log("Internal Error");
     return "Internal Error";
   }
 
@@ -120,6 +123,31 @@ export async function removeFromLoop(prevState: any, formData: FormData) {
     revalidateTag("loopsTag");
   } catch (error) {
     if (typeof error === "string") return error;
+    console.log("Internal Error");
+    return "Internal Error";
+  }
+
+  return "Success";
+}
+
+export async function multiRemoveFromLoop(prevState: any, formData: FormData) {
+  await mongoDB();
+
+  const loop = formData.get("loop");
+  const remove = formData.getAll("remove");
+  try {
+    if (!loop) return "Error: Invalid Form Submission";
+    if (!remove) return "Error: Invalid Form Submission";
+
+    await Loop.findByIdAndUpdate(loop, {
+      $pull: { filled: { $in: remove } },
+    });
+    await SignUp.deleteMany({ _id: { $in: remove } });
+
+    revalidateTag("loopsTag");
+  } catch (error) {
+    if (typeof error === "string") return error;
+    console.log("Internal Error");
     return "Internal Error";
   }
 
@@ -139,6 +167,8 @@ export async function editLoopAction(
   const createdBy = session.user.id;
 
   const loop = formData.get("loop");
+  const timezone = formData.get("timezone");
+
   const loopNumber = formData.get("loopNumber");
   const title = formData.get("title");
   const description = formData.get("description");
@@ -168,7 +198,7 @@ export async function editLoopAction(
   });
 
   try {
-    if (!loop) throw new Error("Error: Invalid Form Submission");
+    if (!loop || !timezone) throw new Error("Error: Invalid Form Submission");
 
     if (
       !title ||
@@ -184,6 +214,22 @@ export async function editLoopAction(
     if (totalSlots > Number(capacity))
       throw new Error("Error: Cannot Reserve More Slots than Capacity");
 
+    const departureD = toDateWithOffset(
+      departureDateTime.toString(),
+      Number(timezone)
+    );
+    const pickUpD = toDateWithOffset(
+      pickUpDateTime.toString(),
+      Number(timezone)
+    );
+    const signUpOpenD = !!signUpOpenDateTime
+      ? toDateWithOffset(signUpOpenDateTime.toString(), Number(timezone))
+      : undefined;
+
+    console.log("Timezone: " + timezone);
+    console.log("Form Departure Time: " + departureDateTime);
+    console.log("Departure Time to DB: " + departureD);
+
     await Loop.findByIdAndUpdate(loop, {
       $set: {
         loopNumber,
@@ -191,13 +237,13 @@ export async function editLoopAction(
         title,
         description,
         capacity,
-        departureDateTime,
+        departureDateTime: departureD,
         departureLocation: departureLoc,
-        pickUpDateTime,
+        pickUpDateTime: pickUpD,
         pickUpLocation: pickUpLoc ?? "",
         approxDriveTime,
         reservations,
-        signUpOpenDateTime,
+        signUpOpenDateTime: signUpOpenD,
       },
     });
 
@@ -208,4 +254,21 @@ export async function editLoopAction(
   }
 
   return { overall: "success" };
+}
+
+export async function deleteLoop(prevState: any, formData: FormData) {
+  await mongoDB();
+
+  const remove = formData.get("remove");
+  //   console.log(selected);
+  try {
+    if (!remove) return "Invalid Form Submission";
+    await Loop.deleteMany({ _id: remove });
+    revalidateTag("loopsTag");
+  } catch (error) {
+    console.log("Internal Error");
+    return "Internal Error";
+  }
+
+  return "Success";
 }

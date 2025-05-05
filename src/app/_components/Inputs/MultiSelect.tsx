@@ -4,17 +4,20 @@ import { ReactNode, useRef, useState } from "react";
 import { useFocusWithin } from "@/app/_lib/use-hooks/useFocusWithin";
 import { XMarkIcon } from "@heroicons/react/16/solid";
 
-export default function MultiSelect<T extends { [key: string]: any }>(props: {
+export default function MultiSelect<T = Record<string, any>>(props: {
   icon: ReactNode;
+  placeholder: string;
+
   allItems: T[];
+
   selected: T[];
-  //   setSelected: (newValue: T[]) => void;
   setSelected: React.Dispatch<React.SetStateAction<T[]>>;
 
   maxSearch: number;
-  keyFn: (item: T) => any;
-  displayFn: (item: T) => any;
-  placeholder: string;
+
+  id: (item: T) => string;
+  filter: (item: T) => string;
+  render: (item: T) => ReactNode;
 }) {
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -34,13 +37,13 @@ export default function MultiSelect<T extends { [key: string]: any }>(props: {
             {props.selected.map((s, i) => (
               <button
                 className="rounded-lg bg-ncssm-gray/25 px-2 w-fit flex gap-1 items-center justify-center"
-                key={props.keyFn(s)}
+                key={props.id(s)}
                 ref={(el) => {
                   buttonRefs.current[i] = el;
                 }}
                 onClick={() => {
                   props.setSelected((a) =>
-                    a.filter((b) => props.keyFn(b) !== props.keyFn(s))
+                    a.filter((b) => props.id(b) !== props.id(s))
                   );
                   if (i === 0) {
                     inputRef.current?.focus();
@@ -51,7 +54,7 @@ export default function MultiSelect<T extends { [key: string]: any }>(props: {
                 onKeyDown={(e) => {
                   if (e.key === "Backspace") {
                     props.setSelected((a) =>
-                      a.filter((b) => props.keyFn(b) !== props.keyFn(s))
+                      a.filter((b) => props.id(b) !== props.id(s))
                     );
                     if (i === 0) {
                       inputRef.current?.focus();
@@ -60,8 +63,9 @@ export default function MultiSelect<T extends { [key: string]: any }>(props: {
                     }
                   }
                 }}
+                tabIndex={0}
               >
-                {props.displayFn(s)}
+                {props.render(s)}
                 <XMarkIcon className="size-4 text-rose-500" />
               </button>
             ))}
@@ -74,12 +78,11 @@ export default function MultiSelect<T extends { [key: string]: any }>(props: {
                 const fullMatch = props.allItems
                   .filter((u) => !props.selected.includes(u))
                   .filter((u) =>
-                    temp
-                      .toLowerCase()
-                      .includes(props.displayFn(u).toLowerCase())
+                    temp.toLowerCase().includes(props.filter(u).toLowerCase())
                   );
+
                 fullMatch.forEach((match) => {
-                  temp = temp.split(match.email).join("").trim();
+                  temp = temp.split(props.filter(match)).join("").trim();
                 });
 
                 props.setSelected((s) => [...s, ...fullMatch]);
@@ -96,28 +99,27 @@ export default function MultiSelect<T extends { [key: string]: any }>(props: {
           props.allItems
             .filter((u) => !props.selected.includes(u))
             .filter((u) =>
-              props.displayFn(u).toLowerCase().includes(value.toLowerCase())
+              props.filter(u).toLowerCase().includes(value.toLowerCase())
             ).length > 0 && (
             <div className="flex flex-wrap gap-1">
               {props.allItems
                 .filter((u) => !props.selected.includes(u))
                 .filter((u) =>
-                  props.displayFn(u).toLowerCase().includes(value.toLowerCase())
+                  props.filter(u).toLowerCase().includes(value.toLowerCase())
                 )
                 .filter((_, i) => i < props.maxSearch)
                 .map((u) => (
                   <button
                     className="rounded-lg bg-ncssm-gray/25 px-2 w-fit"
-                    key={props.keyFn(u)}
+                    key={props.id(u)}
                     onClick={() => {
                       props.setSelected((s) => [...s, u]);
                       setValue("");
                       inputRef.current?.focus();
                     }}
+                    tabIndex={0}
                   >
-                    <span className="text-start max-w-full block break-all">
-                      {props.displayFn(u)}
-                    </span>
+                    {props.render(u)}
                   </button>
                 ))}
             </div>

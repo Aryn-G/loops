@@ -1,11 +1,11 @@
 import { auth } from "@/auth";
 import Image from "next/image";
 import Sidebar from "./Sidebar";
-import { redirect } from "next/navigation";
+import { unauthorized } from "next/navigation";
 
 export default async function Page() {
   const session = await auth();
-  if (!session) return redirect("/");
+  if (!session) return unauthorized();
 
   return (
     <div className="w-full flex flex-col items-center justify-center">
@@ -20,8 +20,8 @@ export default async function Page() {
           referrerPolicy="no-referrer"
         />
       ) : (
-        <div className="brutal-xl size-24 flex items-center justify-center">
-          {session.user?.name?.at(0)}
+        <div className="brutal-xl p-0 size-24 flex items-center justify-center">
+          {session.user?.email?.at(0)}
         </div>
       )}
 
