@@ -199,6 +199,10 @@ function SectionLink({
   collapsed: boolean;
 }) {
   // add logout
+  const href =
+    "/dashboard/" + link.title.trim().toLowerCase().replace(/(\W)/g, "-");
+
+  const pathname = usePathname();
 
   if (link.logout) {
     return (
@@ -226,11 +230,6 @@ function SectionLink({
       </button>
     );
   }
-
-  const href =
-    "/dashboard/" + link.title.trim().toLowerCase().replace(/(\W)/g, "-");
-
-  const pathname = usePathname();
 
   return (
     <Link
