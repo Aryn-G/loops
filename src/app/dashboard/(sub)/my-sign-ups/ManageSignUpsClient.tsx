@@ -3,122 +3,522 @@
 import React, { useActionState, useEffect, useState } from "react";
 
 import Link from "next/link";
+import { getLoops } from "@/app/_db/queries/loops";
 import { formatDate, isDateBetween, toISOStringOffset } from "@/app/_lib/time";
 import Input from "@/app/_components/Inputs/Input";
-import LoopCard from "@/app/_components/LoopCard";
+import LoopCard from "../../../_components/LoopCard";
+import Search, {
+  CheckBoxFilter,
+  RadioFilter,
+  Seperator,
+} from "../../../_components/Search";
+import {
+  ArrowLongRightIcon,
+  ArrowsUpDownIcon,
+  CalendarDateRangeIcon,
+  ClockIcon,
+  CloudIcon,
+  FunnelIcon,
+  MoonIcon,
+  SunIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
+import {
+  useManyParams,
+  useSearchParam,
+} from "../../../_lib/use-hooks/useSearchParam";
+import title from "title";
+import { isValidDateStr } from "../../../_lib/util";
 import { getUserSignUps } from "@/app/_db/queries/signups";
 import { removeSelfFromLoop } from "@/app/loops/[loopId]/actions";
-import Search, { SearchFilters } from "@/app/_components/Search";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/16/solid";
 
 type Props = {
   userSignUps: Awaited<ReturnType<typeof getUserSignUps>>;
 };
 
 const ManageSignUpsClient = ({ userSignUps }: Props) => {
+  const dateOpts = getDateOpts();
+  const timingOpts = getTimingOpts();
+
+  const expanded = {
+    [dateOpts[1].title]: "Yesterday",
+    [dateOpts[2].title]: "Today",
+    [dateOpts[3].title]: "This Week",
+  };
+
+  const { updateMany } = useManyParams();
+
+  const [start, s, setS, updateS] = useSearchParam(
+    "start",
+    dateOpts[3].start,
+    (str) => {
+      if (typeof str === "string") return isValidDateStr(str) ? str : undefined;
+      else return str;
+    },
+    false
+  );
+  const [end, e, setE, updateE] = useSearchParam(
+    "end",
+    dateOpts[3].end,
+    (str) => {
+      if (typeof str === "string") return isValidDateStr(str) ? str : undefined;
+      else return str;
+    },
+    false
+  );
+  const [minParam, min, setMin, updateMin] = useSearchParam(
+    "min",
+    "",
+    (str) => {
+      if (typeof str === "string") return isNaN(Number(str)) ? "" : str;
+      else return str;
+    }
+  );
+  const [sortParam, sort, setSort, updateSort] = useSearchParam(
+    "sort",
+    "earliest"
+  );
+
+  const [timingParam, _t, _setT, updateTiming] = useSearchParam(
+    "timing",
+    "morning afternoon night",
+    (s) => s,
+    false
+  );
+  const [timing, setTiming] = useState<typeof timingOpts>(
+    timingOpts.filter((v) => _t.indexOf(v.title.toLowerCase()) != -1)
+  );
+
+  let defaultDateOpt = dateOpts[0];
+  dateOpts.forEach((opt) => {
+    if (opt.start == start && opt.end == end) {
+      defaultDateOpt = opt;
+    }
+  });
+
+  // defaultDateOpt = undefined;
+  const [dateOpt, setDateOpt] = useState(defaultDateOpt);
+
   return (
     <Search
       all={userSignUps}
-      name="Sign-Ups"
-      inputClassName="flex flex-col gap-2"
+      name="Loops"
+      inputClassName="my-5 flex flex-col gap-2"
       itemsPerPage={6}
-      paginationClassName="grid grid-cols-1  @2xl:grid-cols-2 @4xl:grid-cols-3 gap-2 md:gap-6"
-      render={(item) => <LoopCardR signup={item} key={String(item._id)} />}
-      filterString={(filtered, filters, query) => (
+      paginationClassName="grid grid-cols-1 @2xl:grid-cols-2 @4xl:grid-cols-3 gap-3 md:gap-6"
+      render={(item, i) => <LoopCardR key={i} signup={item} />}
+      filterString={(filtered, query) => (
         <>
           {filtered.length === 0
             ? query
               ? `No Results `
-              : "No Sign-Ups Exist"
+              : "No Loops Exist"
             : ""}
           {query && "for "}
           {query && <span className="font-bold">{`"${query}"`}</span>}
-          {/* {title(formatDateFilter(filters["start"], endDateParam))} */}
-          {filters["start"] && filters["end"]
-            ? filters["start"] == filters["end"]
-              ? ` on`
-              : ` between`
-            : filters["start"]
-            ? " after"
-            : filters["end"] && " before"}
-          {filters["start"] && (
-            <span className="font-bold">{` ${formatDate(
-              filters["start"] + "T00:00",
-              false
-            )}`}</span>
+          {dateOpt.title !== dateOpts[0].title &&
+          dateOpt.title !== dateOpts[4].title ? (
+            <>
+              {/* Describing preset date range */} for{" "}
+              <span className="font-bold">{expanded[dateOpt.title ?? ""]}</span>
+            </>
+          ) : (
+            <>
+              {/* Annoying logic for properly describing date range */}
+              {s && e
+                ? s == e
+                  ? ` on`
+                  : ` between`
+                : s
+                ? " after"
+                : e && " before"}
+              {s && (
+                <span className="font-bold">{` ${formatDate(
+                  s + "T00:00",
+                  false
+                )}`}</span>
+              )}
+              {s && e && s != e && ` and`}
+              {e && s != e && (
+                <span className="font-bold">{` ${formatDate(
+                  e + "T23:59",
+                  false
+                )}`}</span>
+              )}
+            </>
           )}
-          {filters["start"] &&
-            filters["end"] &&
-            filters["start"] != filters["end"] &&
-            ` and`}
-          {filters["end"] && filters["start"] != filters["end"] && (
-            <span className="font-bold">{` ${formatDate(
-              filters["end"] + "T23:59",
-              false
-            )}`}</span>
-          )}
+          {/* {filtered.length === 0 && <div className="mt-1 text-3xl">💔💔💔</div>} */}
         </>
       )}
-      filterLogic={(all, filters, query) => {
+      filterLogic={(all, query) => {
         return all
           .sort((a, b) =>
-            new Date(a.loop.departureDateTime) <
-            new Date(b.loop.departureDateTime)
-              ? -1
-              : 1
+            a.loop.departureDateTime < b.loop.departureDateTime
+              ? sort === "earliest"
+                ? -1
+                : 1
+              : sort === "earliest"
+              ? 1
+              : -1
           )
           .filter((item) => {
             const queryMatches =
               item.loop.title.toLowerCase().includes(query.toLowerCase()) ||
               item.loop.description.toLowerCase().includes(query.toLowerCase());
 
-            const timingMatches = isDateBetween(
-              filters["start"] ? filters["start"] + "T00:00" : undefined,
+            if (!queryMatches) return false;
+
+            const dateMatches = isDateBetween(
+              start ? start + "T00:00" : undefined,
               toISOStringOffset(item.loop.departureDateTime),
-              filters["end"] ? filters["end"] + "T23:59" : undefined
+              end ? end + "T23:59" : undefined
             );
 
-            return queryMatches && timingMatches;
+            if (!dateMatches) return false;
+
+            let timingMatches = false;
+            timing.forEach((opt, i) => {
+              if (
+                isDateBetween(
+                  toISOStringOffset(item.loop.departureDateTime).slice(0, -5) +
+                    opt.start,
+                  toISOStringOffset(item.loop.departureDateTime),
+                  toISOStringOffset(item.loop.departureDateTime).slice(0, -5) +
+                    opt.end
+                )
+              ) {
+                timingMatches = true;
+              }
+            });
+
+            if (!timingMatches) return false;
+
+            // if minParam is not set, then true
+            // if minParam is set, then evaluate
+            const minSpots =
+              minParam == "" ||
+              item.loop.capacity - item.loop.filled.length >= Number(minParam);
+
+            if (!minSpots) return false;
+
+            return true;
           });
       }}
+      renderShortenedFilters={(Chip) => (
+        <div className="flex flex-wrap gap-2">
+          {min != "" && (
+            <Chip
+              value={`${min}+ Available Spots`}
+              action={() => {
+                setMin("");
+                updateMin(undefined);
+              }}
+            />
+          )}
+          {timing.length != 3 && (
+            <Chip
+              value={timingString(timing)}
+              action={() => {
+                updateTiming(undefined);
+                setTiming(timingOpts);
+              }}
+            />
+          )}
+          {sort != "earliest" && (
+            <Chip
+              value={`${title(sort)} Departure First`}
+              action={() => {
+                setSort("earliest");
+                updateSort(undefined);
+              }}
+            />
+          )}
+        </div>
+      )}
     >
-      <div className="flex flex-col md:flex-row items-center gap-2">
-        <SearchFilters
-          name="start"
-          defaultValue={toISOStringOffset(new Date()).slice(0, -6)}
-          noDel
+      <div className="w-full flex flex-col gap-2">
+        {/* Date Range Selector Filter */}
+        <div className="flex items-center gap-2 mt-2">
+          <CalendarDateRangeIcon className="size-6" />
+          <p className="font-bold flex-1">Date Range</p>
+          <button
+            className="underline underline-offset-2"
+            onClick={() => {
+              setDateOpt(dateOpts[3]);
+              setS(dateOpts[3].start ?? "");
+              setE(dateOpts[3].end ?? "");
+              updateMany({ start: undefined, end: undefined }, true);
+            }}
+          >
+            Reset
+          </button>
+        </div>
+        <div className="w-full flex flex-row md:flex-col gap-2">
+          <RadioFilter
+            render={(opt) => <span className="w-full">{opt.title}</span>}
+            opts={dateOpts}
+            state={dateOpt}
+            onClick={(opt) => {
+              setDateOpt(opt);
+              if (opt.start !== undefined) {
+                setS(opt.start ?? "");
+              }
+              if (opt.end !== undefined) {
+                setE(opt.end ?? "");
+              }
+
+              if (opt.start !== undefined && opt.end !== undefined) {
+                updateMany({ start: opt.start, end: opt.end });
+              }
+            }}
+            equal={(state, opt) => state.title === opt.title}
+            className="w-full md:w-fit md:@2xl:px-2 md:@2xl:w-full"
+          />
+          <div className="w-full flex flex-col md:flex-row items-center justify-between gap-3">
+            <Input
+              type="date"
+              name=""
+              className="md:flex-1"
+              value={s ?? ""}
+              setValue={(newValue) => {
+                setDateOpt(dateOpts[0]);
+                setS(newValue as string);
+                updateS(newValue as string);
+              }}
+            />
+            <ArrowLongRightIcon className="size-6 md:rotate-0 rotate-90" />
+            <Input
+              type="date"
+              name=""
+              className="md:flex-1"
+              value={e ?? ""}
+              setValue={(newValue) => {
+                setDateOpt(dateOpts[0]);
+                setE(newValue as string);
+                updateE(newValue as string);
+              }}
+            />
+          </div>
+        </div>
+        {/* Timing Filter */}
+        <div className="flex items-center gap-2 mt-2">
+          <ClockIcon className="size-6" />
+          <p className="font-bold flex-1">Timing</p>
+          <button
+            className="underline underline-offset-2"
+            onClick={() => {
+              updateTiming(undefined);
+              setTiming(timingOpts);
+            }}
+          >
+            Reset
+          </button>
+        </div>
+        <CheckBoxFilter
+          opts={timingOpts}
+          onClick={(opt, prevState) => {
+            if (!prevState)
+              setTiming((t) => {
+                updateTiming(
+                  [...t, opt].map((v) => v.title.toLowerCase()).join(" ")
+                );
+                return [...t, opt];
+              });
+            else
+              setTiming((t) => {
+                updateTiming(
+                  t
+                    .filter((t2) => t2.title != opt.title)
+                    .map((v) => v.title.toLowerCase())
+                    .join(" ")
+                );
+                return t.filter((t2) => t2.title != opt.title);
+              });
+          }}
+          render={(opt) => (
+            <>
+              <span className="flex-1">{opt.title}</span>
+              {opt.icon}
+            </>
+          )}
+          state={timing}
+          selected={(state, opt) => !!state.find((o) => o.title === opt.title)}
+          className="w-full md:px-2"
+        />
+        {/* Min Avaiable Slots Filter */}
+        <div className="flex items-center gap-2 mt-2">
+          <UserGroupIcon className="size-6" />
+          <p className="font-bold flex-1">Minimum Available Spots</p>
+          <button
+            className="underline underline-offset-2"
+            onClick={() => {
+              setMin("");
+              updateMin(undefined);
+            }}
+          >
+            Reset
+          </button>
+        </div>
+        <Input
+          type="number"
+          name=""
+          className="w-full"
+          placeholder="Type minimum..."
+          value={min ?? ""}
+          setValue={(newValue) => {
+            setMin(newValue as string);
+            updateMin(newValue as string);
+          }}
+          min={0}
+          max={999}
+        />
+        {/* Sorting Filter */}
+        <div className="flex items-center gap-2 mt-2">
+          <ArrowsUpDownIcon className="size-6" />
+          <p className="font-bold flex-1">Sorting</p>
+          <button
+            className="underline underline-offset-2"
+            onClick={() => {
+              setSort("earliest");
+              updateSort(undefined);
+            }}
+          >
+            Reset
+          </button>
+        </div>
+        <RadioFilter
+          render={(opt) => <span className="flex-1">{opt}</span>}
+          opts={["Earliest Departure First", "Latest Departure First"]}
+          state={sort}
+          onClick={(opt) => {
+            setSort(opt.split(" ")[0].toLowerCase());
+            updateSort(opt.split(" ")[0].toLowerCase());
+          }}
+          equal={(state, opt) => state == opt.split(" ")[0].toLowerCase()}
+          className="w-full md:px-2"
+        />
+        <button
+          className="underline underline-offset-2 mx-auto"
+          onClick={() => {
+            setDateOpt(dateOpts[3]);
+            setS(dateOpts[3].start ?? "");
+            setE(dateOpts[3].end ?? "");
+            setSort("earliest");
+            setTiming(timingOpts);
+            setMin("");
+            updateMany(
+              {
+                start: undefined,
+                end: undefined,
+                min: undefined,
+                sort: undefined,
+                timing: undefined,
+                p: undefined,
+              },
+              true
+            );
+          }}
         >
-          {(v, setV, updateV) => (
-            <Input
-              label="Starting: "
-              type="date"
-              name=""
-              className="mb-1 md:mr-2"
-              value={v ?? ""}
-              setValue={(newValue) => {
-                setV(newValue as string);
-                updateV(newValue as string);
-              }}
-            />
-          )}
-        </SearchFilters>
-        <SearchFilters name="end">
-          {(v, setV, updateV) => (
-            <Input
-              label="Ending: "
-              type="date"
-              name=""
-              className="mb-1"
-              value={v ?? ""}
-              setValue={(newValue) => {
-                setV(newValue as string);
-                updateV(newValue as string);
-              }}
-            />
-          )}
-        </SearchFilters>
+          Reset All
+        </button>
       </div>
     </Search>
   );
+};
+
+function timingString(arr: ReturnType<typeof getTimingOpts>) {
+  const timingOpts = getTimingOpts();
+
+  if (arr.length === 0) {
+    return "Never Departs";
+  } else if (arr.length === 3) {
+    return "";
+  } else if (arr.length === 1) {
+    return `Departs between ${arr[0].startStr} - ${arr[0].endStr}`;
+  } else {
+    let arr0 = arr[0];
+    let arr1 = arr[1];
+    if (arr0.id > arr1.id) {
+      arr0 = arr1;
+      arr1 = arr[0];
+    }
+    let opt3 = timingOpts.find((o) => o.id != arr0.id && o.id != arr1.id)!;
+    if (Math.abs(arr0.id - arr1.id) == 1) {
+      return `Departs between ${arr0.startStr} - ${arr1.endStr}`;
+    } else {
+      return `Doesn't depart between ${opt3.startStr} - ${opt3.endStr}`;
+    }
+  }
+}
+
+const getDateOpts = () => {
+  const today = new Date();
+  const yesterday = new Date(new Date(today).setDate(today.getDate() - 1));
+  const thisWeekStart = new Date(
+    new Date(today).setDate(today.getDate() - ((today.getDay() + 6) % 7))
+  );
+  const thisWeekEnd = new Date(
+    new Date(today).setDate(today.getDate() + (7 - (today.getDay() % 7)))
+  );
+
+  return [
+    {
+      title: "Custom",
+    },
+    {
+      title: "Yesterday",
+      start: toISOStringOffset(yesterday).slice(0, -6),
+      end: toISOStringOffset(yesterday).slice(0, -6),
+    },
+    {
+      title: "Today",
+      start: toISOStringOffset(today).slice(0, -6),
+      end: toISOStringOffset(today).slice(0, -6),
+    },
+    {
+      title: "Week",
+      start: toISOStringOffset(thisWeekStart).slice(0, -6),
+      end: toISOStringOffset(thisWeekEnd).slice(0, -6),
+    },
+    {
+      title: "All Future",
+      start: toISOStringOffset(today).slice(0, -6),
+      end: "",
+    },
+  ];
+};
+
+const getTimingOpts = () => {
+  return [
+    {
+      title: "Morning",
+      icon: <CloudIcon className="size-5" />,
+      start: "00:00",
+      end: "11:59",
+      startStr: "12 AM",
+      endStr: "12 PM",
+      id: 1,
+    },
+    {
+      title: "Afternoon",
+      icon: <SunIcon className="size-5" />,
+      start: "12:00",
+      end: "17:59",
+      startStr: "12 PM",
+      endStr: "6 PM",
+      id: 2,
+    },
+    {
+      title: "Night",
+      icon: <MoonIcon className="size-5" />,
+      start: "18:00",
+      end: "23:59",
+      startStr: "6 PM",
+      endStr: "11:59 PM",
+      id: 3,
+    },
+  ];
 };
 
 const LoopCardR = ({
@@ -151,19 +551,32 @@ const LoopCardR = ({
 
   return (
     <div className="brutal-sm p-6 flex flex-col">
+      <div className="-mb-8 ml-auto flex items-center gap-2">
+        {/* <div
+          className="text-sm flex items-center justify-center h-fit brutal-sm font-bold w-fit"
+          data-tooltip={loop.published ? "Published" : "Unpublished"}
+        >
+          {loop.published ? (
+            <EyeIcon className="size-5" />
+          ) : (
+            <EyeSlashIcon className="size-5" />
+          )}
+        </div> */}
+        <Link
+          href={"/loops/" + String(signup.loop._id)}
+          className="text-sm flex items-center justify-center h-fit brutal-sm font-bold w-fit"
+          data-tooltip="View Public Page"
+        >
+          <ArrowTopRightOnSquareIcon className="size-4" />
+        </Link>
+      </div>
       <LoopCard data={signup.loop} capDesc="line-clamp-1" />
 
       <div
         className={`${
-          !notOpenYet && !windowPassed && "grid grid-cols-2"
+          !notOpenYet && !windowPassed && "grid grid-cols-1"
         } gap-2`}
       >
-        <Link
-          href={"/loops/" + String(signup.loop._id)}
-          className="text-sm w-full flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
-        >
-          See More
-        </Link>
         {!notOpenYet && !windowPassed && (
           <form action={action} className="flex-shrink-0 w-full">
             <input

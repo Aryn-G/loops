@@ -59,7 +59,7 @@ const EditLoopSignUps = ({ loop, allUsers }: Props) => {
           setSelected={setSelected}
           id={(u) => u._id}
           render={(u) => u.email}
-          filter={(u) => u.email}
+          filter={(u) => `${u.name} <${u.email}>`}
           placeholder="Type or paste in emails..."
         />
         <div className="flex gap-2">

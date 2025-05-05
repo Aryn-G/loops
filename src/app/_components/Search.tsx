@@ -22,6 +22,7 @@ type Props<T> = {
     }) => React.JSX.Element
   ) => ReactNode;
   children?: ReactNode;
+  selectedString?: (itemsOnPage: T[]) => ReactNode;
 };
 
 export const Seperator = () => (
@@ -89,19 +90,33 @@ export function CheckBoxFilter<T, T2>({
             onClick={() => onClick(opt, selected(state, opt))}
             className="flex items-center md:justify-center md:gap-2 gap-3 w-full"
           >
-            <div
-              className={`rounded-[3px] brutal-sm flex items-center justify-center size-4 ${
-                selected(state, opt) && "bg-black"
-              }`}
-            >
-              {selected(state, opt) && (
-                <CheckIcon className="size-3 text-white shrink-0" />
-              )}
-            </div>
+            <CheckBox selected={selected(state, opt)} />
             {render(opt)}
           </button>
         </div>
       ))}
+    </div>
+  );
+}
+
+export function CheckBox({
+  selected,
+  className,
+  activeClassName = "bg-black",
+  partial = false,
+}: {
+  selected: boolean;
+  className?: string;
+  activeClassName?: string;
+  partial?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-[3px] brutal-sm flex items-center justify-center size-4 ${
+        !partial ? "text-white" : "text-black"
+      } ${className} ${selected && !partial && activeClassName}`}
+    >
+      {selected && <CheckIcon className={"size-3 shrink-0 text-inherit"} />}
     </div>
   );
 }
@@ -187,8 +202,10 @@ export default function Search<T>(props: Props<T>) {
         itemsPerPage={props.itemsPerPage}
         className={props.paginationClassName}
         filterString={props.filterString && props.filterString(filtered, query)}
+        selectedString={props.selectedString}
+        render={props.render}
       >
-        {filtered.map(props.render)}
+        {filtered}
       </Pagination>
     </>
   );

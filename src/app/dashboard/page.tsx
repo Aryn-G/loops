@@ -20,8 +20,8 @@ export default async function Page() {
           referrerPolicy="no-referrer"
         />
       ) : (
-        <div className="brutal-xl size-24 flex items-center justify-center">
-          {session.user?.name?.at(0)}
+        <div className="brutal-xl p-0 size-24 flex items-center justify-center">
+          {session.user?.email?.at(0)}
         </div>
       )}
 

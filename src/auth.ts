@@ -8,7 +8,9 @@ declare module "next-auth" {
   interface Session {
     user: {
       picture?: string;
-      role?: "Student" | "Loops" | "Admin";
+      role?: "No" | "Student" | "Loops" | "Admin";
+      linked?: boolean;
+      deleted?: boolean;
     } & DefaultSession["user"];
     id: string;
     sessionToken: string;
@@ -19,12 +21,13 @@ declare module "next-auth" {
     deviceVendor?: string;
     deviceModel?: string;
     os: string;
-    ip: string;
+    // ip: string;
     createdAt: Date;
     updatedAt: Date;
   }
 }
 
+// auth.js config object
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // debug: true,
   // @ts-ignore

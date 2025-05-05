@@ -21,6 +21,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { getSubscriptions } from "@/app/_db/queries/subscriptions";
 import toast from "@/app/_components/Toasts/toast";
+import { useDebounce, useDebouncedCallback } from "use-debounce";
 // import { sendNotification } from "../notifications/actions";
 
 type Props = {
@@ -37,6 +38,10 @@ function genID() {
   count = (count + 1) % Number.MAX_SAFE_INTEGER;
   return count.toString();
 }
+
+type StringKeys<T> = {
+  [K in keyof T]: T[K] extends string ? K : never;
+}[keyof T];
 
 const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
   const [_state, action, pending] = useActionState(createLoopAction, {
@@ -126,9 +131,9 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
           false
         )} Loops`,
         button: {
-          label: "Copy",
-          onClick: () => {
-            navigator.clipboard.writeText(shareUrl(departureDateTime));
+          label: "Copy Link",
+          onClick: async () => {
+            await navigator.clipboard.writeText(shareUrl(departureDateTime));
           },
         },
       });
@@ -185,6 +190,57 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
   //   return `https://mail.google.com/mail/?view=cm&su=${subject}&body=${body}`;
   // };
 
+  // const [debouncedTitle, setDebouncedTitle] = useDebounce(title, 300);
+
+  const [recommendedAutofill, setRecommendedAutofill] = useState<
+    typeof allLoops
+  >([]);
+
+  const [debouncedTitle, setDebouncedTitle] = useState("");
+  const updateDebouncedTitle = useDebouncedCallback((val: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("autofill");
+    replace(`${pathname}?${params.toString()}`, {
+      scroll: false,
+    });
+    setDebouncedTitle(val);
+    if (val !== "") {
+      setRecommendedAutofill(
+        filterQueryAndDuplicates(allLoops, val, ["title", "description"])
+      );
+    }
+  }, 300);
+
+  function filterQueryAndDuplicates<T extends Record<string, any>>(
+    arr: T[],
+    query: string,
+    property: StringKeys<T> | StringKeys<T>[]
+  ): T[] {
+    const seen = new Set<string>();
+
+    if (typeof property === "string") {
+      property = [property];
+    }
+
+    const ret = arr
+      .filter((obj) =>
+        (property as StringKeys<T>[])
+          .map((p) => obj[p].toLowerCase().includes(query.toLowerCase()))
+          .includes(true)
+      )
+      .filter((obj) => {
+        const value = obj[(property as StringKeys<T>[])[0]] as string;
+        if (seen.has(value)) return false;
+        seen.add(value);
+        return true;
+      });
+
+    console.log(ret);
+    return ret;
+  }
+
+  const [focused, setFocused] = useDebounce(false, 300);
+
   return (
     <div className="relative flex flex-col xl:flex-row gap-4">
       <div className="w-full">
@@ -227,8 +283,30 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
               placeholder="Loop title..."
               required
               value={title ?? ""}
-              setValue={(newValue) => setTitle(newValue as string)}
+              setValue={(newValue) => {
+                setTitle(newValue as string);
+                updateDebouncedTitle(newValue as string);
+              }}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
             />
+            {focused &&
+              debouncedTitle !== "" &&
+              recommendedAutofill.map(
+                (l, i) =>
+                  i < 3 &&
+                  l !== undefined && (
+                    <Link
+                      href={"/dashboard/manage-loops?autofill=" + String(l._id)}
+                      key={l._id}
+                      onClick={() => setDebouncedTitle("")}
+                      scroll={false}
+                      className="underline underline-offset-2"
+                    >
+                      {l.title}
+                    </Link>
+                  )
+              )}
           </div>
 
           <div className="flex flex-col w-full">
@@ -371,18 +449,19 @@ const CreateLoopClient = ({ session, allGroups, allLoops }: Props) => {
               max={departureDateTime || "9999-12-31T23:59"}
               value={signUpOpenDateTime ?? ""}
               setValue={(newValue) => setSignUpOpenDateTime(newValue as string)}
+              description="Before this time, no one is allowed to sign up."
             />
           </div>
-          <div className="flex flex-col md:flex-row">
+          <div className="flex flex-col md:flex-row gap-2">
             <input
-              className=" text-sm md:text-base w-full text-white flex items-center justify-center gap-2 h-fit bg-ncssm-green brutal-sm px-4 font-bold"
+              className="cursor-pointer text-sm md:text-base w-full text-black flex items-center justify-center gap-2 h-fit bg-ncssm-yellow brutal-sm px-4 font-bold"
               type="submit"
               aria-disabled={pending}
               name="submissionType"
-              value="Save"
+              value="Save for later" // MUST START WITH 'S'
             />
-            <button
-              className=" text-sm md:text-base w-full text-white flex items-center justify-center gap-2 h-fit bg-ncssm-green brutal-sm px-4 font-bold"
+            <input
+              className="cursor-pointer text-sm md:text-base w-full text-white flex items-center justify-center gap-2 h-fit bg-ncssm-green brutal-sm px-4 font-bold"
               type="submit"
               aria-disabled={pending}
               name="submissionType"

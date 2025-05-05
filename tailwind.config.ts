@@ -1,11 +1,14 @@
 import type { Config } from "tailwindcss";
 
+// This variable contains configurations for tailwind
 const config: Config = {
+  // What files to scan for tailwind
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  // custom extensions to tailwind
   theme: {
     extend: {
       screens: {
@@ -37,6 +40,7 @@ const config: Config = {
       },
     },
   },
+  // extensions to the base tailwind
   plugins: [
     require("@tailwindcss/typography"),
     require("@tailwindcss/container-queries"),

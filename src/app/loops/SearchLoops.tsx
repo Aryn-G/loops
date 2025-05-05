@@ -79,7 +79,9 @@ const SearchLoops = ({ allLoops }: Props) => {
 
   const [timingParam, _t, _setT, updateTiming] = useSearchParam(
     "timing",
-    "morning+afternoon+night"
+    "morning afternoon night",
+    (s) => s,
+    false
   );
   const [timing, setTiming] = useState<typeof timingOpts>(
     timingOpts.filter((v) => _t.indexOf(v.title.toLowerCase()) != -1)
@@ -157,16 +159,17 @@ const SearchLoops = ({ allLoops }: Props) => {
               )}
             </>
           )}
+          {/* {filtered.length === 0 && <div className="mt-1 text-3xl">💔💔💔</div>} */}
         </>
       )}
       filterLogic={(all, query) => {
         return all
           .sort((a, b) =>
             a.departureDateTime < b.departureDateTime
-              ? sortParam === "earliest"
+              ? sort === "earliest"
                 ? -1
                 : 1
-              : sortParam === "ealiest"
+              : sort === "earliest"
               ? 1
               : -1
           )

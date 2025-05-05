@@ -39,7 +39,9 @@ export async function addSelfToLoop(prevState: any, formData: FormData) {
       { path: "reservations.group", select: "name _id", model: Group },
     ]);
     if (!loopDoc) throw new Error("Error: no loop");
-    if (loopDoc.deleted) return "Loop Deleted";
+    if (loopDoc.deleted) return "Loop is Deleted";
+    if (!loopDoc.published) return "Loop is not Published";
+    if (loopDoc.canceled) return "Loop is Canceled";
 
     const allGroups = await Group.find<IGroup>({ deleted: false });
 

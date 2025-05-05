@@ -42,6 +42,7 @@ export const getLoops = unstable_cache(
       canceled: loop.canceled,
       loopNumber: loop.loopNumber,
       createdAt: loop.createdAt,
+      createdBy: String(loop.createdBy),
     }));
   },
   ["loopsTag"],
@@ -97,12 +98,20 @@ export const getLoop = unstable_cache(
         filled: loop.filled.map((v: any) => ({
           _id: String(v._id),
           createdAt: v.createdAt as Date,
-          user: {
-            name: v.user.name as string,
-            email: v.user.email as string,
-            picture: v.user.picture as string | undefined,
-            _id: String(v.user._id),
-          },
+          user:
+            v.user !== null
+              ? {
+                  name: v.user.name as string,
+                  email: v.user.email as string,
+                  picture: v.user.picture as string | undefined,
+                  _id: String(v.user._id),
+                }
+              : {
+                  name: "[deleted user]",
+                  email: null,
+                  picture: null,
+                  _id: null,
+                },
           group: v.group
             ? { name: v.group.name as string, _id: String(v.group._id) }
             : undefined,
@@ -112,6 +121,7 @@ export const getLoop = unstable_cache(
         deleted: loop.deleted,
         loopNumber: loop.loopNumber,
         createdAt: loop.createdAt,
+        createdBy: String(loop.createdBy),
       };
     } catch {
       return null;

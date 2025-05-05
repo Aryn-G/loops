@@ -37,7 +37,7 @@ const GiveAccessClient = (props: Props) => {
         selected={selected}
         setSelected={setSelected}
         id={(u) => u._id}
-        filter={(u) => u.email}
+        filter={(u) => `${u.name} <${u.email}>`}
         render={(u) => u.email}
         placeholder="Type or paste in emails..."
       />

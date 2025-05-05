@@ -130,6 +130,30 @@ export async function removeFromLoop(prevState: any, formData: FormData) {
   return "Success";
 }
 
+export async function multiRemoveFromLoop(prevState: any, formData: FormData) {
+  await mongoDB();
+
+  const loop = formData.get("loop");
+  const remove = formData.getAll("remove");
+  try {
+    if (!loop) return "Error: Invalid Form Submission";
+    if (!remove) return "Error: Invalid Form Submission";
+
+    await Loop.findByIdAndUpdate(loop, {
+      $pull: { filled: { $in: remove } },
+    });
+    await SignUp.deleteMany({ _id: { $in: remove } });
+
+    revalidateTag("loopsTag");
+  } catch (error) {
+    if (typeof error === "string") return error;
+    console.log("Internal Error");
+    return "Internal Error";
+  }
+
+  return "Success";
+}
+
 export async function editLoopAction(
   prevState: any,
   formData: FormData

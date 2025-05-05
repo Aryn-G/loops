@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useActionState, useRef, useState } from "react";
-import { removeLoop } from "./actions";
+import { cancelLoop, publishLoop, removeLoop } from "./actions";
 
 import Pagination from "@/app/_components/Pagination";
 
@@ -13,7 +13,17 @@ import { formatDate, isDateBetween, toISOStringOffset } from "@/app/_lib/time";
 import Input from "@/app/_components/Inputs/Input";
 import LoopCard from "@/app/_components/LoopCard";
 
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowTopRightOnSquareIcon,
+  MagnifyingGlassIcon,
+  Square2StackIcon,
+  XMarkIcon,
+  PencilIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  ArchiveBoxXMarkIcon,
+  TrashIcon,
+} from "@heroicons/react/16/solid";
 import { objectMap } from "@/app/_lib/util";
 
 import Search, {
@@ -22,6 +32,7 @@ import Search, {
   Seperator,
 } from "@/app/_components/Search";
 import {
+  ArchiveBoxIcon,
   ArrowLongRightIcon,
   ArrowsUpDownIcon,
   CalendarDateRangeIcon,
@@ -30,6 +41,7 @@ import {
   FunnelIcon,
   MoonIcon,
   SunIcon,
+  UserCircleIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -38,14 +50,15 @@ import {
 } from "@/app/_lib/use-hooks/useSearchParam";
 import title from "title";
 import { isValidDateStr } from "@/app/_lib/util";
+import { Session } from "next-auth";
 
 type Props = {
+  session: Session;
   allLoops: Awaited<ReturnType<typeof getLoops>>;
 };
 
-const ManageLoopsClient = ({ allLoops }: Props) => {
+const ManageLoopsClient = ({ session, allLoops }: Props) => {
   const dateOpts = getDateOpts();
-  const timingOpts = getTimingOpts();
 
   const expanded = {
     [dateOpts[1].title]: "Yesterday",
@@ -73,26 +86,32 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
     },
     false
   );
-  const [minParam, min, setMin, updateMin] = useSearchParam(
-    "min",
-    "",
-    (str) => {
-      if (typeof str === "string") return isNaN(Number(str)) ? "" : str;
-      else return str;
-    }
-  );
   const [sortParam, sort, setSort, updateSort] = useSearchParam(
     "sort",
     "earliest"
   );
 
-  const [timingParam, _t, _setT, updateTiming] = useSearchParam(
-    "timing",
-    "morning+afternoon+night"
+  const [sharingParam, _sharing, _setSharing, updateSharing] = useSearchParam(
+    "sharing",
+    "unpublished published canceled",
+    (s) => s,
+    false
   );
-  const [timing, setTiming] = useState<typeof timingOpts>(
-    timingOpts.filter((v) => _t.indexOf(v.title.toLowerCase()) != -1)
+  const [sharing, setSharing] = useState<
+    ("unpublished" | "published" | "canceled" | "deleted")[]
+  >(
+    (["unpublished", "published", "canceled", "deleted"] as const).filter(
+      (opt) => _sharing.split(" ").indexOf(opt) != -1
+    )
   );
+
+  const [createdByParam, createdBy, setCreatedBy, updateCreatedBy] =
+    useSearchParam("createdBy", "all");
+
+  // const [viewParam, view, setView, updateView] = useSearchParam(
+  //   "sort",
+  //   "earliest"
+  // );
 
   let defaultDateOpt = dateOpts[0];
   dateOpts.forEach((opt) => {
@@ -108,10 +127,10 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
     <Search
       all={allLoops}
       name="Loops"
-      inputClassName="my-5 max-w-xl mx-auto flex flex-col gap-2"
+      inputClassName="my-5 flex flex-col gap-2"
       itemsPerPage={6}
-      paginationClassName="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6"
-      render={(item, i) => <LoopCardR loop={item} />}
+      paginationClassName="grid grid-cols-1 @2xl:grid-cols-2 @4xl:grid-cols-3 gap-3 md:gap-6"
+      render={(item, i) => <LoopCardR key={item._id} loop={item} />}
       filterString={(filtered, query) => (
         <>
           {filtered.length === 0
@@ -161,7 +180,7 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
               ? sortParam === "earliest"
                 ? -1
                 : 1
-              : sortParam === "ealiest"
+              : sortParam === "earliest"
               ? 1
               : -1
           )
@@ -180,53 +199,70 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
 
             if (!dateMatches) return false;
 
-            let timingMatches = false;
-            timing.forEach((opt, i) => {
-              if (
-                isDateBetween(
-                  toISOStringOffset(item.departureDateTime).slice(0, -5) +
-                    opt.start,
-                  toISOStringOffset(item.departureDateTime),
-                  toISOStringOffset(item.departureDateTime).slice(0, -5) +
-                    opt.end
-                )
-              ) {
-                timingMatches = true;
-              }
-            });
+            let sharingMatches = false;
+            // if anything is not selected
+            // user doesn't want to see those
+            if (item.published === true && sharing.includes("published")) {
+              sharingMatches = true;
+            }
+            if (item.published === false && sharing.includes("unpublished")) {
+              sharingMatches = true;
+            }
+            if (item.canceled === true && !sharing.includes("canceled")) {
+              sharingMatches = false;
+            }
+            if (item.deleted === true && !sharing.includes("deleted")) {
+              sharingMatches = false;
+            } else if (item.deleted === true) {
+              sharingMatches = true;
+            }
+            if (!sharingMatches) return false;
 
-            if (!timingMatches) return false;
+            let createdByMatches = true;
 
-            // if minParam is not set, then true
-            // if minParam is set, then evaluate
-            const minSpots =
-              minParam == "" ||
-              item.capacity - item.filled.length >= Number(minParam);
+            if (createdBy === "only" && item.createdBy !== session.userId)
+              createdByMatches = false;
+            else if (
+              createdBy === "others" &&
+              item.createdBy === session.userId
+            )
+              createdByMatches = false;
 
-            if (!minSpots) return false;
+            if (!createdByMatches) return false;
 
             return true;
           });
       }}
       renderShortenedFilters={(Chip) => (
         <div className="flex flex-wrap gap-2">
-          {min != "" && (
-            <Chip
-              value={`${min}+ Available Spots`}
-              action={() => {
-                setMin("");
-                updateMin(undefined);
-              }}
-            />
-          )}
-          {timing.length != 3 && (
-            <Chip
-              value={timingString(timing)}
-              action={() => {
-                updateTiming(undefined);
-                setTiming(timingOpts);
-              }}
-            />
+          {(["unpublished", "published", "canceled", "deleted"] as const).map(
+            (opt) => {
+              let value = "";
+              if (opt != "deleted") {
+                if (!sharing.includes(opt)) {
+                  value = `Hiding ${opt}`;
+                } else return;
+              } else {
+                if (sharing.includes(opt)) {
+                  value = `Showing ${opt}`;
+                } else return;
+              }
+
+              return (
+                <Chip
+                  value={title(value)}
+                  key={opt}
+                  action={() => {
+                    const newState = sharing.includes(opt)
+                      ? sharing.filter((o) => o != opt)
+                      : [opt, ...sharing];
+
+                    updateSharing(newState.join(" "));
+                    setSharing(newState);
+                  }}
+                />
+              );
+            }
           )}
           {sort != "earliest" && (
             <Chip
@@ -276,7 +312,7 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
               }
             }}
             equal={(state, opt) => state.title === opt.title}
-            className="w-full md:w-fit"
+            className="w-full md:w-fit md:@2xl:px-2 md:@2xl:w-full"
           />
           <div className="w-full flex flex-col md:flex-row items-center justify-between gap-3">
             <Input
@@ -304,7 +340,49 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
             />
           </div>
         </div>
-        {/* Timing Filter */}
+        {/* Sharing Filter */}
+        <div className="flex items-center gap-2 mt-2">
+          <ArchiveBoxIcon className="size-6" />
+          <p className="font-bold flex-1">Sharing</p>
+          <button
+            className="underline underline-offset-2"
+            onClick={() => {
+              updateSharing(undefined);
+              setSharing(["unpublished", "published", "canceled"]);
+            }}
+          >
+            Reset
+          </button>
+        </div>
+        <CheckBoxFilter
+          opts={["unpublished", "published", "canceled", "deleted"] as const}
+          onClick={(opt, prevState) => {
+            if (!prevState)
+              setSharing((t) => {
+                updateSharing([...t, opt].map((v) => v).join(" "));
+                return [...t, opt];
+              });
+            else
+              setSharing((t) => {
+                updateSharing(
+                  t
+                    .filter((t2) => t2 != opt)
+                    .map((v) => v)
+                    .join(" ")
+                );
+                return t.filter((t2) => t2 != opt);
+              });
+          }}
+          render={(opt) => (
+            <>
+              <span className="flex-1">{title(opt)}</span>
+            </>
+          )}
+          state={sharing}
+          selected={(state, opt) => !!state.find((o) => o === opt)}
+          className="w-full md:px-2"
+        />
+        {/* Timing Filter
         <div className="flex items-center gap-2 mt-2">
           <ClockIcon className="size-6" />
           <p className="font-bold flex-1">Timing</p>
@@ -348,33 +426,31 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
           state={timing}
           selected={(state, opt) => !!state.find((o) => o.title === opt.title)}
           className="w-full md:px-2"
-        />
-        {/* Min Avaiable Slots Filter */}
+        /> */}
+        {/* Created By Filter */}
         <div className="flex items-center gap-2 mt-2">
-          <UserGroupIcon className="size-6" />
-          <p className="font-bold flex-1">Minimum Available Spots</p>
+          <UserCircleIcon className="size-6" />
+          <p className="font-bold flex-1">Created By</p>
           <button
             className="underline underline-offset-2"
             onClick={() => {
-              setMin("");
-              updateMin(undefined);
+              setCreatedBy("All");
+              updateCreatedBy(undefined);
             }}
           >
             Reset
           </button>
         </div>
-        <Input
-          type="number"
-          name=""
-          className="w-full"
-          placeholder="Type minimum..."
-          value={min ?? ""}
-          setValue={(newValue) => {
-            setMin(newValue as string);
-            updateMin(newValue as string);
+        <RadioFilter
+          render={(opt) => <span className="flex-1">{title(opt)}</span>}
+          opts={["all", "only me", "others"]}
+          state={createdBy}
+          onClick={(opt) => {
+            setCreatedBy(opt.split(" ")[0].toLowerCase());
+            updateCreatedBy(opt.split(" ")[0].toLowerCase());
           }}
-          min={0}
-          max={999}
+          equal={(state, opt) => state == opt.split(" ")[0].toLowerCase()}
+          className="w-full md:px-2"
         />
         {/* Sorting Filter */}
         <div className="flex items-center gap-2 mt-2">
@@ -408,16 +484,17 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
             setS(dateOpts[3].start ?? "");
             setE(dateOpts[3].end ?? "");
             setSort("earliest");
-            setTiming(timingOpts);
-            setMin("");
+            setSharing(["unpublished", "published", "canceled"]);
+            setCreatedBy("all");
             updateMany(
               {
                 start: undefined,
                 end: undefined,
-                min: undefined,
                 sort: undefined,
                 timing: undefined,
+                sharing: undefined,
                 p: undefined,
+                createdBy: undefined,
               },
               true
             );
@@ -429,31 +506,6 @@ const ManageLoopsClient = ({ allLoops }: Props) => {
     </Search>
   );
 };
-
-function timingString(arr: ReturnType<typeof getTimingOpts>) {
-  const timingOpts = getTimingOpts();
-
-  if (arr.length === 0) {
-    return "Never Departs";
-  } else if (arr.length === 3) {
-    return "";
-  } else if (arr.length === 1) {
-    return `Departs between ${arr[0].startStr} - ${arr[0].endStr}`;
-  } else {
-    let arr0 = arr[0];
-    let arr1 = arr[1];
-    if (arr0.id > arr1.id) {
-      arr0 = arr1;
-      arr1 = arr[0];
-    }
-    let opt3 = timingOpts.find((o) => o.id != arr0.id && o.id != arr1.id)!;
-    if (Math.abs(arr0.id - arr1.id) == 1) {
-      return `Departs between ${arr0.startStr} - ${arr1.endStr}`;
-    } else {
-      return `Doesn't depart between ${opt3.startStr} - ${opt3.endStr}`;
-    }
-  }
-}
 
 const getDateOpts = () => {
   const today = new Date();
@@ -492,67 +544,102 @@ const getDateOpts = () => {
   ];
 };
 
-const getTimingOpts = () => {
-  return [
-    {
-      title: "Morning",
-      icon: <CloudIcon className="size-5" />,
-      start: "00:00",
-      end: "11:59",
-      startStr: "12 AM",
-      endStr: "12 PM",
-      id: 1,
-    },
-    {
-      title: "Afternoon",
-      icon: <SunIcon className="size-5" />,
-      start: "12:00",
-      end: "17:59",
-      startStr: "12 PM",
-      endStr: "6 PM",
-      id: 2,
-    },
-    {
-      title: "Night",
-      icon: <MoonIcon className="size-5" />,
-      start: "18:00",
-      end: "23:59",
-      startStr: "6 PM",
-      endStr: "11:59 PM",
-      id: 3,
-    },
-  ];
-};
-
 const LoopCardR = ({
   loop,
 }: {
   loop: Awaited<ReturnType<typeof getLoops>>[number];
 }) => {
   const [_state, action, pending] = useActionState(removeLoop, "");
+  const [_state2, action2, pending2] = useActionState(publishLoop, "");
+  const [_state3, action3, pending3] = useActionState(cancelLoop, "");
 
   return (
     <div className="brutal-sm p-6 flex flex-col">
+      <div className="-mb-8 ml-auto flex items-center gap-2">
+        {/* <div
+          className="text-sm flex items-center justify-center h-fit brutal-sm font-bold w-fit"
+          data-tooltip={loop.published ? "Published" : "Unpublished"}
+        >
+          {loop.published ? (
+            <EyeIcon className="size-5" />
+          ) : (
+            <EyeSlashIcon className="size-5" />
+          )}
+        </div> */}
+        <Link
+          href={"/loops/" + String(loop._id)}
+          className="text-sm flex items-center justify-center h-fit brutal-sm font-bold w-fit"
+          data-tooltip="View Public Page"
+        >
+          <ArrowTopRightOnSquareIcon className="size-4" />
+        </Link>
+      </div>
       <LoopCard data={loop} capDesc="line-clamp-1" />
       <div className="grid grid-cols-2 gap-2">
         <Link
-          href={"/loops/" + String(loop._id)}
-          className="text-sm w-full flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
-        >
-          Public Page
-        </Link>
-        <Link
           href={"/dashboard/manage-loops/" + String(loop._id)}
-          className="text-sm w-full flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
+          className="col-span-2 text-sm w-full flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
         >
+          <PencilIcon className="size-4" />
           Edit
+          <span className="size-4" />
         </Link>
         <Link
           href={"/dashboard/manage-loops?autofill=" + String(loop._id)}
-          className="text-sm w-full flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
+          className="text-sm w-full flex items-center justify-between gap-2 h-fit brutal-sm md:px-4 font-bold"
         >
+          <Square2StackIcon className="size-4" />
           Duplicate
+          <span className="size-4" />
         </Link>
+        <form action={action2} className="flex-shrink-0 w-full">
+          <input
+            className="hidden"
+            name="loop"
+            readOnly
+            value={String(loop._id)}
+          />
+          <button
+            className={
+              (!loop.published
+                ? "bg-ncssm-green text-white"
+                : "bg-ncssm-yellow text-black") +
+              " text-sm w-full flex items-center justify-between gap-2 h-fit brutal-sm md:px-4 font-bold"
+            }
+            type="submit"
+            aria-disabled={pending2}
+          >
+            {!loop.published ? (
+              <EyeIcon className="size-4" />
+            ) : (
+              <EyeSlashIcon className="size-4" />
+            )}
+            {!loop.published ? "Publish" : "Unpublish"}
+            {pending2 ? "ing" : ""}
+            <span className="size-4" />
+          </button>
+        </form>
+        <form action={action3} className="flex-shrink-0 w-full">
+          <input
+            className="hidden"
+            name="loop"
+            readOnly
+            value={String(loop._id)}
+          />
+          <button
+            className={
+              (loop.canceled ? "bg-ncssm-green" : "bg-rose-500") +
+              " text-sm w-full text-white flex items-center justify-between gap-2 h-fit brutal-sm md:px-4 font-bold"
+            }
+            type="submit"
+            aria-disabled={pending3}
+          >
+            <ArchiveBoxXMarkIcon className="size-4" />
+            {!loop.canceled ? "Cancel" : "Uncancel"}
+            {pending3 ? "ing" : ""}
+            <span className="size-4" />
+          </button>
+        </form>
         <form action={action} className="flex-shrink-0 w-full">
           <input
             className="hidden"
@@ -563,13 +650,15 @@ const LoopCardR = ({
           <button
             className={
               (loop.deleted ? "bg-ncssm-green" : "bg-rose-500") +
-              " text-sm w-full text-white flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
+              " text-sm w-full text-white flex items-center justify-between gap-2 h-fit brutal-sm md:px-4 font-bold"
             }
             type="submit"
             aria-disabled={pending}
           >
+            <TrashIcon className="size-4" />
             {loop.deleted ? "Restor" : "Delet"}
             {pending ? "ing" : "e"}
+            <span className="size-4" />
           </button>
         </form>
       </div>

@@ -55,7 +55,7 @@ async function main() {
         .filter(
           (user) =>
             user.email.toLowerCase().includes(input.toLowerCase()) ||
-            user.name.toLowerCase().includes(input.toLowerCase())
+            user.name?.toLowerCase().includes(input.toLowerCase())
         )
         .map((user) => ({
           name: `(${user.role} Account) - ${user.name}`,

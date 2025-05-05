@@ -3,65 +3,176 @@
 import React, { useActionState, useRef, useState } from "react";
 import { removeGroup } from "./actions";
 
-import Pagination from "@/app/_components/Pagination";
-import { getGroups } from "@/app/_db/queries/groups";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useDebouncedCallback } from "use-debounce";
-import Link from "next/link";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParam";
-import Search, { SearchFilters } from "@/app/_components/Search";
+import { formatDate, isDateBetween, toISOStringOffset } from "@/app/_lib/time";
 
+import Search, { CheckBoxFilter } from "@/app/_components/Search";
+import { ArchiveBoxIcon } from "@heroicons/react/24/outline";
+import {
+  useManyParams,
+  useSearchParam,
+} from "@/app/_lib/use-hooks/useSearchParam";
+import title from "title";
+import { getFilteredUsers } from "@/app/_db/queries/users";
+import Image from "next/image";
+import { Session } from "next-auth";
+import { getGroups } from "@/app/_db/queries/groups";
+import Link from "next/link";
 type Props = {
   allGroups: Awaited<ReturnType<typeof getGroups>>;
 };
 
 const ManageGroupsClient = ({ allGroups }: Props) => {
+  const { updateMany } = useManyParams();
+
+  const [sharingParam, _sharing, _setSharing, updateSharing] = useSearchParam(
+    "type",
+    "all",
+    (s) => s,
+    false
+  );
+  const [sharing, setSharing] = useState<("all" | "deleted")[]>(
+    (["all", "deleted"] as const).filter(
+      (opt) => _sharing.split(" ").indexOf(opt) != -1
+    )
+  );
   return (
     <Search
-      name="Student Groups"
       all={allGroups}
-      inputClassName=""
+      name="Groups"
+      inputClassName="my-5 flex flex-col gap-2"
+      itemsPerPage={25}
       paginationClassName="divide-y divide-black flex flex-col md:gap-2"
-      itemsPerPage={6}
-      render={(item) => <GroupCard group={item} key={item._id} />}
-      filterLogic={(all, filters, query) => {
-        return all
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .filter(
-            (group) =>
-              ((!group.deleted || filters["deleted"] == "true") &&
-                group.name.toLowerCase().includes(query.toLowerCase())) ||
-              group.users.filter((v) =>
-                v.toLowerCase().includes(query.toLowerCase())
-              ).length > 0
-          );
-      }}
-      filterString={(filtered, filters, query) => (
+      render={(item, i) => <GroupCard key={i} group={item} />}
+      filterString={(filtered, query) => (
         <>
           {filtered.length === 0
             ? query
               ? `No Results `
-              : "No Student Groups Exist"
+              : "No Groups Exist"
             : ""}
           {query && "for "}
           {query && <span className="font-bold">{`"${query}"`}</span>}
         </>
       )}
+      filterLogic={(all, query) => {
+        return all
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .filter((item) => {
+            const queryMatches = item.name
+              ?.toLowerCase()
+              .includes(query.toLowerCase());
+
+            if (!queryMatches) return false;
+
+            let sharingMatches = true;
+
+            if (item.deleted === true && !sharing.includes("deleted")) {
+              sharingMatches = false;
+            } else if (item.deleted === true) {
+              sharingMatches = true;
+            }
+
+            if (item.deleted === false && !sharing.includes("all")) {
+              sharingMatches = false;
+            }
+
+            if (!sharingMatches) return false;
+
+            return true;
+          });
+      }}
+      renderShortenedFilters={(Chip) => (
+        <div className="flex flex-wrap gap-2">
+          {(["all", "deleted"] as const).map((opt) => {
+            let value = "";
+            if (opt != "deleted") {
+              if (!sharing.includes(opt)) {
+                value = `Hiding ${opt}`;
+              } else return;
+            } else {
+              if (sharing.includes(opt)) {
+                value = `Showing ${opt}`;
+              } else return;
+            }
+
+            return (
+              <Chip
+                value={title(value)}
+                key={opt}
+                action={() => {
+                  const newState = sharing.includes(opt)
+                    ? sharing.filter((o) => o != opt)
+                    : [opt, ...sharing];
+
+                  updateSharing(newState.join(" "));
+                  setSharing(newState);
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
     >
-      <SearchFilters name="deleted" debounceDelay={0}>
-        {(v, setV, updateV) => (
+      <div className="w-full flex flex-col gap-2">
+        {/* Sharing Filter */}
+        <div className="flex items-center gap-2 mt-2">
+          <ArchiveBoxIcon className="size-6" />
+          <p className="font-bold flex-1">Group Type</p>
           <button
-            className="block w-full text-start underline underline-offset-2 my-2"
+            className="underline underline-offset-2"
             onClick={() => {
-              updateV(v == "true" ? "" : "true");
-              setV(v == "true" ? "" : "true");
+              updateSharing(undefined);
+              setSharing(["all"]);
             }}
           >
-            {v == "true" ? "Hide" : "Show"} Deleted
+            Reset
           </button>
-        )}
-      </SearchFilters>
+        </div>
+        <CheckBoxFilter
+          opts={["all", "deleted"] as const}
+          onClick={(opt, prevState) => {
+            if (!prevState)
+              setSharing((t) => {
+                updateSharing([...t, opt].map((v) => v).join(" "));
+                return [...t, opt];
+              });
+            else
+              setSharing((t) => {
+                updateSharing(
+                  t
+                    .filter((t2) => t2 != opt)
+                    .map((v) => v)
+                    .join(" ")
+                );
+                return t.filter((t2) => t2 != opt);
+              });
+          }}
+          render={(opt) => (
+            <>
+              <span className="flex-1">{title(opt)}</span>
+            </>
+          )}
+          state={sharing}
+          selected={(state, opt) => !!state.find((o) => o === opt)}
+          className="w-full md:px-2"
+        />
+
+        <button
+          className="underline underline-offset-2 mx-auto"
+          onClick={() => {
+            setSharing(["all"]);
+            updateMany(
+              {
+                sharing: undefined,
+                p: undefined,
+              },
+              true
+            );
+          }}
+        >
+          Reset All
+        </button>
+      </div>
     </Search>
   );
 };
@@ -87,7 +198,9 @@ const GroupCard = ({
             {group.name}
           </p>
           {/* <p className="text-base">{group.users.join(", ")}</p> */}
-          <p className="text-base">Contains {group.users.length} People</p>
+          <p className="text-base">
+            Contains {group.count} {group.count === 1 ? "Person" : "People"}
+          </p>
         </div>
       </div>
 

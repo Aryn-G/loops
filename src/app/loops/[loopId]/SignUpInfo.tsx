@@ -113,7 +113,7 @@ const PersonCard = ({
       className="py-3 flex flex-row gap-2 w-full items-center justify-center"
     >
       <div className="flex gap-2 flex-1 w-full items-center">
-        {u.user.picture && (
+        {u.user.picture ? (
           <Image
             src={u.user.picture}
             alt="profile pic"
@@ -123,6 +123,10 @@ const PersonCard = ({
             unoptimized
             referrerPolicy="no-referrer"
           />
+        ) : (
+          <div className="brutal-sm p-0 size-10 md:size-12 flex items-center justify-center">
+            {u.user.email?.at(0)}
+          </div>
         )}
         <div className="flex flex-col flex-1">
           <p className="text-base font-bold">{u.user.name}</p>

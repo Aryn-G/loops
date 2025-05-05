@@ -59,7 +59,8 @@ export async function createLoopAction(
       !departureDateTime ||
       !departureLoc ||
       !pickUpDateTime ||
-      !approxDriveTime
+      !approxDriveTime ||
+      !submissionType
     )
       throw new Error("Error: Incomplete Form Submission");
 
@@ -96,6 +97,7 @@ export async function createLoopAction(
       reservations,
       signUpOpenDateTime: signUpOpenD,
       createdAt: new Date(),
+      published: submissionType.toString()[0] === "S" ? false : true, // Save for later button
     });
 
     await newLoop.save();
@@ -123,6 +125,52 @@ export async function removeLoop(prevState: any, formData: FormData) {
     if (!loopDoc) return "Error";
 
     loopDoc.deleted = !loopDoc.deleted;
+    await loopDoc.save();
+    revalidateTag("loopsTag");
+  } catch (error) {
+    console.log("Internal Error");
+    return "Internal Error";
+  }
+
+  return "Success";
+}
+export async function publishLoop(prevState: any, formData: FormData) {
+  await mongoDB();
+
+  const loop = formData.get("loop");
+  try {
+    if (!loop) return "Error: Invalid Form Submission";
+
+    const loopDoc = await Loop.findOne(
+      { _id: loop }
+      // { $set: { deleted: { $not: "$deleted" } } }
+    );
+    if (!loopDoc) return "Error";
+
+    loopDoc.published = !loopDoc.published;
+    await loopDoc.save();
+    revalidateTag("loopsTag");
+  } catch (error) {
+    console.log("Internal Error");
+    return "Internal Error";
+  }
+
+  return "Success";
+}
+export async function cancelLoop(prevState: any, formData: FormData) {
+  await mongoDB();
+
+  const loop = formData.get("loop");
+  try {
+    if (!loop) return "Error: Invalid Form Submission";
+
+    const loopDoc = await Loop.findOne(
+      { _id: loop }
+      // { $set: { deleted: { $not: "$deleted" } } }
+    );
+    if (!loopDoc) return "Error";
+
+    loopDoc.canceled = !loopDoc.canceled;
     await loopDoc.save();
     revalidateTag("loopsTag");
   } catch (error) {

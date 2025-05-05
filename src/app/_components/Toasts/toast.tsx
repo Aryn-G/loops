@@ -15,7 +15,7 @@ export default function toast(
         description={toast.description}
         button={{
           label: toast.button.label,
-          onClick: () => console.log("Button clicked"),
+          onClick: toast.button.onClick,
         }}
       />
     ),

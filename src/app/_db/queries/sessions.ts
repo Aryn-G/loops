@@ -31,7 +31,7 @@ export const getUserSessions = unstable_cache(
           deviceModel: session.deviceModel,
           os: session.os,
           location: session.location,
-          ip: session.ip,
+          // ip: session.ip,
           createdAt: session.createdAt,
           updatedAt: session.updatedAt,
         };

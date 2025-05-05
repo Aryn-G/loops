@@ -3,7 +3,7 @@
 import React, { useActionState, useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
 import { createGroup } from "./actions";
-import { UserPlusIcon } from "@heroicons/react/24/outline";
+import { InboxStackIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 
 import { IGroup } from "@/app/_db/models/Group";
 import Input from "@/app/_components/Inputs/Input";
@@ -26,11 +26,13 @@ const CreateGroupClient = ({ allGroups, allUsers }: Props) => {
   const [groupName, setGroupName] = useState("");
 
   const [selected, setSelected] = useState<FilteredUser[]>([]);
+  const [selectedGroups, setSelectedGroups] = useState<Group[]>([]);
 
   useEffect(() => {
     if (!pending) {
       setGroupName("");
       setSelected([]);
+      setSelectedGroups([]);
     }
   }, [pending]);
 
@@ -57,8 +59,24 @@ const CreateGroupClient = ({ allGroups, allUsers }: Props) => {
           setSelected={setSelected}
           id={(u) => u._id}
           render={(u) => u.email}
-          filter={(u) => u.email}
+          filter={(u) => `${u.name} <${u.email}>`}
           placeholder="Type or paste in emails..."
+        />
+      </div>
+      <div className="w-full">
+        <label htmlFor="textarea" className="font-bold block my-1">
+          Subgroups
+        </label>
+        <MultiSelect
+          icon={<InboxStackIcon className="size-6 flex-shrink-0" />}
+          allItems={allGroups}
+          maxSearch={3}
+          selected={selectedGroups}
+          setSelected={setSelectedGroups}
+          id={(u) => u._id}
+          render={(u) => u.name}
+          filter={(u) => u.name}
+          placeholder="Type or paste in group names..."
         />
       </div>
       <div>
@@ -66,6 +84,15 @@ const CreateGroupClient = ({ allGroups, allUsers }: Props) => {
           <input
             className="hidden"
             name="users"
+            readOnly
+            value={s._id}
+            key={s._id}
+          />
+        ))}
+        {selectedGroups.map((s) => (
+          <input
+            className="hidden"
+            name="subgroups"
             readOnly
             value={s._id}
             key={s._id}

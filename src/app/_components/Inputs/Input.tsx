@@ -16,6 +16,7 @@ type Props = React.HTMLProps<HTMLInputElement> & {
   value: string | number;
   setValue?: (newValue: string | number) => any;
   defaultNum?: number;
+  description?: string;
 };
 
 const Input = forwardRef<HTMLInputElement, Props>(
@@ -33,6 +34,8 @@ const Input = forwardRef<HTMLInputElement, Props>(
       max,
       value,
       setValue,
+      description,
+      ...props
     },
     ref
   ) => {
@@ -57,6 +60,7 @@ const Input = forwardRef<HTMLInputElement, Props>(
             )}
           </div>
         )}
+        {description && <p className="-mt-1 mb-1">{description}</p>}
         <input
           readOnly={setValue === undefined}
           type={type}
@@ -121,6 +125,7 @@ const Input = forwardRef<HTMLInputElement, Props>(
               setValue(newValue);
             }
           }}
+          {...props}
         />
       </>
     );
