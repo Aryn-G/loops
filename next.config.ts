@@ -11,6 +11,7 @@ const withSerwist = withSerwistInit({
   additionalPrecacheEntries: [
     { url: "/~offline", revision: crypto.randomUUID() },
   ],
+  disable: process.env.NODE_ENV === "development",
 });
 
 export default withSerwist({
@@ -62,16 +63,17 @@ export default withSerwist({
       },
     ];
   },
-  async rewrites() {
-    return [
-      {
-        source: "/manifest.json",
-        destination: "/manifest.webmanifest",
-      },
-    ];
-  },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: "/manifest.json",
+  //       destination: "/manifest.webmanifest",
+  //     },
+  //   ];
+  // },
   experimental: {
     authInterrupts: true,
+    // ppr: true,
   },
 });
 

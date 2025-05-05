@@ -74,7 +74,7 @@ export const getUserSubscriptions = unstable_cache(
           deviceModel: sub.session.deviceModel,
           os: sub.session.os,
           location: sub.session.location,
-          ip: sub.session.ip,
+          // ip: sub.session.ip,
         },
         endpoint: sub.endpoint,
         keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth },

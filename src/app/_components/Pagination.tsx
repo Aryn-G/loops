@@ -1,19 +1,28 @@
 "use client";
 
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/20/solid";
 
-type Props = {
+type Props<T> = {
   filterString?: ReactNode;
-  children?: ReactNode[];
+  children?: T[];
   itemsPerPage: number;
   className?: string;
+  selectedString?: (itemsOnPage: T[]) => ReactNode;
+  render: (item: T, i: number) => ReactNode;
   // initPage?: number;
 };
 
-const Pagination = (props: Props) => {
+const Pagination = <T,>(props: Props<T>) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
@@ -70,9 +79,11 @@ const Pagination = (props: Props) => {
     }
   };
 
+  const ref = useRef<HTMLDivElement>(null);
+
   return (
     <div className="z-10 flex flex-col gap-2">
-      <div className="text-center my-3">
+      <div className="text-center my-3 scroll-mt-60" ref={ref}>
         {items.length === 0 ? "" : <>Showing {pageNumberString()}</>}{" "}
         {props.filterString}
         <span className="sr-only"> total pages</span>
@@ -159,13 +170,31 @@ const Pagination = (props: Props) => {
           </Link>
         </div>
       )}
-      <div className={props.className ?? "flex flex-col gap-2"}>
-        {items.filter(
-          (item, i) =>
-            i >= (currentPage - 1) * itemsPerPage &&
-            i < (currentPage - 1) * itemsPerPage + itemsPerPage
+      {props.selectedString &&
+        props.selectedString(
+          items.filter(
+            (item, i) =>
+              i >= (currentPage - 1) * itemsPerPage &&
+              i < (currentPage - 1) * itemsPerPage + itemsPerPage
+          )
         )}
+      <div className={props.className ?? "flex flex-col gap-2"}>
+        {items
+          .filter(
+            (item, i) =>
+              i >= (currentPage - 1) * itemsPerPage &&
+              i < (currentPage - 1) * itemsPerPage + itemsPerPage
+          )
+          .map(props.render)}
       </div>
+      <button
+        className="underline underline-offset-2 mt-2 p-2"
+        onClick={() =>
+          ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+      >
+        Scroll to Top
+      </button>
     </div>
   );
 };

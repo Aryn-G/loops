@@ -46,8 +46,9 @@ const EditGroupUsers = (props: Props) => {
           maxSearch={3}
           selected={selected}
           setSelected={setSelected}
-          keyFn={(u) => u._id}
-          displayFn={(u) => u.email}
+          id={(u) => u._id}
+          render={(u) => u.email}
+          filter={(u) => `${u.name} <${u.email}>`}
           placeholder="Type or paste in emails..."
         />
         <form action={action}>

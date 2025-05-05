@@ -48,3 +48,8 @@ export function urlBase64ToUint8Array(base64String: string) {
   }
   return outputArray;
 }
+
+export function isValidDateStr(str: string) {
+  // @ts-ignore
+  return new Date(str) !== "Invalid Date" && !isNaN(new Date(str));
+}

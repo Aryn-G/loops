@@ -1,20 +1,10 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSearchParam } from "../_lib/use-hooks/useSearchParam";
-import React, {
-  createContext,
-  memo,
-  ReactNode,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { ReactNode, useRef, useState } from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import Pagination from "./Pagination";
-import { DebouncedState } from "use-debounce";
-import { objectMap } from "../_lib/util";
+import { CheckIcon } from "@heroicons/react/16/solid";
 
 type Props<T> = {
   name: string;
@@ -23,92 +13,139 @@ type Props<T> = {
   paginationClassName: string;
   all: T[];
   render: (item: T, i: number) => ReactNode;
-  filterLogic: (
-    all: T[],
-    filters: Record<string, string>,
-    query: string
-  ) => T[];
-  filterString: (
-    filtered: T[],
-    filters: Record<string, string>,
-    query: string
+  filterLogic: (all: T[], query: string) => T[];
+  filterString?: (filtered: T[], query: string) => ReactNode;
+  renderShortenedFilters?: (
+    Chip: (pros: {
+      value: ReactNode | string;
+      action: () => void;
+    }) => React.JSX.Element
   ) => ReactNode;
   children?: ReactNode;
+  selectedString?: (itemsOnPage: T[]) => ReactNode;
 };
 
-function findFilters(children: ReactNode) {
-  const filters: [string, { defaultValue: string; value: string }][] = [];
+export const Seperator = () => (
+  <div className="shrink-0 md:w-0.5 w-full h-0.5 md:h-auto rounded-full bg-neutral-200"></div>
+);
 
-  React.Children.forEach(children, (child) => {
-    if (React.isValidElement(child)) {
-      if (child.type === SearchFilters) {
-        const { name, defaultValue = "" } = child.props;
-        filters.push([name, { defaultValue, value: defaultValue }]);
-      } else if (child.props && child.props.children) {
-        filters.push(...findFilters(child.props.children));
-      }
-    }
-  });
-  return filters;
+export function RadioFilter<T, T2>({
+  opts,
+  state,
+  onClick,
+  render,
+  equal,
+  className = "",
+}: {
+  opts: T[];
+  state: T2;
+  onClick: (opt: T) => void;
+  render: (opt: T) => ReactNode;
+  equal: (state: T2, opt: T) => boolean;
+  className?: string;
+}) {
+  return (
+    <div className="w-full flex flex-col md:flex-row brutal-sm gap-2 items-center justify-center px-4 p-3 md:p-2">
+      {opts.map((opt, i) => (
+        <div className={"flex md:flex-row flex-col gap-3 " + className} key={i}>
+          {i != 0 && <Seperator />}
+          <button
+            onClick={() => onClick(opt)}
+            className="flex items-center md:justify-center md:gap-2 gap-3"
+          >
+            <div className="rounded-full brutal-sm flex items-center justify-center size-4">
+              {equal(state, opt) && (
+                <div className="flex-shrink-0 rounded-full size-3 bg-black"></div>
+              )}
+            </div>
+            {render(opt)}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
 }
 
-type SearchContextType = {
-  setStates: React.Dispatch<
-    React.SetStateAction<{
-      [key: string]: React.Dispatch<React.SetStateAction<string>>;
-    }>
-  >;
-};
+export function CheckBoxFilter<T, T2>({
+  opts,
+  state,
+  onClick,
+  render,
+  selected,
+  className = "",
+}: {
+  opts: T[];
+  state: T2[];
+  onClick: (opt: T, prevState: boolean) => void;
+  render: (opt: T) => ReactNode;
+  selected: (state: T2[], opt: T) => boolean;
+  className?: string;
+}) {
+  return (
+    <div className="w-full flex flex-col md:flex-row brutal-sm gap-2 items-center justify-center px-4 p-3 md:p-2">
+      {opts.map((opt, i) => (
+        <div className={"flex md:flex-row flex-col gap-3 " + className} key={i}>
+          {i != 0 && <Seperator />}
+          <button
+            onClick={() => onClick(opt, selected(state, opt))}
+            className="flex items-center md:justify-center md:gap-2 gap-3 w-full"
+          >
+            <CheckBox selected={selected(state, opt)} />
+            {render(opt)}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-const SearchContext = createContext<SearchContextType | null>(null);
+export function CheckBox({
+  selected,
+  className,
+  activeClassName = "bg-black",
+  partial = false,
+}: {
+  selected: boolean;
+  className?: string;
+  activeClassName?: string;
+  partial?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-[3px] brutal-sm flex items-center justify-center size-4 ${
+        !partial ? "text-white" : "text-black"
+      } ${className} ${selected && !partial && activeClassName}`}
+    >
+      {selected && <CheckIcon className={"size-3 shrink-0 text-inherit"} />}
+    </div>
+  );
+}
+
+export const Chip = ({
+  value,
+  action,
+}: {
+  value: ReactNode | string;
+  action: () => void;
+}) => (
+  <div className="brutal-sm w-fit h-fit text-sm gap-1 flex px-3 py-2">
+    <button onClick={() => action()}>
+      <XMarkIcon className="size-4 text-rose-700" />
+    </button>
+    {value}
+  </div>
+);
 
 export default function Search<T>(props: Props<T>) {
-  const searchParams = useSearchParams();
-  const { replace } = useRouter();
-  const pathname = usePathname();
-
   const [query, q, setQ, updateQ] = useSearchParam("q");
-
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const filterNames = Object.fromEntries(findFilters(props.children));
-
-  const filters: Record<string, { value: string }> = {};
-  Object.keys(filterNames).forEach((name) => {
-    filters[name] = {
-      value:
-        searchParams.get(name) !== null
-          ? searchParams.get(name)!
-          : filterNames[name].defaultValue,
-    };
-  });
 
   const [showFilters, setShowFilters] = useState(false);
 
-  const filtered = props.filterLogic(
-    props.all,
-    objectMap(filters, (f) => f.value),
-    query
-  );
-
-  const [states, setStates] = useState<{
-    [key: string]: React.Dispatch<React.SetStateAction<string>>;
-  }>({});
-
-  const resetFilters = () => {
-    const params = new URLSearchParams(searchParams);
-    for (const key in filters) {
-      // somehow call setV in children
-      if (states[key]) states[key](filterNames[key].defaultValue);
-      params.delete(key);
-    }
-    replace(`${pathname}?${params.toString()}`, {
-      scroll: false,
-    });
-  };
+  const filtered = props.filterLogic(props.all, query);
 
   return (
-    <SearchContext.Provider value={{ setStates }}>
+    <>
       <div className={props.inputClassName}>
         <div
           className="flex flex-1 gap-2 px-4 brutal-sm focus-within:[outline:-webkit-focus-ring-color_auto_1px]"
@@ -141,7 +178,7 @@ export default function Search<T>(props: Props<T>) {
           )}
           {props.children && (
             <>
-              <div className="w-0.5 rounded-full bg-neutral-200"></div>
+              <div className="w-0.5 rounded-full bg-neutral-200 shrink-0"></div>
               <button
                 className="px-2 text-nowrap"
                 onClick={() => setShowFilters((f) => !f)}
@@ -151,69 +188,25 @@ export default function Search<T>(props: Props<T>) {
             </>
           )}
         </div>
-        <div className={`flex flex-col ${!showFilters && "hidden"}`}>
-          {props.children}
-          <button
-            className="block w-full text-start underline underline-offset-2"
-            onClick={resetFilters}
-          >
-            Reset Filters
-          </button>
-        </div>
+        {showFilters ? (
+          <div className="flex flex-col">{props.children}</div>
+        ) : (
+          <></>
+        )}
+        <>
+          {props.renderShortenedFilters && props.renderShortenedFilters(Chip)}
+        </>
       </div>
 
       <Pagination
         itemsPerPage={props.itemsPerPage}
         className={props.paginationClassName}
-        filterString={props.filterString(
-          filtered,
-          objectMap(filters, (f) => f.value),
-          query
-        )}
+        filterString={props.filterString && props.filterString(filtered, query)}
+        selectedString={props.selectedString}
+        render={props.render}
       >
-        {filtered.map(props.render)}
+        {filtered}
       </Pagination>
-    </SearchContext.Provider>
+    </>
   );
 }
-
-export const SearchFilters = memo(
-  ({
-    children,
-    name,
-    defaultValue = "",
-    noDel = false,
-    debounceDelay = 300,
-  }: {
-    children: (
-      v: string,
-      // setV: (newValue: string) => void,
-      setV: React.Dispatch<React.SetStateAction<string>>,
-      updateV: DebouncedState<(value: string) => void>
-    ) => ReactNode;
-    name: string;
-    defaultValue?: string;
-    noDel?: boolean;
-    debounceDelay?: number;
-  }) => {
-    const context = useContext(SearchContext);
-    if (!context) {
-      throw new Error("<Search.Filters /> must be used within a <Search />");
-    }
-
-    const [_param, v, setV, updateV] = useSearchParam(
-      name,
-      defaultValue,
-      !noDel,
-      debounceDelay
-    );
-
-    useEffect(() => {
-      context.setStates((s) => ({ ...s, [name]: setV }));
-    }, []);
-
-    return <>{children(v, setV, updateV)}</>;
-  }
-);
-
-SearchFilters.displayName = "SearchFilters";

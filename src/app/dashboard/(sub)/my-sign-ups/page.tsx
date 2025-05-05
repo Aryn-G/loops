@@ -31,6 +31,7 @@ export default async function Page() {
         <h1 className="font-black text-xl">My Sign-Ups</h1>
         <div className="flex items-center">
           <Refresh tag={"signups"} />
+          {/* <Refresh path="/dashboard/my-sign-ups" /> */}
         </div>
       </div>
       <p>This is a list of all the loops that have you have signed up for.</p>

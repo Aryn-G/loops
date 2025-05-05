@@ -46,10 +46,10 @@ export async function signUpMany(
   const notOpenYet = isDateBetween(
     undefined,
     toISOStringOffset(new Date()),
-    loop.signUpOpenDateTime
+    toISOStringOffset(loop.signUpOpenDateTime)
   );
   const windowPassed = isDateBetween(
-    loop.departureDateTime,
+    toISOStringOffset(loop.departureDateTime),
     toISOStringOffset(new Date()),
     undefined
   );

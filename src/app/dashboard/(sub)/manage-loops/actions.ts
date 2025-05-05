@@ -2,7 +2,7 @@
 
 import mongoDB from "@/app/_db/connect";
 import Loop from "@/app/_db/models/Loop";
-import { toISOStringOffset } from "@/app/_lib/time";
+import { toDateWithOffset } from "@/app/_lib/time";
 import { auth } from "@/auth";
 import { revalidateTag } from "next/cache";
 
@@ -18,6 +18,8 @@ export async function createLoopAction(
 
   const createdBy = session.user.id;
 
+  const timezone = formData.get("timezone");
+
   const loopNumber = formData.get("loopNumber");
   const title = formData.get("title");
   const description = formData.get("description");
@@ -30,6 +32,8 @@ export async function createLoopAction(
 
   const res = formData.getAll("reservations");
   const signUpOpenDateTime = formData.get("signUpOpenDateTime");
+
+  const submissionType = formData.get("submissionType");
 
   const reservations: {
     group: FormDataEntryValue | null;
@@ -48,18 +52,36 @@ export async function createLoopAction(
 
   try {
     if (
+      !timezone ||
       !title ||
       !description ||
       !capacity ||
       !departureDateTime ||
       !departureLoc ||
       !pickUpDateTime ||
-      !approxDriveTime
+      !approxDriveTime ||
+      !submissionType
     )
       throw new Error("Error: Incomplete Form Submission");
 
     if (totalSlots > Number(capacity))
       throw new Error("Error: Cannot Reserve More Slots than Capacity");
+
+    const departureD = toDateWithOffset(
+      departureDateTime.toString(),
+      Number(timezone)
+    );
+    const pickUpD = toDateWithOffset(
+      pickUpDateTime.toString(),
+      Number(timezone)
+    );
+    const signUpOpenD = !!signUpOpenDateTime
+      ? toDateWithOffset(signUpOpenDateTime.toString(), Number(timezone))
+      : undefined;
+
+    console.log("Timezone: " + timezone);
+    console.log("Form Departure Time: " + departureDateTime);
+    console.log("Departure Time to DB: " + departureD);
 
     const newLoop = new Loop({
       createdBy,
@@ -67,19 +89,21 @@ export async function createLoopAction(
       title,
       description,
       capacity,
-      departureDateTime,
+      departureDateTime: departureD,
       departureLocation: departureLoc,
-      pickUpDateTime,
+      pickUpDateTime: pickUpD,
       pickUpLocation: pickUpLoc ?? "",
       approxDriveTime,
       reservations,
-      signUpOpenDateTime,
+      signUpOpenDateTime: signUpOpenD,
       createdAt: new Date(),
+      published: submissionType.toString()[0] === "S" ? false : true, // Save for later button
     });
 
     await newLoop.save();
     revalidateTag("loopsTag");
   } catch (error: any) {
+    console.log(error);
     if (typeof error === "string") return { overall: error };
     return { overall: "Internal Error" };
   }
@@ -104,6 +128,53 @@ export async function removeLoop(prevState: any, formData: FormData) {
     await loopDoc.save();
     revalidateTag("loopsTag");
   } catch (error) {
+    console.log("Internal Error");
+    return "Internal Error";
+  }
+
+  return "Success";
+}
+export async function publishLoop(prevState: any, formData: FormData) {
+  await mongoDB();
+
+  const loop = formData.get("loop");
+  try {
+    if (!loop) return "Error: Invalid Form Submission";
+
+    const loopDoc = await Loop.findOne(
+      { _id: loop }
+      // { $set: { deleted: { $not: "$deleted" } } }
+    );
+    if (!loopDoc) return "Error";
+
+    loopDoc.published = !loopDoc.published;
+    await loopDoc.save();
+    revalidateTag("loopsTag");
+  } catch (error) {
+    console.log("Internal Error");
+    return "Internal Error";
+  }
+
+  return "Success";
+}
+export async function cancelLoop(prevState: any, formData: FormData) {
+  await mongoDB();
+
+  const loop = formData.get("loop");
+  try {
+    if (!loop) return "Error: Invalid Form Submission";
+
+    const loopDoc = await Loop.findOne(
+      { _id: loop }
+      // { $set: { deleted: { $not: "$deleted" } } }
+    );
+    if (!loopDoc) return "Error";
+
+    loopDoc.canceled = !loopDoc.canceled;
+    await loopDoc.save();
+    revalidateTag("loopsTag");
+  } catch (error) {
+    console.log("Internal Error");
     return "Internal Error";
   }
 

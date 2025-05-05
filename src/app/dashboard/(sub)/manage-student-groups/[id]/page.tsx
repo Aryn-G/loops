@@ -2,12 +2,14 @@ import { auth } from "@/auth";
 import { forbidden, notFound, redirect, unauthorized } from "next/navigation";
 import Refresh from "@/app/_components/Refresh";
 import Link from "next/link";
-import { getGroup } from "@/app/_db/queries/groups";
+import { getGroup, getGroups } from "@/app/_db/queries/groups";
 import EditGroupUsers from "./EditGroupUsers";
 import { getFilteredUsers } from "@/app/_db/queries/users";
 import ManageGroupUsers from "./ManageGroupUsers";
 import EditGroup from "./EditGroup";
 import { Metadata } from "next";
+import ManageSubgroups from "./ManageSubgroups";
+import EditSubgroups from "./EditSubgroups";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -32,6 +34,7 @@ export default async function Page({ params }: Props) {
   const group = await getGroup(id);
   if (!group) return notFound();
 
+  const allGroups = await getGroups();
   const allUsers = await getFilteredUsers();
 
   return (
@@ -55,13 +58,18 @@ export default async function Page({ params }: Props) {
         <h1 className="font-black text-xl">Editting Student Group</h1>
         <div className="flex items-center">
           <Refresh tag={"groups"} />
+          {/* <Refresh path={"/dashboard/manage-student-groups/" + id} /> */}
         </div>
       </div>
 
       <EditGroup group={group} />
-
       <EditGroupUsers allUsers={allUsers} group={group} />
+      <EditSubgroups allGroups={allGroups} group={group} />
 
+      <p className="font-black text-xl">Subgroups</p>
+      <ManageSubgroups group={group} />
+
+      <p className="font-black text-xl">Users Directly in Group</p>
       <ManageGroupUsers group={group} />
     </>
   );

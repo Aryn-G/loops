@@ -30,6 +30,7 @@ export default async function Page() {
         <h1 className="font-black text-xl">Sessions</h1>
         <div className="flex items-center">
           <Refresh tag={"sessions"} />
+          {/* <Refresh path="/dashboard/sessions" /> */}
         </div>
       </div>
       <p>

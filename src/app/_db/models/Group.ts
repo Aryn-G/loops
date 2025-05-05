@@ -2,12 +2,17 @@ import mongoose from "mongoose";
 
 export interface IGroup extends mongoose.Document {
   users: mongoose.Types.ObjectId[];
+  subgroups: mongoose.Types.ObjectId[];
   name: string;
   deleted: boolean;
 }
 
 const GroupSchema = new mongoose.Schema<IGroup>({
   users: {
+    type: [mongoose.Schema.ObjectId],
+    default: [],
+  },
+  subgroups: {
     type: [mongoose.Schema.ObjectId],
     default: [],
   },

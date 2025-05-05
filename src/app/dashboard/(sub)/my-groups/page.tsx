@@ -31,6 +31,7 @@ export default async function Page() {
         <h1 className="font-black text-xl">My Groups</h1>
         <div className="flex items-center">
           <Refresh tag={"groups"} />
+          {/* <Refresh path="/dashboard/my-groups" /> */}
         </div>
       </div>
       <p>This is a list of all the student groups you are a part of.</p>

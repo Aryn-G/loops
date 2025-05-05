@@ -11,14 +11,18 @@ export default function Footer() {
         </span>
         <div className="flex flex-wrap justify-center lg:justify-start">
           {[
-            // { href: "/suggest", title: "Suggest Loops" },
+            {
+              href: "https://docs.google.com/forms/d/e/1FAIpQLSeBbGURCi6QPvpJEDIvRuXa1PZXXn-KjcC4o6xvjeGgqrrwdg/viewform",
+              target: "_blank",
+              title: "Suggest Loops",
+            },
             {
               href: "https://www.ncssm.edu/accessibility",
               target: "_blank",
               title: "Accessibility",
             },
             {
-              href: "https://www.ncssm.edu",
+              href: "https://www.ncssm.edu/privacy-statement",
               target: "_blank",
               title: "Privacy Poliy",
             },

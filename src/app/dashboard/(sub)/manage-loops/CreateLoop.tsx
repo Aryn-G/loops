@@ -16,7 +16,7 @@ export default async function CreateLoop({
 }) {
   // await wait(1000);
   const allGroups = await getGroups();
-  const allLoops = await getLoops();
+  const allLoops = await getLoops(null, null);
   // const allSubs = await getSubscriptions();
 
   // const autofill = (await searchParams).autofill;

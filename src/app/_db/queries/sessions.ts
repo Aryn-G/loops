@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import mongoDB from "../connect";
 import Sessions, { ISessions } from "../models/Sessions";
 import { ObjectId } from "mongodb";
+import Users, { IUsers } from "../models/Users";
 
 /**
  * Gets a User's Groups from DB
@@ -30,7 +31,7 @@ export const getUserSessions = unstable_cache(
           deviceModel: session.deviceModel,
           os: session.os,
           location: session.location,
-          ip: session.ip,
+          // ip: session.ip,
           createdAt: session.createdAt,
           updatedAt: session.updatedAt,
         };
@@ -42,6 +43,49 @@ export const getUserSessions = unstable_cache(
   ["sessions"],
   {
     tags: ["sessions"],
+    revalidate: 60,
+  }
+);
+
+/**
+ * Gets Group by id from DB
+ * @param id object id of document
+ * @returns group or null
+ */
+export const getCachedSessionAndUser = unstable_cache(
+  async (sessionToken: string) => {
+    // connect to mongodb
+    await mongoDB();
+
+    // find group by id and populate necessary paths
+    try {
+      const session = await Sessions.findOne<ISessions>({
+        sessionToken,
+      });
+      if (!session) return { session: null, user: null };
+      const user = await Users.findById<IUsers>(session.userId);
+      if (!user) return { session, user: null };
+
+      // console.log(
+      //   "getCachedSessionAndUser(...) at ",
+      //   new Date().toLocaleTimeString("en-US", {
+      //     hour12: true,
+      //     minute: "2-digit",
+      //     hour: "2-digit",
+      //     second: "2-digit",
+      //   })
+      // );
+      return {
+        user: user.toObject(),
+        session: session.toObject(),
+      };
+    } catch {
+      return { session: null, user: null };
+    }
+  },
+  ["auth"],
+  {
+    tags: ["auth"],
     revalidate: 60,
   }
 );

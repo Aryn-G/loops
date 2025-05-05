@@ -1,22 +1,20 @@
 "use client";
 
 import React, { useActionState, useEffect, useRef, useState } from "react";
-import { editLoopAction } from "./actions";
+import { deleteLoop, editLoopAction } from "./actions";
 import Input from "@/app/_components/Inputs/Input";
 import LoopCard from "@/app/_components/LoopCard";
 
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/20/solid";
 
 import { getGroups } from "@/app/_db/queries/groups";
-import mongoose from "mongoose";
 import { Session } from "next-auth";
 import TextArea from "@/app/_components/Inputs/TextArea";
-import { addMinutes, formatDate, toISOStringOffset } from "@/app/_lib/time";
-import Modal from "@/app/_components/Modal";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { getLoop, getLoops } from "@/app/_db/queries/loops";
+import { addMinutes, toISOStringOffset } from "@/app/_lib/time";
+import { getLoop } from "@/app/_db/queries/loops";
 
 import { ReservationItem } from "../CreateLoopClient";
+import { removeLoop } from "../actions";
 
 type Props = {
   session: Session;
@@ -26,11 +24,13 @@ type Props = {
 
 type Reservation = { slots?: number; group?: string; id: string };
 
-const EditLoopForm = ({ session, allGroups, loop }: Props) => {
-  const searchParams = useSearchParams();
-  const { replace } = useRouter();
-  const pathname = usePathname();
+let count = 0;
+function genID() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER;
+  return count.toString();
+}
 
+const EditLoopForm = ({ session, allGroups, loop }: Props) => {
   const [_state, action, pending] = useActionState(editLoopAction, {});
 
   const [loopNumber, setLoopNumber] = useState<number>(loop.loopNumber ?? NaN);
@@ -39,7 +39,7 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
       ? loop.reservations.map((r, i) => ({
           group: r.group._id,
           slots: r.slots,
-          id: i + "",
+          id: genID(),
         }))
       : []
   );
@@ -54,18 +54,18 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
     loop.departureLocation
   );
   const [departureDateTime, setDepartureDateTime] = useState<string>(
-    loop.departureDateTime
+    toISOStringOffset(loop.departureDateTime)
   );
 
   const [pickUpLocation, setPickUpLocation] = useState<string>(
     loop.pickUpLocation ?? ""
   );
   const [pickUpDateTime, setPickUpDateTime] = useState<string>(
-    loop.pickUpDateTime
+    toISOStringOffset(loop.pickUpDateTime)
   );
 
   const [signUpOpenDateTime, setSignUpOpenDateTime] = useState<string>(
-    loop.signUpOpenDateTime
+    toISOStringOffset(loop.signUpOpenDateTime)
   );
   useEffect(() => {
     if (!pending) {
@@ -75,15 +75,21 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
 
   const addReservation = () => {
     if (reservations.length < Math.min(allGroups.length, capacity)) {
-      setReservations((r) => [
-        ...r,
-        { group: "", slots: 1, id: self.crypto.randomUUID() },
-      ]);
+      setReservations((r) => [...r, { group: "", slots: 1, id: genID() }]);
     }
   };
 
   return (
     <>
+      {loop.deleted && (
+        <>
+          <span className="text-rose-700">
+            This Loop has been Deleted. You can restore it if you wish, or you
+            can permanently delete it.
+          </span>
+          <RestorePermaDelete loop={loop} />
+        </>
+      )}
       <div className="relative flex flex-col xl:flex-row gap-4">
         <div className="w-full">
           <form action={action} className="flex flex-col gap-2 w-full">
@@ -93,6 +99,13 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
               className="hidden"
               readOnly
               value={session.user?.id}
+            />
+            <input
+              name="timezone"
+              type="number"
+              className="hidden"
+              readOnly
+              value={new Date().getTimezoneOffset()}
             />
             <input
               name="loop"
@@ -262,7 +275,10 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
                 label="Sign Ups Open"
                 type="datetime-local"
                 required
-                min={loop.createdAt.slice(0, -2) + "00" || "0000-01-01T00:00"}
+                min={
+                  toISOStringOffset(loop.createdAt).slice(0, -2) + "00" ||
+                  "0000-01-01T00:00"
+                }
                 max={departureDateTime || "9999-12-31T23:59"}
                 value={signUpOpenDateTime ?? ""}
                 setValue={(newValue) =>
@@ -304,6 +320,57 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
         </div>
       </div>
     </>
+  );
+};
+
+const RestorePermaDelete = ({ loop }: { loop: Props["loop"] }) => {
+  const [_state, action, pending] = useActionState(removeLoop, "");
+  const [_state2, action2, pending2] = useActionState(deleteLoop, "");
+
+  return (
+    <div className={loop.deleted ? "grid grid-cols-2 gap-2" : ""}>
+      <form action={action} className="flex-shrink-0 w-full">
+        <input
+          className="hidden"
+          name="loop"
+          readOnly
+          value={String(loop._id)}
+        />
+        <button
+          className={
+            (loop.deleted ? "bg-ncssm-green" : "bg-rose-500") +
+            " text-sm w-full text-white flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
+          }
+          type="submit"
+          aria-disabled={pending}
+        >
+          {loop.deleted ? "Restor" : "Delet"}
+          {pending ? "ing" : "e"}
+        </button>
+      </form>
+      {/* {loop.deleted && (
+        
+        <form action={action2} className="flex-shrink-0 w-full">
+          <input
+            className="hidden"
+            name="loop"
+            readOnly
+            value={String(loop._id)}
+          />
+          <button
+            className={
+              (loop.deleted ? "bg-ncssm-green" : "bg-rose-500") +
+              " text-sm w-full text-white flex items-center justify-center gap-2 h-fit brutal-sm md:px-4 font-bold"
+            }
+            type="submit"
+            aria-disabled={pending2}
+          >
+            Permanently Delet
+            {pending2 ? "ing" : "e"}
+          </button>
+        </form>
+      )} */}
+    </div>
   );
 };
 

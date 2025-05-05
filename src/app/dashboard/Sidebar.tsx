@@ -9,6 +9,10 @@ import {
   BookmarkIcon,
   RectangleGroupIcon,
   BellIcon,
+  ArrowLeftStartOnRectangleIcon,
+  PaintBrushIcon,
+  BuildingLibraryIcon,
+  FolderOpenIcon,
 } from "@heroicons/react/24/outline";
 
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
@@ -21,13 +25,15 @@ import {
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
 } from "@heroicons/react/20/solid";
+import { signOutAction } from "./actions";
+import toast from "../_components/Toasts/toast";
 
 export type SectionType = {
   section: string;
   links: SectionLink[];
   allow: string[];
 };
-export type SectionLink = { title: string; icon: ReactNode };
+export type SectionLink = { title: string; icon: ReactNode; logout?: boolean };
 export const SidebarData: SectionType[] = [
   {
     section: "General",
@@ -35,7 +41,7 @@ export const SidebarData: SectionType[] = [
       // { title: "Profile", icon: <UserCircle /> },
       { title: "My Sign-Ups", icon: <BookmarkIcon className="size-6" /> },
       { title: "My Groups", icon: <UserGroupIcon className="size-6" /> },
-      { title: "Sessions", icon: <RectangleGroupIcon className="size-6" /> },
+      // { title: "Sessions", icon: <RectangleGroupIcon className="size-6" /> },
       // { title: "Notifications", icon: <BellIcon className="size-6" /> },
     ],
     allow: ["Student", "Loops", "Admin"],
@@ -63,11 +69,29 @@ export const SidebarData: SectionType[] = [
     links: [
       // { title: "Analytics", icon: <Analytics /> },
       {
+        title: "Manage Accounts",
+        icon: <BuildingLibraryIcon className="size-6" />,
+      },
+      {
         title: "Manage Loops Access",
         icon: <AcademicCapIcon className="size-6" />,
       },
+      // { title: "Clean Up", icon: <FolderOpenIcon className="size-6" /> },
     ],
     allow: ["Admin"],
+  },
+  {
+    section: "Settings",
+    links: [
+      { title: "Sessions", icon: <RectangleGroupIcon className="size-6" /> },
+      // { title: "Appearance", icon: <PaintBrushIcon className="size-6" /> },
+      {
+        title: "Log Out",
+        icon: <ArrowLeftStartOnRectangleIcon className="size-6" />,
+        logout: true,
+      },
+    ],
+    allow: ["No", "Student", "Loops", "Admin"],
   },
 ];
 
@@ -84,8 +108,11 @@ export default function Sidebar({
 
   return (
     <div
+      id="sidebar"
       className={`max-w-sm h-fit flex-shrink-0 bg-ncssm-light-blue ${
-        !noBorder ? "sticky top-20 brutal-md p-4" : ""
+        !noBorder
+          ? "sticky top-20 brutal-md p-4 max-h-[calc(100vh-7rem)] overflow-y-auto"
+          : ""
       } ${!showOnMobile ? "hidden lg:block" : ""} ${
         !noBorder && collapsed ? " p-3.5" : "w-full p-4 pt-7"
       }`}
@@ -138,7 +165,12 @@ function Section({
   }
   return (
     <div className="mb-2">
-      {!collapsed && <p className="text-lg font-black">{section.section}</p>}
+      {!collapsed ? (
+        <p className="text-lg font-black">{section.section}</p>
+      ) : (
+        // <div className="shrink-0 w-full h-0.5 rounded-full bg-black my-0.5"></div>
+        <></>
+      )}
       <div
         className={`flex flex-col ${
           noBorder ? "divide-y divide-black" : "gap-2"
@@ -166,10 +198,38 @@ function SectionLink({
   noBorder?: boolean;
   collapsed: boolean;
 }) {
+  // add logout
   const href =
     "/dashboard/" + link.title.trim().toLowerCase().replace(/(\W)/g, "-");
 
   const pathname = usePathname();
+
+  if (link.logout) {
+    return (
+      <button
+        onClick={() => signOutAction()}
+        className={`text-left flex items-center w-full gap-2  ${
+          noBorder
+            ? "py-4 group"
+            : `${
+                collapsed
+                  ? "p-2 hover:brutal-sm"
+                  : "py-3 px-5 hover:brutal-sm hover:py-3 hover:px-5"
+              }`
+        }`}
+      >
+        {link.icon}
+        {!collapsed && (
+          <>
+            <span className="flex-1 text-neutral-700 group-hover:text-black group-hover:underline underline-offset-2">
+              {link.title}
+            </span>
+            {noBorder && <ChevronRightIcon className="size-5" />}
+          </>
+        )}
+      </button>
+    );
+  }
 
   return (
     <Link
