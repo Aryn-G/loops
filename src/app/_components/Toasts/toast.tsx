@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { ReactNode } from "react";
 import { ExternalToast, toast as sonnerToast } from "sonner";
 
 export default function toast(
@@ -13,10 +13,14 @@ export default function toast(
         id={id}
         title={toast.title}
         description={toast.description}
-        button={{
-          label: toast.button.label,
-          onClick: toast.button.onClick,
-        }}
+        button={
+          isCustomButton(toast.button)
+            ? toast.button
+            : {
+                label: toast.button.label,
+                onClick: toast.button.onClick,
+              }
+        }
       />
     ),
     data
@@ -34,25 +38,38 @@ function Toast(props: ToastProps) {
           <p className="text-sm text-gray-500">{description}</p>
         </div>
       </div>
-      <button
-        className="ml-5 flex-shrink-0 brutal-sm px-3 py-1 text-sm font-semibold bg-ncssm-blue text-white"
-        onClick={() => {
-          button.onClick();
-          sonnerToast.dismiss(id);
-        }}
-      >
-        {button.label}
-      </button>
+      {isCustomButton(button) ? (
+        button.render(id)
+      ) : (
+        <button
+          className="ml-5 flex-shrink-0 brutal-sm px-3 py-1 text-sm font-semibold bg-ncssm-blue text-white"
+          onClick={() => {
+            button.onClick();
+            sonnerToast.dismiss(id);
+          }}
+        >
+          {button.label}
+        </button>
+      )}
     </div>
   );
 }
+
+function isCustomButton(
+  button: RegularButton | CustomButton
+): button is CustomButton {
+  return "render" in button;
+}
+
+type CustomButton = { render: (id: string | number) => ReactNode };
+type RegularButton = {
+  label: string;
+  onClick: () => void;
+};
 
 interface ToastProps {
   id: string | number;
   title: string;
   description: string;
-  button: {
-    label: string;
-    onClick: () => void;
-  };
+  button: RegularButton | CustomButton;
 }

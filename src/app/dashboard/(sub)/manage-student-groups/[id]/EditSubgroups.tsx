@@ -11,6 +11,7 @@ import { EMAIL_PATTERN } from "@/app/_lib/constants";
 import MultiSelect from "@/app/_components/Inputs/MultiSelect";
 import { getFilteredUsers } from "@/app/_db/queries/users";
 import { addSubgroups } from "./actions";
+import toast from "@/app/_components/Toasts/toast";
 
 type Groups = Awaited<ReturnType<typeof getGroups>>[number];
 type Group = NonNullable<Awaited<ReturnType<typeof getGroup>>>;
@@ -32,6 +33,20 @@ const EditSubgroups = (props: Props) => {
 
   useEffect(() => {
     if (selected.length > 0 && !pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description:
+            "Added " +
+            selected.length +
+            " subgroup" +
+            (selected.length != 1 ? "s" : ""),
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
       setSelected([]);
     }
   }, [pending]);

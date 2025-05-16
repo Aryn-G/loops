@@ -11,6 +11,7 @@ import { EMAIL_PATTERN } from "@/app/_lib/constants";
 import MultiSelect from "@/app/_components/Inputs/MultiSelect";
 import { getFilteredUsers } from "@/app/_db/queries/users";
 import { addStudents } from "./actions";
+import toast from "@/app/_components/Toasts/toast";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 type Group = NonNullable<Awaited<ReturnType<typeof getGroup>>>;
@@ -32,6 +33,20 @@ const EditGroupUsers = (props: Props) => {
 
   useEffect(() => {
     if (selected.length > 0 && !pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description:
+            "Added " +
+            selected.length +
+            " student" +
+            (selected.length != 1 ? "s" : ""),
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
       setSelected([]);
     }
   }, [pending]);

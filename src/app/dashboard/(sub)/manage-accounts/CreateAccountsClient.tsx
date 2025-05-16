@@ -10,6 +10,7 @@ import MultiSelect from "@/app/_components/Inputs/MultiSelect";
 import { useFocusWithin } from "@/app/_lib/use-hooks/useFocusWithin";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { EMAIL_PATTERN } from "@/app/_lib/constants";
+import toast from "@/app/_components/Toasts/toast";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 
@@ -24,6 +25,16 @@ const CreateAccountsClient = (props: Props) => {
 
   useEffect(() => {
     if (selected.length > 0 && !pending) {
+      if (_state == "Success")
+        toast({
+          title: "Success",
+          description:
+            "Created " +
+            selected.length +
+            " account" +
+            (selected.length != 1 ? "s" : ""),
+          button: { label: "Close", onClick: () => {} },
+        });
       setSelected([]);
     }
   }, [pending]);

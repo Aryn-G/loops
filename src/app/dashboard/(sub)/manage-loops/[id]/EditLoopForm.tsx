@@ -17,6 +17,7 @@ import { addMinutes, toISOStringOffset } from "@/app/_lib/time";
 import { getLoop } from "@/app/_db/queries/loops";
 
 import { removeLoop } from "../actions";
+import toast from "@/app/_components/Toasts/toast";
 
 type Props = {
   session: Session;
@@ -80,6 +81,17 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
       setReservations((r) => [...r, { group: "", slots: 1, id: genID() }]);
     }
   };
+
+  useEffect(() => {
+    if (!pending) {
+      if (_state.overall == "success")
+        toast({
+          title: "Success",
+          description: "Saved changes.",
+          button: { label: "Close", onClick: () => {} },
+        });
+    }
+  }, [pending]);
 
   return (
     <>

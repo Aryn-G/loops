@@ -6,6 +6,7 @@ import { multiRemoveFromGroup, removeFromGroup } from "./actions";
 import Image from "next/image";
 import { getGroup } from "@/app/_db/queries/groups";
 import Search, { CheckBox } from "@/app/_components/Search";
+import toast from "@/app/_components/Toasts/toast";
 
 type Group = NonNullable<Awaited<ReturnType<typeof getGroup>>>;
 type Props = {
@@ -19,6 +20,20 @@ const ManageGroupUsers = (props: Props) => {
 
   useEffect(() => {
     if (selected.length > 0 && !pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description:
+            "Removed " +
+            selected.length +
+            " student" +
+            (selected.length != 1 ? "s" : ""),
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
       setSelected([]);
     }
   }, [pending]);

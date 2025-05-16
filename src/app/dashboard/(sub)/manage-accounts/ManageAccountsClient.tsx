@@ -21,6 +21,7 @@ import title from "title";
 import { getFilteredUsers } from "@/app/_db/queries/users";
 import Image from "next/image";
 import { Session } from "next-auth";
+import toast from "@/app/_components/Toasts/toast";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 
@@ -49,6 +50,24 @@ const ManageAccountsClient = (props: Props) => {
 
   useEffect(() => {
     if (selected.length > 0 && !pending) {
+      if (_state == "Success") {
+        const fd = new FormData();
+        selected.forEach((id) => fd.append("remove", id));
+        toast({
+          title: "Success",
+          description:
+            "Updated " +
+            selected.length +
+            " account" +
+            (selected.length != 1 ? "s" : ""),
+          button: {
+            label: "Undo",
+            onClick: () => {
+              multiDeleteUser("", fd);
+            },
+          },
+        });
+      }
       setSelected([]);
     }
   }, [pending]);
@@ -324,6 +343,24 @@ const PersonCard = <T,>({
   setSelected: React.Dispatch<React.SetStateAction<T[]>>;
 }) => {
   const [_state, action, pending] = useActionState(deleteUser, "");
+
+  useEffect(() => {
+    if (!pending) {
+      if (_state == "Success")
+        toast({
+          title: "Success",
+          description: "Updated account",
+          button: {
+            label: "Undo",
+            onClick: () => {
+              const fd = new FormData();
+              fd.append("remove", u._id);
+              deleteUser("", fd);
+            },
+          },
+        });
+    }
+  }, [pending]);
 
   return (
     <div

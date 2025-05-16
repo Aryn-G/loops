@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useActionState, useRef, useState } from "react";
+import React, { useActionState, useEffect, useRef, useState } from "react";
 import { cancelLoop, publishLoop, removeLoop } from "./actions";
 
 import Pagination from "@/app/_components/Pagination";
@@ -51,6 +51,7 @@ import {
 import title from "title";
 import { isValidDateStr } from "@/app/_lib/util";
 import { Session } from "next-auth";
+import toast from "@/app/_components/Toasts/toast";
 
 type Props = {
   session: Session;
@@ -552,6 +553,25 @@ const LoopCardR = ({
   const [_state, action, pending] = useActionState(removeLoop, "");
   const [_state2, action2, pending2] = useActionState(publishLoop, "");
   const [_state3, action3, pending3] = useActionState(cancelLoop, "");
+
+  useEffect(() => {
+    if (!pending) {
+      if (_state == "Success") {
+        const fd = new FormData();
+        fd.append("loop", loop._id);
+        toast({
+          title: "Success",
+          description: "Deleted Loop",
+          button: {
+            label: "Undo",
+            onClick: () => {
+              removeLoop("", fd);
+            },
+          },
+        });
+      }
+    }
+  }, [pending]);
 
   return (
     <div className="brutal-sm p-6 flex flex-col">

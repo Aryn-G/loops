@@ -142,8 +142,8 @@ export function isDateBetween(
 
   const currentDate = new Date(date);
 
-  if (start && end) return currentDate > start && currentDate < end;
-  if (start) return currentDate > start;
-  if (end) return currentDate < end;
+  if (start && end) return currentDate >= start && currentDate <= end;
+  if (start) return currentDate >= start;
+  if (end) return currentDate <= end;
   return true;
 }

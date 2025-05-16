@@ -11,6 +11,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { useSearchParam } from "@/app/_lib/use-hooks/useSearchParam";
 import Search, { CheckBox } from "@/app/_components/Search";
+import toast from "@/app/_components/Toasts/toast";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 
@@ -27,6 +28,20 @@ const ManageAccessClient = (props: Props) => {
 
   useEffect(() => {
     if (selected.length > 0 && !pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description:
+            "Removed access from " +
+            selected.length +
+            " account" +
+            (selected.length != 1 ? "s" : ""),
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
       setSelected([]);
     }
   }, [pending]);
@@ -154,7 +169,20 @@ const ManageAccessClient = (props: Props) => {
 
 const PersonCard = ({ u }: { u: FilteredUser }) => {
   const [_state, action, pending] = useActionState(removeAccessAction, "");
-
+  useEffect(() => {
+    if (!pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description: "Removed access",
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
+    }
+  }, [pending]);
   return (
     <div
       // key={u._id}

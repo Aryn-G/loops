@@ -7,6 +7,7 @@ import { UserPlusIcon } from "@heroicons/react/24/outline";
 
 import { getFilteredUsers } from "@/app/_db/queries/users";
 import MultiSelect from "@/app/_components/Inputs/MultiSelect";
+import toast from "@/app/_components/Toasts/toast";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 
@@ -24,6 +25,20 @@ const GiveAccessClient = (props: Props) => {
 
   useEffect(() => {
     if (selected.length > 0 && !pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description:
+            "Updated " +
+            selected.length +
+            " account" +
+            (selected.length != 1 ? "s" : ""),
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
       setSelected([]);
     }
   }, [pending]);

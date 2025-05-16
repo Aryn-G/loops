@@ -2,8 +2,9 @@
 
 import Input from "@/app/_components/Inputs/Input";
 import { getGroup } from "@/app/_db/queries/groups";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { editGroup } from "./actions";
+import toast from "@/app/_components/Toasts/toast";
 
 type Group = NonNullable<Awaited<ReturnType<typeof getGroup>>>;
 
@@ -15,6 +16,21 @@ const EditGroup = ({ group }: Props) => {
   const [_state, action, pending] = useActionState(editGroup, "");
 
   const [groupName, setGroupName] = useState(group.name);
+
+  useEffect(() => {
+    if (!pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description: "Saved changes",
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
+    }
+  }, [pending]);
 
   return (
     <form

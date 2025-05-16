@@ -11,6 +11,7 @@ import { getGroups } from "@/app/_db/queries/groups";
 import { EMAIL_PATTERN } from "@/app/_lib/constants";
 import MultiSelect from "@/app/_components/Inputs/MultiSelect";
 import { getFilteredUsers } from "@/app/_db/queries/users";
+import toast from "@/app/_components/Toasts/toast";
 
 type FilteredUser = Awaited<ReturnType<typeof getFilteredUsers>>[number];
 type Group = Awaited<ReturnType<typeof getGroups>>[number];
@@ -30,6 +31,16 @@ const CreateGroupClient = ({ allGroups, allUsers }: Props) => {
 
   useEffect(() => {
     if (!pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description: "Created group",
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
       setGroupName("");
       setSelected([]);
       setSelectedGroups([]);

@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import { addSelfToLoop } from "./actions";
 import { getButtonColor } from "../SearchLoops";
+import toast from "@/app/_components/Toasts/toast";
 
 type Loop = NonNullable<Awaited<ReturnType<typeof getLoop>>>;
 
@@ -24,6 +25,21 @@ const SignUpButton = ({ loop, session }: Props) => {
   const [_state, action, pending] = useActionState(addSelfToLoop, "");
 
   const [dateTime, setDateTime] = useState(new Date());
+
+  useEffect(() => {
+    if (!pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description: "Signed Up!",
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
+    }
+  }, [pending]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {

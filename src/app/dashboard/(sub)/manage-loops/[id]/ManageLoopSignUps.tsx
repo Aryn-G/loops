@@ -7,6 +7,7 @@ import Image from "next/image";
 import { getLoop } from "@/app/_db/queries/loops";
 import { formatDate, formatTime, toISOStringOffset } from "@/app/_lib/time";
 import Search, { CheckBox } from "@/app/_components/Search";
+import toast from "@/app/_components/Toasts/toast";
 
 type Loop = NonNullable<Awaited<ReturnType<typeof getLoop>>>;
 type Props = {
@@ -20,6 +21,20 @@ const ManageLoopSignUps = (props: Props) => {
 
   useEffect(() => {
     if (selected.length > 0 && !pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description:
+            "Removed " +
+            selected.length +
+            " student" +
+            (selected.length != 1 ? "s" : ""),
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
       setSelected([]);
     }
   }, [pending]);
@@ -164,7 +179,20 @@ const PersonCard = ({
   loop: string;
 }) => {
   const [_state, action, pending] = useActionState(removeFromLoop, "");
-
+  useEffect(() => {
+    if (!pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description: "Removed student from loop",
+          button: {
+            label: "close",
+            onClick: () => {},
+          },
+        });
+      }
+    }
+  }, [pending]);
   return (
     <div
       // key={u._id}

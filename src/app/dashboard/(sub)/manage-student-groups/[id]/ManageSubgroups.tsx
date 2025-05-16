@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useActionState, useRef, useState } from "react";
+import React, { useActionState, useEffect, useRef, useState } from "react";
 import { removeSubgroup } from "./actions";
 
 import { formatDate, isDateBetween, toISOStringOffset } from "@/app/_lib/time";
@@ -17,6 +17,7 @@ import Image from "next/image";
 import { Session } from "next-auth";
 import { getGroup, getGroups } from "@/app/_db/queries/groups";
 import Link from "next/link";
+import toast from "@/app/_components/Toasts/toast";
 
 type Props = {
   group: NonNullable<Awaited<ReturnType<typeof getGroup>>>;
@@ -50,6 +51,21 @@ const GroupCard = ({
   >["subgroups"][number];
 }) => {
   const [_state, action, pending] = useActionState(removeSubgroup, "");
+
+  useEffect(() => {
+    if (!pending) {
+      if (_state == "Success") {
+        toast({
+          title: "Success",
+          description: "Removed subgroup",
+          button: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
+    }
+  }, [pending]);
 
   return (
     <div className="py-3 flex flex-row gap-2 w-full items-center justify-center">
