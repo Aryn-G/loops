@@ -63,7 +63,7 @@ export async function editLoopSignUps(prevState: any, formData: FormData) {
     revalidateTag("signups");
   } catch (error) {
     if (typeof error === "string") return error;
-    console.log("Internal Error");
+    console.log("Internal Error 2");
     return "Internal Error";
   }
 

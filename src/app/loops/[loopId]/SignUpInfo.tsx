@@ -44,26 +44,34 @@ const SignUpInfo = ({ loop, session }: Props) => {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="w-fit grid grid-cols-[repeat(4,auto)] gap-x-1">
+      <div className="w-fit grid grid-cols-[repeat(4,auto)] gap-x-2">
         {loop.reservations.map((res) => (
           <Fragment key={res.group._id}>
             <span className="text-center">
               {
                 loop.filled.filter(
-                  (f) => f.group && f.group._id == res.group._id
+                  (f) =>
+                    f.group &&
+                    !!loop.reservations.find(
+                      (r2) => r2.group._id === f.group?._id
+                    ) && // contains group
+                    f.group._id == res.group._id
                 ).length
               }
             </span>
             <span> / </span>
             <span className="text-center">{res.slots}</span>
-            <span className="ml-2">
-              {" "}
-              Reservations for {res.group.name} filled
-            </span>
+            <span className="ml-2">{res.group.name}</span>
           </Fragment>
         ))}
         <span className="text-center">
-          {loop.filled.filter((f) => f.group === undefined).length}
+          {
+            loop.filled.filter(
+              (f) =>
+                f.group === undefined ||
+                !loop.reservations.find((r2) => r2.group._id === f.group?._id)
+            ).length
+          }
         </span>
         <span> / </span>
         <span className="text-center">
@@ -72,7 +80,6 @@ const SignUpInfo = ({ loop, session }: Props) => {
               .map((r) => r.slots)
               .reduce((sum, r) => sum + r, 0)}
         </span>
-        <span className="ml-2"> Unreserved slots filled</span>
       </div>
       <div className="mt-4 divide-y divide-black flex flex-col md:gap-2 items-center">
         {loop.filled.length === 0

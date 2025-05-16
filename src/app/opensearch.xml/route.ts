@@ -1,7 +1,10 @@
 import { NextRequest } from "next/server";
 
+export const runtime = "edge"; // avoid node cold-starts
+export const revalidate = 0; // disable ISR caching
+
 export async function GET(req: NextRequest) {
-  const baseUrl = req.url.split("/opensearch.xml")[0];
+  const baseUrl = new URL(req.url).origin;
 
   console.log(baseUrl);
 

@@ -3,8 +3,11 @@ import { SignInButton } from "./page";
 
 export default async function Unauthorized() {
   const h = await headers();
+  // original pathname to redirect user back to after they login
+  // example:
+  // unauthorized user tries to access /dashboard/manage-loops
+  // after they login successfully, they will be sent to /dashboard/manage-loops instead of default home
   const pathname = h.get("x-current-path");
-  // console.log("redirect to: " + pathname);
 
   return (
     <main className="pt-20 flex-1 flex flex-col items-center justify-center">
