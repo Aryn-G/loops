@@ -106,7 +106,7 @@ const ManageSignUpsClient = ({ userSignUps }: Props) => {
       name="Loops"
       inputClassName="my-5 flex flex-col gap-2"
       itemsPerPage={6}
-      paginationClassName="grid grid-cols-1 @2xl:grid-cols-2 @4xl:grid-cols-3 gap-3 md:gap-6"
+      paginationClassName="grid grid-cols-1 @3xl:grid-cols-2 @4xl:grid-cols-3 gap-3 md:gap-6"
       render={(item, i) => <LoopCardR key={i} signup={item} />}
       filterString={(filtered, query) => (
         <>
@@ -273,7 +273,7 @@ const ManageSignUpsClient = ({ userSignUps }: Props) => {
               }
             }}
             equal={(state, opt) => state.title === opt.title}
-            className="w-full md:w-fit md:@2xl:px-2 md:@2xl:w-full"
+            className="w-full md:w-fit md:@3xl:px-2 md:@3xl:w-full"
           />
           <div className="w-full flex flex-col md:flex-row items-center justify-between gap-3">
             <Input
