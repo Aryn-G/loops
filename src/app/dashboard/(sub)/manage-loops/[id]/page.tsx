@@ -79,7 +79,12 @@ export default async function Page({ params }: Props) {
             <span className="text-center">
               {
                 loop.filled.filter(
-                  (f) => f.group && f.group._id == res.group._id
+                  (f) =>
+                    f.group &&
+                    !!loop.reservations.find(
+                      (r2) => r2.group._id === f.group?._id
+                    ) && // contains group
+                    f.group._id == res.group._id
                 ).length
               }
             </span>
@@ -89,7 +94,13 @@ export default async function Page({ params }: Props) {
           </Fragment>
         ))}
         <span className="text-center">
-          {loop.filled.filter((f) => f.group === undefined).length}
+          {
+            loop.filled.filter(
+              (f) =>
+                f.group === undefined ||
+                !loop.reservations.find((r2) => r2.group._id === f.group?._id)
+            ).length
+          }
         </span>
         <span> / </span>
         <span className="text-center">

@@ -14,6 +14,7 @@ body {
   overflow-y: scroll;
 }
 
+/* THIS DOES NOT WORK. DATETIME INPUTS ARE STILL BROKEN ON iOS */
 @layer base {
   input[type="date"],
   input[type="time"],

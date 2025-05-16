@@ -1,3 +1,7 @@
+// this page is from serwist's docs
+// it allows this app to be a Progress Web App (PWA)
+// this has cool caching features and offline support
+
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 import { Serwist } from "serwist";

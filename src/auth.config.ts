@@ -15,16 +15,18 @@ export default {
           // google provides account id with .sub
           // this line below is crucial!
           id: profile.sub ?? profile.id,
-          // default role to "Student"
+          // default role to "No"
           role:
             foundUser !== null && foundUser.linked === false
               ? foundUser.role
               : profile.role ?? "No",
+          // default account to be linked and deleted
           linked: true,
           deleted: true,
           ...profile,
         };
 
+        // if found a user, or an unlinked user, link account / update account
         if (foundUser !== null && foundUser.linked === false) {
           await Users.findByIdAndUpdate(
             foundUser._id,
@@ -45,6 +47,7 @@ export default {
           // prompt: "none",
         },
       },
+      // neccesary for account linking logic
       allowDangerousEmailAccountLinking: true,
     }),
   ],

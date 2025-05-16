@@ -93,7 +93,13 @@ export const getLoop = unstable_cache(
         capacity: loop.capacity,
         reservations: loop.reservations.map((r: any) => ({
           slots: r.slots as number,
-          group: { name: r.group.name as string, _id: String(r.group._id) },
+          group:
+            r.group !== null
+              ? {
+                  name: r.group.name as string,
+                  _id: String(r.group._id),
+                }
+              : { name: "[null]", _id: "" },
         })),
         filled: loop.filled.map((v: any) => ({
           _id: String(v._id),

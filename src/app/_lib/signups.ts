@@ -1,6 +1,6 @@
 "use server";
 
-import { getGroups } from "../_db/queries/groups";
+import { getGroups, getUserGroupsHelper } from "../_db/queries/groups";
 import { getLoop } from "../_db/queries/loops";
 import { isDateBetween, toISOStringOffset } from "./time";
 
@@ -25,10 +25,10 @@ export async function signUpMany(
   // for every signup
   loop.filled.forEach((signUp) => {
     // if the sign up is using a reserved slot
-    // increment that groups filled slots
-    if (signUp.group)
+    if (signUp.group) {
       reservedSlotsUsed[String(signUp.group._id)] =
         (reservedSlotsUsed[String(signUp.group._id)] || 0) + 1;
+    }
   });
 
   let totalSlotsUsed = loop.filled.length;
@@ -71,11 +71,21 @@ export async function signUpMany(
 
     // get loop's reservation groups
     // ensure that reservation group contains current user id
-    const reservations = loop.reservations.filter((res) =>
-      allGroups
-        .find((g) => String(g._id) === String(res.group._id))
-        ?.users.includes(userId)
-    );
+
+    const reservations = loop.reservations
+      .map((res) => {
+        const userGroup = getUserGroupsHelper(allGroups, userId).find(
+          (userGroup) => String(userGroup.group._id) === String(res.group._id)
+        );
+        if (userGroup) {
+          return { res, level: userGroup.level };
+        } else {
+          return null;
+        }
+      })
+      .filter((res) => res !== null)
+      .sort((a, b) => a.level - b.level)
+      .map((res) => res.res);
 
     // go through each reservation group
     for (const reservation of reservations) {

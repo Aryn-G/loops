@@ -5,7 +5,10 @@ import { deleteLoop, editLoopAction } from "./actions";
 import Input from "@/app/_components/Inputs/Input";
 import LoopCard from "@/app/_components/LoopCard";
 
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/20/solid";
+import {
+  AdjustmentsHorizontalIcon,
+  XMarkIcon,
+} from "@heroicons/react/20/solid";
 
 import { getGroups } from "@/app/_db/queries/groups";
 import { Session } from "next-auth";
@@ -13,7 +16,6 @@ import TextArea from "@/app/_components/Inputs/TextArea";
 import { addMinutes, toISOStringOffset } from "@/app/_lib/time";
 import { getLoop } from "@/app/_db/queries/loops";
 
-import { ReservationItem } from "../CreateLoopClient";
 import { removeLoop } from "../actions";
 
 type Props = {
@@ -39,7 +41,7 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
       ? loop.reservations.map((r, i) => ({
           group: r.group._id,
           slots: r.slots,
-          id: genID(),
+          id: r.group._id,
         }))
       : []
   );
@@ -322,6 +324,100 @@ const EditLoopForm = ({ session, allGroups, loop }: Props) => {
     </>
   );
 };
+
+export function ReservationItem({
+  reservation,
+  setReservations,
+  capacity,
+  allGroups,
+  pending,
+}: {
+  reservation: Reservation;
+  setReservations: React.Dispatch<React.SetStateAction<Reservation[]>>;
+  capacity: number;
+  allGroups: Awaited<ReturnType<typeof getGroups>>;
+  pending: boolean;
+}) {
+  // console.log(reservation);
+  // useEffect(() => {}, [reservation]);
+
+  const deleteReservation = () => {
+    setReservations((rs) => rs.filter((r2) => r2.id != reservation.id));
+  };
+
+  const onSlotsChange = (newValue: string | number | undefined) => {
+    setReservations((prev) =>
+      prev.map((r) =>
+        r.id === reservation.id ? { ...r, slots: newValue as number } : r
+      )
+    );
+  };
+
+  const onGroupChange = (newValue: string) => {
+    setReservations((prev) =>
+      prev.map((r) => (r.id === reservation.id ? { ...r, group: newValue } : r))
+    );
+  };
+  return (
+    <div className="flex gap-2 items-end w-full" key={reservation.id}>
+      <input
+        name="reservations"
+        type="text"
+        className="hidden"
+        readOnly
+        value={String(reservation.id)}
+      />
+      <button
+        type="button"
+        onClick={deleteReservation}
+        className="flex items-center justify-center p-2 h-fit mb-3 text-red-500"
+      >
+        <XMarkIcon className="size-5" />
+      </button>
+      <div className="flex items-center justify-center gap-2 w-full">
+        <div className="flex flex-col w-full">
+          <label
+            htmlFor={"reservationGroup" + reservation.id}
+            className="font-bold mb-1"
+          >
+            Group
+            <span className="text-ncssm-blue">*</span>
+          </label>
+          <select
+            name={"reservationGroup" + reservation.id}
+            id={"reservationGroup" + reservation.id}
+            className={"brutal-sm px-4 mb-3 min-w-0 w-full h-11 " + pending}
+            required
+            value={reservation.group ?? ""}
+            onChange={(e) => onGroupChange(e.target.value)}
+          >
+            <option value={""} disabled>
+              Select a group
+            </option>
+            {allGroups.map((v) => (
+              <option value={v._id} key={v._id}>
+                {v.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col w-full">
+          <Input
+            name={"reservationSlots" + reservation.id}
+            type="number"
+            min={1}
+            max={capacity}
+            label="Slots"
+            className="mb-3 min-w-0 w-full"
+            required
+            value={reservation.slots!}
+            setValue={onSlotsChange}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const RestorePermaDelete = ({ loop }: { loop: Props["loop"] }) => {
   const [_state, action, pending] = useActionState(removeLoop, "");
