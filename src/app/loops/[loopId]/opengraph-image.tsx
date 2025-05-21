@@ -45,8 +45,8 @@ export default async function Image({
 
     // return await (await fetch(new URL(url, import.meta.url))).arrayBuffer();
     return new Promise((resolve, reject) => {
-      (process.env.APP_URL?.startsWith("https") ? https : http)
-        .get(`${process.env.APP_URL}/${url.slice(2)}`, (res) => {
+      (process.env.AUTH_URL?.startsWith("https") ? https : http)
+        .get(`${process.env.AUTH_URL}/${url.slice(2)}`, (res) => {
           const chunks: any[] = [];
           res.on("data", (c) => chunks.push(c));
           res.on("end", () => resolve(Buffer.concat(chunks)));

@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "roles": "node scripts/out/scripts/updateUserRole.js",
-    "updates": "node scripts/out/scripts/updateLoops.js"
+    "createAccount": "node scripts/out/scripts/createAccount.js",
+    "accountRoles": "node scripts/out/scripts/updateUserRole.js"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.7.2",

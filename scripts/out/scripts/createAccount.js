@@ -35,6 +35,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var dotenv_1 = require("dotenv");
 (0, dotenv_1.config)({ path: ".env.local" });
@@ -42,6 +51,7 @@ var prompts_1 = require("@inquirer/prompts");
 var mongodb_1 = require("mongodb");
 var mongoose_1 = require("mongoose");
 var Users_1 = require("../src/app/_db/models/Users");
+var EMAIL_PATTERN = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
 process.on("SIGINT", function () {
     console.log("\nClosing Terminal...");
     process.exit(0);
@@ -54,10 +64,23 @@ process.on("unhandledRejection", function (reason) {
     console.error("Unhandled Rejection:", reason);
     process.exit(1);
 });
+var extractEmails = function (input) {
+    // @ts-ignore
+    var emails = __spreadArray([], input.toLowerCase().matchAll(EMAIL_PATTERN), true).map(function (match) { return match[0]; });
+    var remaining = input;
+    for (var _i = 0, emails_1 = emails; _i < emails_1.length; _i++) {
+        var email = emails_1[_i];
+        // Replace exact matches, globally
+        remaining = remaining.replace(new RegExp(email, "g"), "").trim();
+    }
+    return {
+        emails: emails,
+        remaining: remaining.replace(/\s+/g, " "), // normalize spaces
+    };
+};
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var MONGODB_URI, opts, allUsers, user, updatedRole, confirmation;
-        var _this = this;
+        var MONGODB_URI, opts, inputted, emails, foundEmailDocs, foundEmails, newUsers;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -74,85 +97,38 @@ function main() {
                     return [4 /*yield*/, mongoose_1.default.connect(MONGODB_URI, opts)];
                 case 1:
                     _a.sent();
-                    console.log("Loading Users...");
-                    return [4 /*yield*/, Users_1.default.find({})];
+                    return [4 /*yield*/, (0, prompts_1.input)({
+                            message: "Input emails seperated by spaces. ",
+                            required: true,
+                        })];
                 case 2:
-                    allUsers = (_a.sent()).map(function (user) {
-                        return {
-                            _id: String(user._id),
-                            name: user.name,
-                            email: user.email,
-                            role: user.role,
-                            picture: user.picture,
-                        };
-                    });
-                    return [4 /*yield*/, (0, prompts_1.search)({
-                            message: "Search for a User to update:",
-                            source: function (input_1, _a) { return __awaiter(_this, [input_1, _a], void 0, function (input, _b) {
-                                var signal = _b.signal;
-                                return __generator(this, function (_c) {
-                                    if (!input) {
-                                        return [2 /*return*/, []];
-                                    }
-                                    return [2 /*return*/, allUsers
-                                            .filter(function (user) {
-                                            var _a;
-                                            return user.email.toLowerCase().includes(input.toLowerCase()) ||
-                                                ((_a = user.name) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes(input.toLowerCase()));
-                                        })
-                                            .map(function (user) { return ({
-                                            name: "(".concat(user.role, " Account) - ").concat(user.name),
-                                            value: user,
-                                            description: "(".concat(user.role, " Account) - ").concat(user.name, " (").concat(user.email, ")"),
-                                        }); })];
-                                });
-                            }); },
+                    inputted = _a.sent();
+                    emails = extractEmails(inputted).emails;
+                    if (emails.length == 0)
+                        return [2 /*return*/, console.log("No Valid Emails Entered.")];
+                    return [4 /*yield*/, Users_1.default.find({
+                            email: { $in: emails },
                         })];
                 case 3:
-                    user = _a.sent();
-                    return [4 /*yield*/, (0, prompts_1.select)({
-                            message: "Update selected user to:",
-                            choices: [
-                                {
-                                    name: "Student Account",
-                                    value: "Student",
-                                    description: "This is the default account type.",
-                                },
-                                {
-                                    name: "Loops Account",
-                                    value: "Loops",
-                                    description: "This account can create loops and manage student groups.",
-                                },
-                                {
-                                    name: "Admin Account",
-                                    value: "Admin",
-                                    description: "This account can create loops, manage student groups, and also manage Loops Accounts.",
-                                },
-                            ],
-                        })];
+                    foundEmailDocs = _a.sent();
+                    foundEmails = new Set(foundEmailDocs.map(function (doc) { return doc.email; }));
+                    newUsers = emails
+                        .filter(function (email) { return !foundEmails.has(email.toString()); })
+                        .map(function (email) { return ({
+                        email: email,
+                        linked: false,
+                        deleted: false,
+                        role: "Student",
+                    }); });
+                    if (!(newUsers.length > 0)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, Users_1.default.collection.insertMany(newUsers, { ordered: false })];
                 case 4:
-                    updatedRole = _a.sent();
-                    if (updatedRole === user.role) {
-                        console.log("Previous role and new role are the same.");
-                        process.exit(0);
-                    }
-                    confirmation = true;
-                    if (!(updatedRole === "Admin")) return [3 /*break*/, 6];
-                    return [4 /*yield*/, (0, prompts_1.confirm)({
-                            message: "Are you sure you want to grant this account Admin permissions?",
-                            default: false,
-                        })];
+                    _a.sent();
+                    return [3 /*break*/, 6];
                 case 5:
-                    confirmation = _a.sent();
+                    console.log("Nothing new to create");
                     _a.label = 6;
                 case 6:
-                    if (!confirmation) {
-                        console.log("Canceled!");
-                        process.exit(0);
-                    }
-                    return [4 /*yield*/, Users_1.default.findOneAndUpdate({ _id: user._id }, { $set: { role: updatedRole } })];
-                case 7:
-                    _a.sent();
                     console.log("Success!");
                     process.exit(0);
                     return [2 /*return*/];

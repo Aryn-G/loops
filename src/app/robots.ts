@@ -10,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    // sitemap: process.env.APP_URL + "/sitemap.xml",
+    // sitemap: process.env.AUTH_URL + "/sitemap.xml",
   };
 }

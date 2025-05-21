@@ -44,9 +44,10 @@ export default async function Page() {
           <li>A club</li>
           <li>A sports team</li>
         </ul>
-        <p>Student groups are useful to create reserved loops.</p>
-        <p>Example: 4th South Golf Loop</p>
-        <p>Example: 3rd South Olive Garden Loop</p>
+        <p>Example: 4th South</p>
+        <p>Example: South Halls</p>
+        <p>Example: Fall Sports</p>
+        <p>Student groups are useful to create reserved loops. </p>
       </div>
       <br />
       <p className="font-black text-xl">Create a Group</p>
