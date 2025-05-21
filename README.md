@@ -97,7 +97,7 @@ Go through the prompts and change the account's role to Admin.
 
 ### Project Structure
 ```
-repo/
+loops/
 ├─ public/                  # Static assets
 ├─ src/
 │  ├─ app/                  # App Router
@@ -114,3 +114,16 @@ repo/
 ├─ middleware.ts             
 ...
 ```
+
+### How Routing Works
+
+`/src/app/{segment}/page.tsx` = URL => `/segment`
+
+`layout.tsx`'s have slots for child layouts and pages to enter. This provides shared layouts across pages, for example, for dashbord side bars, navigation bars, footers, etc.
+
+
+### Next.js 15 Essentials
+
+React Server Components (RSC) are the default in the app router. They run on the server and stream HTML to the client. This means there is no JS bundle cost. However, these pages cannot have inherent interactivity. To add interactivity, add `"use client"` at the top of a `.tsx` file.
+
+Server Actions allow you to call server functions directly from forms or client components. This avoids any excess back-and-forths between the server and the client, as the execution only occurs when it needs to once. To create a server action, export an async function from a .ts file and invoke it in the client. [Learn More here.](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
