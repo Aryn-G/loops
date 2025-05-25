@@ -13,7 +13,7 @@ import CreateAccountsClient from "./CreateAccountsClient";
 import ManageAccountsClient from "./ManageAccountsClient";
 
 export const metadata: Metadata = {
-  title: "Loops • Dashboard / Sessions",
+  title: "Loops • Dashboard / Manage Accounts",
 };
 
 export default async function Page() {

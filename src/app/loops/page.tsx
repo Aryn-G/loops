@@ -3,6 +3,7 @@ import { redirect, unauthorized } from "next/navigation";
 import SearchLoops from "./SearchLoops";
 import { getLoops } from "../_db/queries/loops";
 import { Metadata } from "next";
+import { getFilteredUsers } from "../_db/queries/users";
 
 export const metadata: Metadata = {
   title: "Loops • Browse",
@@ -12,11 +13,11 @@ export default async function Page() {
   const session = await auth();
   if (!session) return unauthorized();
 
-  const whoToEmail = [
-    "test.user@ncssm.edu",
-    "test.user2@ncssm.edu",
-    "test.user3@ncssm.edu",
-  ];
+  const allUsers = await getFilteredUsers();
+
+  const whoToEmail = allUsers
+    .filter((user) => user.role === "Admin")
+    .map((user) => user.email);
 
   if (
     (session.user.role !== "Admin" &&

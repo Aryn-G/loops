@@ -10,7 +10,7 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Loops • Dashboard / Sessions",
+  title: "Loops • Dashboard / Appearance",
 };
 
 export default async function Page() {

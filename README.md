@@ -14,14 +14,15 @@ Loops provide students with easy access to essential shopping, dining, and recre
 * [Typescript](https://www.typescriptlang.org) - Typed programming language build on top of Javascript
 * [Auth.js V5](https://authjs.dev/) - A customizable library for authentication and session managmeent. 
 
-## Prerequisites
+## Get Started
+
+### Prerequisites
 ```
 node --version  # >= 20.18.0
 npm --version   # >= 10.9.0 (or pnpm 9 or yarn 4)
 ```
 Tools I used: VSCode + Prettier + TailwindCSS IntelliSense
 
-## Get Started
 
 ### Env Vars
 `.env.local`

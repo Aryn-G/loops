@@ -31,6 +31,10 @@ export default function Footer() {
               target: "_blank",
               title: "Institutional Policy",
             },
+            {
+              href: "/authors",
+              title: "Authors",
+            },
           ].map((l) => (
             <Link
               href={l.href}
