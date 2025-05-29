@@ -84,7 +84,6 @@ export const SidebarData: SectionType[] = [
     section: "Settings",
     links: [
       { title: "Sessions", icon: <RectangleGroupIcon className="size-6" /> },
-      // { title: "Appearance", icon: <PaintBrushIcon className="size-6" /> },
       {
         title: "Log Out",
         icon: <ArrowLeftStartOnRectangleIcon className="size-6" />,
