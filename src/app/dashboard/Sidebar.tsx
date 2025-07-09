@@ -34,15 +34,18 @@ export type SectionType = {
   allow: string[];
 };
 export type SectionLink = { title: string; icon: ReactNode; logout?: boolean };
+
 export const SidebarData: SectionType[] = [
   {
     section: "General",
     links: [
-      // { title: "Profile", icon: <UserCircle /> },
+      
+      // maps to `/dashboard/appearance`
+      { title: "Appearance", icon: <PaintBrushIcon className="size-6" /> },
+
       { title: "My Sign-Ups", icon: <BookmarkIcon className="size-6" /> },
       { title: "My Groups", icon: <UserGroupIcon className="size-6" /> },
-      // { title: "Sessions", icon: <RectangleGroupIcon className="size-6" /> },
-      // { title: "Notifications", icon: <BellIcon className="size-6" /> },
+
     ],
     allow: ["Student", "Loops", "Admin"],
   },

@@ -32,6 +32,7 @@ import { getCachedSessionAndUser } from "./queries/sessions"
 
 interface ModifiedAdapterUser extends AdapterUser {
   linked: boolean;
+  appearance?: string;
 }
 
 interface ModifiedAdapterSession extends AdapterSession {

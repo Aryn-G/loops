@@ -11,6 +11,7 @@ declare module "next-auth" {
       role?: "No" | "Student" | "Loops" | "Admin";
       linked?: boolean;
       deleted?: boolean;
+      appearance?: string;
     } & DefaultSession["user"];
     id: string;
     sessionToken: string;

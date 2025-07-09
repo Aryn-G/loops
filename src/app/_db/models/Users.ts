@@ -7,6 +7,7 @@ export interface IUsers extends mongoose.Document {
   role?: "No" | "Student" | "Loops" | "Admin";
   linked: boolean;
   deleted: boolean;
+  appearance?: string;
 }
 
 const UsersSchema = new mongoose.Schema<IUsers>({
@@ -33,6 +34,9 @@ const UsersSchema = new mongoose.Schema<IUsers>({
   deleted: {
     type: Boolean,
     default: false,
+  },
+  appearance: {
+    type: String,
   },
 });
 
