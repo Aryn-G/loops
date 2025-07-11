@@ -2,7 +2,7 @@
 
 <img src="./public/Logo.png" />
 
-#### Created by Aryan Gera (gera25aryan@ncssm.edu)
+#### Created by Aryan Gera '25 (gera25aryan@ncssm.edu)
 Loops provide students with easy access to essential shopping, dining, and recreational activities during their time on campus. This web application provides student life a way to conviently publish and keep track of loops and allows students to securely sign up for these loops.
 
 </div>
@@ -13,6 +13,17 @@ Loops provide students with easy access to essential shopping, dining, and recre
 * [MongoDB Atlas](https://www.mongodb.com) - NoSQL Document Database
 * [Typescript](https://www.typescriptlang.org) - Typed programming language build on top of Javascript
 * [Auth.js V5](https://authjs.dev/) - A customizable library for authentication and session managmeent. 
+
+## Guides
+
+### [Developer Guide #1](https://youtu.be/) by Aryan Gera '25
+
+> *Video is not posted yet. This guide does NOT cover how to set up the project. To learn how to do that, navigate to the [Get Started](#get-started) Section*.
+
+Learn about the planning and designing phases, the NextJS server and client architectures, working with and modifying existing data in MongoDB, and more.
+
+This video should give an insight into how I developed Loops and make it easier for you to maintain and add new features.
+
 
 ## Get Started
 
