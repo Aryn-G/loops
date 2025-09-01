@@ -111,13 +111,14 @@ Students have the ability to easily filter for loops, sign-up with the click of 
 
 Below are some screenshots from friends still attending NCSSM.  
 
-<img src="./public/readme/20250814_193207351_iOS.jpg" width='200' />
-<img src="./public/readme/20250814_193834371_iOS.jpg" width='200' />
-<img src="./public/readme/20250814_222143000_iOS.png" width='200' />
-<img src="./public/readme/20250814_222157542_iOS.jpg" width='200' />
-<img src="./public/readme/20250815_023056000_iOS.png" width='200' />
-<img src="./public/readme/20250815_023108000_iOS.png" width='200' />
-
+<p align='center'>
+  <img src="./public/readme/20250814_193207351_iOS.jpg" width='200' />
+  <img src="./public/readme/20250814_193834371_iOS.jpg" width='200' />
+  <img src="./public/readme/20250814_222143000_iOS.png" width='200' />
+  <img src="./public/readme/20250814_222157542_iOS.jpg" width='200' />
+  <img src="./public/readme/20250815_023056000_iOS.png" width='200' />
+  <img src="./public/readme/20250815_023108000_iOS.png" width='200' />
+</p>
 
 
 ## Libraries and Equipment
