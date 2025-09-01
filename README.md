@@ -4,17 +4,15 @@
 
 #### Created by Aryan Gera '25 (gera25aryan@ncssm.edu)
 Loops provide students with easy access to essential shopping, dining, and recreational activities during their time on campus. 
+</div>
 
-This web application (L∞ps) provides student life a way to conviently publish and keep track of loops and allows students to securely sign up for these loops.
+## Demo
+
+This web application (L∞ps) provides student-life a way to conveniently publish and keep track of loops and allows students to securely sign up for these loops.
 
 L∞ps replaces the old, clunky spreadsheet system and is in production on [https://loops.ncssm.edu](https://loops.ncssm.edu).
 
 > *Requires @ncssm.edu email AND a connection to either NCSSM's eduroam wifi or NCSSM's VPN*
-
-</div>
-
-
-## Demo
 
 ### Authentication Flow
 
@@ -58,7 +56,7 @@ Groups can also have subgroups. For example, you might create `South Halls` with
 
 <img alt='manage groups page' src='./public/readme/Screenshot 2025-05-20 225835.png'>
 
-All groups can be editted as well.
+All groups can be edited as well.
 
 <img alt='editting a group page' src='./public/readme/Screenshot 2025-05-20 230414.png'>
 
@@ -67,7 +65,7 @@ This page is for creating and managing loops. It provides QOL features such as a
 
 <img alt='creating loop section' src='./public/readme/Screenshot 2025-05-20 230636.png'>
 
-Below, options for editting, deleting/restoring, canceling/uncanceling, publishing/unpublishing loops are provided. 
+Below, options for editing, deleting/restoring, canceling/uncanceling, publishing/unpublishing loops are provided. 
 
 <img alt='manging loops section' src='./public/readme/Screenshot 2025-05-20 230723.png'>
 
@@ -122,11 +120,11 @@ Below are some screenshots from friends still attending NCSSM.
 
 
 ## Libraries and Equipment
-* [Next.js 15](https://nextjs.org) - Industry leading full stack website development framework
+* [Next.js 15](https://nextjs.org) - Industry-leading full-stack website development framework
 * [React 19](https://react.dev) - Library for building highly interactive websites
 * [MongoDB Atlas](https://www.mongodb.com) - NoSQL Document Database
-* [Typescript](https://www.typescriptlang.org) - Typed programming language build on top of Javascript
-* [Auth.js V5](https://authjs.dev/) - A customizable library for authentication and session managmeent. 
+* [Typescript](https://www.typescriptlang.org) - Typed programming language built on top of JavaScript
+* [Auth.js V5](https://authjs.dev/) - A customizable library for authentication and session management. 
 * [TailwindCSS v3](https://tailwindcss.com/) - Class-based CSS Framework for quick designing
 * [Figma](https://figma.com) - Design and Planning Software
 
@@ -139,8 +137,7 @@ Below are some screenshots from friends still attending NCSSM.
 
 Learn about the planning and designing phases, the NextJS server and client architectures, working with and modifying existing data in MongoDB, and more.
 
-This video should give an insight into how I developed Loops and make it easier for you to maintain and add new features.
-
+This video goes through adding an "Appearances" page to the dashboard. It should give an insight into how I developed Loops and make it easier for you to maintain and add new features.
 
 ## Get Started
 
@@ -180,15 +177,15 @@ Then, run the following command:
 ```
 npx auth secret
 ```
-This creates a `.env.local` file in the root folder and populates the `AUTH_SECRET` enviorment variable.
+This creates a `.env.local` file in the root folder and populates the `AUTH_SECRET` environment variable.
 
-Then, go to Google Cloud, create a new project, set up the conset screen, and generate an OAuth2 Key. Set the JS Origin in the Cloud Console to whatever `AUTH_URL` is. If you are running a local deployment, then that will be `http://localhost:3000`. The redirect origin will be the `AUTH_URL` concatonated with  `/api/auth/callback/google`. If you are running a local deployment, that will look like `https://localhost:3000/api/auth/callback/google`. 
+Then, go to Google Cloud, create a new project, set up the conset screen, and generate an OAuth2 Key. Set the JS Origin in the Cloud Console to whatever `AUTH_URL` is. If you are running a local deployment, then that will be `http://localhost:3000`. The redirect origin will be the `AUTH_URL` concatenated with  `/api/auth/callback/google`. If you are running a local deployment, that will look like `https://localhost:3000/api/auth/callback/google`. 
 
-Then, copy the Client ID and paste it into the `AUTH_GOOGLE_ID` enviorment variable. Then, copy the Client Secret and paste it into the `AUTH_GOOGLE_SECRET` enviorment variable.
+Then, copy the Client ID and paste it into the `AUTH_GOOGLE_ID` environment variable. Then, copy the Client Secret and paste it into the `AUTH_GOOGLE_SECRET` environment variable.
 
-Then, link MongoDB. You can either do this in the online dashboard or run a local instance of MongoDB on your own computer. Either way, create a cluster and an admin user. Then, copy the Connection URI into the `MONGODB_URI` enviorment variable.
+Then, link MongoDB. You can either do this in the online dashboard or run a local instance of MongoDB on your own computer. Either way, create a cluster and an admin user. Then, copy the Connection URI into the `MONGODB_URI` environment variable.
 
-> (OPTIONAL) You may have noticed the `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` enviorment variables. These can be left empty, as they are unused. The original purpose was for push notification in PWAs, but that feature was scrappped due to implementation issues. 
+> (OPTIONAL) You may have noticed the `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` enviorment variables. These can be left empty, as they are unused. The original purpose was for push notification in PWAs, but that feature was scrapped due to implementation issues. 
 
 ### Running Application
 
@@ -205,7 +202,7 @@ npm run start
 
 ### Admin Accounts
 
-If the account you are trying to grant access to has registered into the application, skip to the next section.
+If the account you are trying to grant access to has registered in the application, skip to the next section.
 
 #### Creating an account
 
@@ -213,9 +210,9 @@ Go into the terminal and run:
 ```
 npm run createAccount
 ```
-Go through the prompts and set the user's role to Admin. When the users logs in to the account, they will have the role.
+Go through the prompts and set the user's role to Admin. When the user logs in to the account, they will have the role.
 
-#### Granting access to an account that has already registered into the application.
+#### Granting access to an account that has already registered in the application.
 
 Go into the terminal and run:
 ```
